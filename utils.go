@@ -7,12 +7,12 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/hopinc/hop-go/structures"
+	"github.com/hopinc/hop-go/types"
 )
 
 type errorResponse struct {
-	Success bool                  `json:"success"`
-	Error   structures.BadRequest `json:"error"`
+	Success bool             `json:"success"`
+	Error   types.BadRequest `json:"error"`
 }
 
 func handleErrors(res *http.Response) error {
@@ -23,7 +23,7 @@ func handleErrors(res *http.Response) error {
 	var r errorResponse
 	err = json.Unmarshal(b, &r)
 	if err != nil {
-		return structures.ServerError("status code " + strconv.Itoa(res.StatusCode) + " (cannot turn into json): " +
+		return types.ServerError("status code " + strconv.Itoa(res.StatusCode) + " (cannot turn into json): " +
 			string(b))
 	}
 	if r.Success {
@@ -33,9 +33,9 @@ func handleErrors(res *http.Response) error {
 
 	switch r.Error.Code {
 	case "not_found":
-		return structures.NotFound(r.Error.Message)
+		return types.NotFound(r.Error.Message)
 	case "invalid_auth":
-		return structures.NotAuthorized(r.Error.Message)
+		return types.NotAuthorized(r.Error.Message)
 	}
 	if res.StatusCode == 400 {
 		// As a special case, for 400s return the r.Error object.
@@ -43,9 +43,9 @@ func handleErrors(res *http.Response) error {
 	}
 	if res.StatusCode >= 500 {
 		// Infer that this is a internal server error.
-		return structures.ServerError(r.Error.Message)
+		return types.ServerError(r.Error.Message)
 	}
-	return structures.UnknownServerError{
+	return types.UnknownServerError{
 		StatusCode: res.StatusCode,
 		Message:    r.Error.Message,
 		Code:       r.Error.Code,

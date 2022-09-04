@@ -7,6 +7,7 @@ import (
 	"errors"
 	"io"
 	"net/http"
+	"net/url"
 )
 
 // APIBase is used to define the base API URL.
@@ -41,16 +42,26 @@ func NewClient(authorization string) *Client {
 	return &c
 }
 
+type clientArgs struct {
+	method    string
+	path      string
+	resultKey string
+	query     map[string]string
+	body      any
+	result    any
+	ignore404 bool
+}
+
 // Does the specified HTTP request.
-func (c *Client) do(ctx context.Context, method, path, resultKey string, body, result any, ignore404 bool) error {
+func (c *Client) do(ctx context.Context, a clientArgs) error {
 	// Handle getting the body bytes.
 	var r io.Reader
-	if method != "GET" && body != nil {
-		switch x := body.(type) {
+	if a.method != "GET" && a.body != nil {
+		switch x := a.body.(type) {
 		case []byte:
 			r = bytes.NewReader(x)
 		default:
-			bodyBytes, err := json.Marshal(body)
+			bodyBytes, err := json.Marshal(a.body)
 			if err != nil {
 				return err
 			}
@@ -59,7 +70,21 @@ func (c *Client) do(ctx context.Context, method, path, resultKey string, body, r
 	}
 
 	// Create the request.
-	req, err := http.NewRequestWithContext(ctx, method, APIBase+path, r)
+	suffix := ""
+	if a.query != nil {
+		suffix = "?"
+		first := false
+		for k, v := range a.query {
+			chunk := ""
+			if first {
+				first = false
+			} else {
+				chunk = "&"
+			}
+			suffix += chunk + url.QueryEscape(k) + "=" + url.QueryEscape(v)
+		}
+	}
+	req, err := http.NewRequestWithContext(ctx, a.method, APIBase+a.path+suffix, r)
 	if err != nil {
 		return err
 	}
@@ -76,34 +101,34 @@ func (c *Client) do(ctx context.Context, method, path, resultKey string, body, r
 	// If this is a 4xs or 5xx, handle the error.
 	if res.StatusCode >= 400 && 599 >= res.StatusCode {
 		// If this is a 404, check if it is a special case before jumping to the error handler.
-		if res.StatusCode != 404 || !ignore404 {
+		if res.StatusCode != 404 || !a.ignore404 {
 			return handleErrors(res)
 		}
 	}
 
 	// Handle if we should process the data.
-	if result != nil {
+	if a.result != nil {
 		var b []byte
 		if b, err = io.ReadAll(res.Body); err != nil {
 			// Failed to read the body.
 			return err
 		}
 
-		if resultKey != "" {
+		if a.resultKey != "" {
 			// Get the json.RawMessage for the specific key.
 			var m map[string]json.RawMessage
 			if err = json.Unmarshal(b, &m); err != nil {
 				return err
 			}
 			var ok bool
-			if b, ok = m[resultKey]; !ok {
+			if b, ok = m[a.resultKey]; !ok {
 				// The key specified was not actually valid.
 				return errors.New("api response error: key was not in response - please report this to " +
 					"the go-hop github repository")
 			}
 		}
 
-		if err = json.Unmarshal(b, result); err != nil {
+		if err = json.Unmarshal(b, a.result); err != nil {
 			return err
 		}
 	}
