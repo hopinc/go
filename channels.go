@@ -45,3 +45,19 @@ func (c Channels) Create(
 	}
 	return &ch, nil
 }
+
+// Get is used to get a channel. Will throw types.NotFound if it was not found.
+func (c Channels) Get(ctx context.Context, id string) (*types.Channel, error) {
+	var ch types.Channel
+	err := c.c.do(ctx, clientArgs{
+		method:    "GET",
+		path:      "/channels/" + url.PathEscape(id),
+		resultKey: "channel",
+		result:    &ch,
+		ignore404: false,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &ch, nil
+}
