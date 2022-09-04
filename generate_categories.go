@@ -55,9 +55,20 @@ func main() {
 		panic(err)
 	}
 
+	// Get the root categories and sort them.
+	rootCats := make([]string, len(categories))
+	i := 0
+	for rootCat := range categories {
+		rootCats[i] = rootCat
+		i++
+	}
+
 	// Turn the categories into code.
 	goCode := []string{}
-	for rootCat, subCats := range categories {
+	for _, rootCat := range rootCats {
+		// Get the sub-categories.
+		subCats := categories[rootCat]
+
 		// Get the fields for this category.
 		fields := []field{}
 		for _, subCat := range subCats {
