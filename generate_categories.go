@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"go/format"
 	"os"
+	"sort"
 	"strings"
 	"text/template"
 )
@@ -62,6 +63,7 @@ func main() {
 		rootCats[i] = rootCat
 		i++
 	}
+	sort.Strings(rootCats)
 
 	// Turn the categories into code.
 	goCode := []string{}

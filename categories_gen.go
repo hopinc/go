@@ -91,6 +91,38 @@ func newPipe(c *Client) *Pipe {
 	}
 }
 
+// ProjectsTokens is an auto-generated struct which is used to allow for simple categorisation of the APIs.
+// It is public since it may be desired to store a reference to this somewhere, however, do NOT create a instance of this
+// directly. Instead, call NewClient and then go to the field Projects.Tokens.
+type ProjectsTokens struct {
+	c *Client
+}
+
+// ProjectsSecrets is an auto-generated struct which is used to allow for simple categorisation of the APIs.
+// It is public since it may be desired to store a reference to this somewhere, however, do NOT create a instance of this
+// directly. Instead, call NewClient and then go to the field Projects.Secrets.
+type ProjectsSecrets struct {
+	c *Client
+}
+
+// Projects is an auto-generated struct which is used to allow for simple categorisation of the APIs.
+// It is public since it may be desired to store a reference to this somewhere, however, do NOT create a instance of this
+// directly. Instead, call NewClient and then go to the field Projects.
+type Projects struct {
+	c *Client
+
+	Tokens  *ProjectsTokens
+	Secrets *ProjectsSecrets
+}
+
+func newProjects(c *Client) *Projects {
+	return &Projects{
+		c:       c,
+		Tokens:  &ProjectsTokens{c},
+		Secrets: &ProjectsSecrets{c},
+	}
+}
+
 // RegistryImages is an auto-generated struct which is used to allow for simple categorisation of the APIs.
 // It is public since it may be desired to store a reference to this somewhere, however, do NOT create a instance of this
 // directly. Instead, call NewClient and then go to the field Registry.Images.
@@ -134,37 +166,5 @@ func newUsers(c *Client) *Users {
 	return &Users{
 		c:  c,
 		Me: &UsersMe{c},
-	}
-}
-
-// ProjectsTokens is an auto-generated struct which is used to allow for simple categorisation of the APIs.
-// It is public since it may be desired to store a reference to this somewhere, however, do NOT create a instance of this
-// directly. Instead, call NewClient and then go to the field Projects.Tokens.
-type ProjectsTokens struct {
-	c *Client
-}
-
-// ProjectsSecrets is an auto-generated struct which is used to allow for simple categorisation of the APIs.
-// It is public since it may be desired to store a reference to this somewhere, however, do NOT create a instance of this
-// directly. Instead, call NewClient and then go to the field Projects.Secrets.
-type ProjectsSecrets struct {
-	c *Client
-}
-
-// Projects is an auto-generated struct which is used to allow for simple categorisation of the APIs.
-// It is public since it may be desired to store a reference to this somewhere, however, do NOT create a instance of this
-// directly. Instead, call NewClient and then go to the field Projects.
-type Projects struct {
-	c *Client
-
-	Tokens  *ProjectsTokens
-	Secrets *ProjectsSecrets
-}
-
-func newProjects(c *Client) *Projects {
-	return &Projects{
-		c:       c,
-		Tokens:  &ProjectsTokens{c},
-		Secrets: &ProjectsSecrets{c},
 	}
 }
