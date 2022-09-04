@@ -52,6 +52,10 @@ type clientArgs struct {
 	ignore404 bool
 }
 
+type responseBody struct {
+	Data json.RawMessage `json:"data"`
+}
+
 // Does the specified HTTP request.
 func (c *Client) do(ctx context.Context, a clientArgs) error {
 	// Handle getting the body bytes.
@@ -113,6 +117,12 @@ func (c *Client) do(ctx context.Context, a clientArgs) error {
 			// Failed to read the body.
 			return err
 		}
+		var x responseBody
+		if err = json.Unmarshal(b, &x); err != nil {
+			// Unable to unmarshal the body.
+			return err
+		}
+		b = x.Data
 
 		if a.resultKey != "" {
 			// Get the json.RawMessage for the specific key.

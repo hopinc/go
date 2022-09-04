@@ -34,3 +34,8 @@ type Channel struct {
 	// Type is the type of this channel.
 	Type ChannelType `json:"type"`
 }
+
+// Stats is used to define the stats for a channel.
+type Stats struct {
+	OnlineCount int `json:"online_count"`
+}
