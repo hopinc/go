@@ -18,12 +18,12 @@ type Client struct {
 	httpClient    *http.Client
 	authorization string
 
-	Pipe     *Pipe
-	Projects *Projects
-	Ignite   *Ignite
-	Users    *Users
-	Registry *Registry
-	Channels *Channels
+	Pipe     *ClientCategoryPipe
+	Projects *ClientCategoryProjects
+	Ignite   *ClientCategoryIgnite
+	Users    *ClientCategoryUsers
+	Registry *ClientCategoryRegistry
+	Channels *ClientCategoryChannels
 }
 
 // NewClient is used to make a new Hop client.

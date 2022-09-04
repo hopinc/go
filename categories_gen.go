@@ -4,167 +4,167 @@ package hopgo
 
 //go:generate go run generate_categories.go
 
-// ChannelsTokens is an auto-generated struct which is used to allow for simple categorisation of the APIs.
+// ClientCategoryChannelsTokens is an auto-generated struct which is used to allow for simple categorisation of the APIs.
 // It is public since it may be desired to store a reference to this somewhere, however, do NOT create a instance of this
 // directly. Instead, call NewClient and then go to the field Channels.Tokens.
-type ChannelsTokens struct {
+type ClientCategoryChannelsTokens struct {
 	c *Client
 }
 
-// Channels is an auto-generated struct which is used to allow for simple categorisation of the APIs.
+// ClientCategoryChannels is an auto-generated struct which is used to allow for simple categorisation of the APIs.
 // It is public since it may be desired to store a reference to this somewhere, however, do NOT create a instance of this
 // directly. Instead, call NewClient and then go to the field Channels.
-type Channels struct {
+type ClientCategoryChannels struct {
 	c *Client
 
-	Tokens *ChannelsTokens
+	Tokens *ClientCategoryChannelsTokens
 }
 
-func newChannels(c *Client) *Channels {
-	return &Channels{
+func newChannels(c *Client) *ClientCategoryChannels {
+	return &ClientCategoryChannels{
 		c:      c,
-		Tokens: &ChannelsTokens{c},
+		Tokens: &ClientCategoryChannelsTokens{c},
 	}
 }
 
-// IgniteGateways is an auto-generated struct which is used to allow for simple categorisation of the APIs.
+// ClientCategoryIgniteGateways is an auto-generated struct which is used to allow for simple categorisation of the APIs.
 // It is public since it may be desired to store a reference to this somewhere, however, do NOT create a instance of this
 // directly. Instead, call NewClient and then go to the field Ignite.Gateways.
-type IgniteGateways struct {
+type ClientCategoryIgniteGateways struct {
 	c *Client
 }
 
-// IgniteDeployments is an auto-generated struct which is used to allow for simple categorisation of the APIs.
+// ClientCategoryIgniteDeployments is an auto-generated struct which is used to allow for simple categorisation of the APIs.
 // It is public since it may be desired to store a reference to this somewhere, however, do NOT create a instance of this
 // directly. Instead, call NewClient and then go to the field Ignite.Deployments.
-type IgniteDeployments struct {
+type ClientCategoryIgniteDeployments struct {
 	c *Client
 }
 
-// IgniteContainers is an auto-generated struct which is used to allow for simple categorisation of the APIs.
+// ClientCategoryIgniteContainers is an auto-generated struct which is used to allow for simple categorisation of the APIs.
 // It is public since it may be desired to store a reference to this somewhere, however, do NOT create a instance of this
 // directly. Instead, call NewClient and then go to the field Ignite.Containers.
-type IgniteContainers struct {
+type ClientCategoryIgniteContainers struct {
 	c *Client
 }
 
-// Ignite is an auto-generated struct which is used to allow for simple categorisation of the APIs.
+// ClientCategoryIgnite is an auto-generated struct which is used to allow for simple categorisation of the APIs.
 // It is public since it may be desired to store a reference to this somewhere, however, do NOT create a instance of this
 // directly. Instead, call NewClient and then go to the field Ignite.
-type Ignite struct {
+type ClientCategoryIgnite struct {
 	c *Client
 
-	Gateways    *IgniteGateways
-	Deployments *IgniteDeployments
-	Containers  *IgniteContainers
+	Gateways    *ClientCategoryIgniteGateways
+	Deployments *ClientCategoryIgniteDeployments
+	Containers  *ClientCategoryIgniteContainers
 }
 
-func newIgnite(c *Client) *Ignite {
-	return &Ignite{
+func newIgnite(c *Client) *ClientCategoryIgnite {
+	return &ClientCategoryIgnite{
 		c:           c,
-		Gateways:    &IgniteGateways{c},
-		Deployments: &IgniteDeployments{c},
-		Containers:  &IgniteContainers{c},
+		Gateways:    &ClientCategoryIgniteGateways{c},
+		Deployments: &ClientCategoryIgniteDeployments{c},
+		Containers:  &ClientCategoryIgniteContainers{c},
 	}
 }
 
-// PipeRooms is an auto-generated struct which is used to allow for simple categorisation of the APIs.
+// ClientCategoryPipeRooms is an auto-generated struct which is used to allow for simple categorisation of the APIs.
 // It is public since it may be desired to store a reference to this somewhere, however, do NOT create a instance of this
 // directly. Instead, call NewClient and then go to the field Pipe.Rooms.
-type PipeRooms struct {
+type ClientCategoryPipeRooms struct {
 	c *Client
 }
 
-// Pipe is an auto-generated struct which is used to allow for simple categorisation of the APIs.
+// ClientCategoryPipe is an auto-generated struct which is used to allow for simple categorisation of the APIs.
 // It is public since it may be desired to store a reference to this somewhere, however, do NOT create a instance of this
 // directly. Instead, call NewClient and then go to the field Pipe.
-type Pipe struct {
+type ClientCategoryPipe struct {
 	c *Client
 
-	Rooms *PipeRooms
+	Rooms *ClientCategoryPipeRooms
 }
 
-func newPipe(c *Client) *Pipe {
-	return &Pipe{
+func newPipe(c *Client) *ClientCategoryPipe {
+	return &ClientCategoryPipe{
 		c:     c,
-		Rooms: &PipeRooms{c},
+		Rooms: &ClientCategoryPipeRooms{c},
 	}
 }
 
-// ProjectsTokens is an auto-generated struct which is used to allow for simple categorisation of the APIs.
+// ClientCategoryProjectsTokens is an auto-generated struct which is used to allow for simple categorisation of the APIs.
 // It is public since it may be desired to store a reference to this somewhere, however, do NOT create a instance of this
 // directly. Instead, call NewClient and then go to the field Projects.Tokens.
-type ProjectsTokens struct {
+type ClientCategoryProjectsTokens struct {
 	c *Client
 }
 
-// ProjectsSecrets is an auto-generated struct which is used to allow for simple categorisation of the APIs.
+// ClientCategoryProjectsSecrets is an auto-generated struct which is used to allow for simple categorisation of the APIs.
 // It is public since it may be desired to store a reference to this somewhere, however, do NOT create a instance of this
 // directly. Instead, call NewClient and then go to the field Projects.Secrets.
-type ProjectsSecrets struct {
+type ClientCategoryProjectsSecrets struct {
 	c *Client
 }
 
-// Projects is an auto-generated struct which is used to allow for simple categorisation of the APIs.
+// ClientCategoryProjects is an auto-generated struct which is used to allow for simple categorisation of the APIs.
 // It is public since it may be desired to store a reference to this somewhere, however, do NOT create a instance of this
 // directly. Instead, call NewClient and then go to the field Projects.
-type Projects struct {
+type ClientCategoryProjects struct {
 	c *Client
 
-	Tokens  *ProjectsTokens
-	Secrets *ProjectsSecrets
+	Tokens  *ClientCategoryProjectsTokens
+	Secrets *ClientCategoryProjectsSecrets
 }
 
-func newProjects(c *Client) *Projects {
-	return &Projects{
+func newProjects(c *Client) *ClientCategoryProjects {
+	return &ClientCategoryProjects{
 		c:       c,
-		Tokens:  &ProjectsTokens{c},
-		Secrets: &ProjectsSecrets{c},
+		Tokens:  &ClientCategoryProjectsTokens{c},
+		Secrets: &ClientCategoryProjectsSecrets{c},
 	}
 }
 
-// RegistryImages is an auto-generated struct which is used to allow for simple categorisation of the APIs.
+// ClientCategoryRegistryImages is an auto-generated struct which is used to allow for simple categorisation of the APIs.
 // It is public since it may be desired to store a reference to this somewhere, however, do NOT create a instance of this
 // directly. Instead, call NewClient and then go to the field Registry.Images.
-type RegistryImages struct {
+type ClientCategoryRegistryImages struct {
 	c *Client
 }
 
-// Registry is an auto-generated struct which is used to allow for simple categorisation of the APIs.
+// ClientCategoryRegistry is an auto-generated struct which is used to allow for simple categorisation of the APIs.
 // It is public since it may be desired to store a reference to this somewhere, however, do NOT create a instance of this
 // directly. Instead, call NewClient and then go to the field Registry.
-type Registry struct {
+type ClientCategoryRegistry struct {
 	c *Client
 
-	Images *RegistryImages
+	Images *ClientCategoryRegistryImages
 }
 
-func newRegistry(c *Client) *Registry {
-	return &Registry{
+func newRegistry(c *Client) *ClientCategoryRegistry {
+	return &ClientCategoryRegistry{
 		c:      c,
-		Images: &RegistryImages{c},
+		Images: &ClientCategoryRegistryImages{c},
 	}
 }
 
-// UsersMe is an auto-generated struct which is used to allow for simple categorisation of the APIs.
+// ClientCategoryUsersMe is an auto-generated struct which is used to allow for simple categorisation of the APIs.
 // It is public since it may be desired to store a reference to this somewhere, however, do NOT create a instance of this
 // directly. Instead, call NewClient and then go to the field Users.Me.
-type UsersMe struct {
+type ClientCategoryUsersMe struct {
 	c *Client
 }
 
-// Users is an auto-generated struct which is used to allow for simple categorisation of the APIs.
+// ClientCategoryUsers is an auto-generated struct which is used to allow for simple categorisation of the APIs.
 // It is public since it may be desired to store a reference to this somewhere, however, do NOT create a instance of this
 // directly. Instead, call NewClient and then go to the field Users.
-type Users struct {
+type ClientCategoryUsers struct {
 	c *Client
 
-	Me *UsersMe
+	Me *ClientCategoryUsersMe
 }
 
-func newUsers(c *Client) *Users {
-	return &Users{
+func newUsers(c *Client) *ClientCategoryUsers {
+	return &ClientCategoryUsers{
 		c:  c,
-		Me: &UsersMe{c},
+		Me: &ClientCategoryUsersMe{c},
 	}
 }

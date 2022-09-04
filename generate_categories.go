@@ -80,6 +80,7 @@ func main() {
 				// Remove this suffix.
 				goName = goName[:len(goName)-10]
 				structName = goName
+				goName = "ClientCategory" + goName
 			} else {
 				// Add the prefix.
 				goName = rootCat + goName
@@ -87,7 +88,7 @@ func main() {
 			fields = append(fields, field{
 				key:   structName,
 				value: goName,
-				code:  buildStruct(goName, rootCat+"."+structName, ""),
+				code:  buildStruct("ClientCategory"+goName, rootCat+"."+structName, ""),
 			})
 		}
 
@@ -99,10 +100,10 @@ func main() {
 
 			// Handle each field.
 			for _, v := range fields {
-				fieldsS += "\t" + v.key + " *" + v.value + "\n"
+				fieldsS += "\t" + v.key + " *ClientCategory" + v.value + "\n"
 			}
 		}
-		rootStruct := buildStruct(rootCat, rootCat, fieldsS)
+		rootStruct := buildStruct("ClientCategory"+rootCat, rootCat, fieldsS)
 
 		// Append all the structs.
 		for _, v := range fields {
@@ -111,15 +112,15 @@ func main() {
 		goCode = append(goCode, rootStruct)
 
 		// Build the root initializer.
-		initFunc := "func new" + rootCat + "(c *Client) *" + rootCat + " {"
+		initFunc := "func new" + rootCat + "(c *Client) *ClientCategory" + rootCat + " {"
 		if len(fields) == 0 {
 			// Do a simple inline init here.
-			initFunc += "\n\treturn &" + rootCat + "{c}\n}"
+			initFunc += "\n\treturn &ClientCategory" + rootCat + "{c}\n}"
 		} else {
 			// Handle each field.
-			initFunc += "\n\treturn &" + rootCat + "{\n\t\tc: c,"
+			initFunc += "\n\treturn &ClientCategory" + rootCat + "{\n\t\tc: c,"
 			for _, v := range fields {
-				initFunc += "\n\t\t" + v.key + ": &" + v.value + "{c},"
+				initFunc += "\n\t\t" + v.key + ": &ClientCategory" + v.value + "{c},"
 			}
 			initFunc += "\n\t}\n}"
 		}
