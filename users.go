@@ -5,3 +5,7 @@ package hopgo
 type Users struct {
 	c *Client
 }
+
+func newUsers(c *Client) *Users {
+	return &Users{c}
+}

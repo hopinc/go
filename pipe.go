@@ -5,3 +5,7 @@ package hopgo
 type Pipe struct {
 	c *Client
 }
+
+func newPipe(c *Client) *Pipe {
+	return &Pipe{c}
+}

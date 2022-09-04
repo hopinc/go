@@ -5,3 +5,7 @@ package hopgo
 type Quotas struct {
 	c *Client
 }
+
+func newQuotas(c *Client) *Quotas {
+	return &Quotas{c}
+}

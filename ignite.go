@@ -5,3 +5,7 @@ package hopgo
 type Ignite struct {
 	c *Client
 }
+
+func newIgnite(c *Client) *Ignite {
+	return &Ignite{c}
+}

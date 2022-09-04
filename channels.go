@@ -5,3 +5,7 @@ package hopgo
 type Channels struct {
 	c *Client
 }
+
+func newChannels(c *Client) *Channels {
+	return &Channels{c}
+}

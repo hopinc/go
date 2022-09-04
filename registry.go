@@ -5,3 +5,7 @@ package hopgo
 type Registry struct {
 	c *Client
 }
+
+func newRegistry(c *Client) *Registry {
+	return &Registry{c}
+}

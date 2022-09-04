@@ -5,3 +5,7 @@ package hopgo
 type Projects struct {
 	c *Client
 }
+
+func newProjects(c *Client) *Projects {
+	return &Projects{c}
+}

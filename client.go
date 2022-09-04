@@ -17,17 +17,13 @@ type Client struct {
 	httpClient    *http.Client
 	authorization string
 
-	Pipe        Pipe
-	Projects    Projects
-	Ignite      Ignite
-	Users       Users
-	Registry    Registry
-	Invites     Invites
-	Channels    Channels
-	BetaInvites BetaInvites
-	Incidents   Incidents
-	Quotas      Quotas
-	Billing     Billing
+	Pipe     *Pipe
+	Projects *Projects
+	Ignite   *Ignite
+	Users    *Users
+	Registry *Registry
+	Channels *Channels
+	Quotas   *Quotas
 }
 
 // NewClient is used to make a new Hop client.
@@ -36,23 +32,19 @@ func NewClient(authorization string) *Client {
 	c = Client{
 		httpClient:    &http.Client{},
 		authorization: authorization,
-		Pipe:          Pipe{&c},
-		Projects:      Projects{&c},
-		Ignite:        Ignite{&c},
-		Users:         Users{&c},
-		Registry:      Registry{&c},
-		Invites:       Invites{&c},
-		Channels:      Channels{&c},
-		BetaInvites:   BetaInvites{&c},
-		Incidents:     Incidents{&c},
-		Quotas:        Quotas{&c},
-		Billing:       Billing{&c},
+		Pipe:          newPipe(&c),
+		Projects:      newProjects(&c),
+		Ignite:        newIgnite(&c),
+		Users:         newUsers(&c),
+		Registry:      newRegistry(&c),
+		Channels:      newChannels(&c),
+		Quotas:        newQuotas(&c),
 	}
 	return &c
 }
 
 // Does the specified HTTP request.
-func (c Client) do(ctx context.Context, method, path, resultKey string, body, result any) error {
+func (c *Client) do(ctx context.Context, method, path, resultKey string, body, result any, ignore404 bool) error {
 	// Handle getting the body bytes.
 	var r io.Reader
 	if method != "GET" && body != nil {
@@ -85,7 +77,10 @@ func (c Client) do(ctx context.Context, method, path, resultKey string, body, re
 
 	// If this is a 4xs or 5xx, handle the error.
 	if res.StatusCode >= 400 && 599 >= res.StatusCode {
-		return handleErrors(res)
+		// If this is a 404, check if it is a special case before jumping to the error handler.
+		if res.StatusCode != 404 || !ignore404 {
+			return handleErrors(res)
+		}
 	}
 
 	// Handle if we should process the data.
