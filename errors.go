@@ -1,4 +1,4 @@
-package gohop
+package hopgo
 
 import (
 	"encoding/json"
