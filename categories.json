@@ -1,6 +1,6 @@
 {
   "Projects": [
-    "ProjectTokens:no-prefix",
+    "Tokens",
     "Secrets"
   ],
   "Channels": [
