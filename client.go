@@ -1,4 +1,4 @@
-package gop
+package gohop
 
 import (
 	"bytes"
@@ -106,7 +106,7 @@ func (c Client) do(ctx context.Context, method, path, resultKey string, body, re
 			if b, ok = m[resultKey]; !ok {
 				// The key specified was not actually valid.
 				return errors.New("api response error: key was not in response - please report this to " +
-					"the gop github repository")
+					"the go-hop github repository")
 			}
 		}
 

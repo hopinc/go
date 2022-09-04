@@ -1,4 +1,4 @@
-package gop
+package gohop
 
 import (
 	"encoding/json"
@@ -28,7 +28,7 @@ func handleErrors(res *http.Response) error {
 	}
 	if r.Success {
 		return errors.New("api response error: error request was marked as success - please report this to " +
-			"the gop github repository")
+			"the go-hop github repository")
 	}
 
 	switch r.Error.Code {
