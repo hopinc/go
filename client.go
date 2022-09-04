@@ -23,7 +23,6 @@ type Client struct {
 	Users    *Users
 	Registry *Registry
 	Channels *Channels
-	Quotas   *Quotas
 }
 
 // NewClient is used to make a new Hop client.
@@ -38,7 +37,6 @@ func NewClient(authorization string) *Client {
 		Users:         newUsers(&c),
 		Registry:      newRegistry(&c),
 		Channels:      newChannels(&c),
-		Quotas:        newQuotas(&c),
 	}
 	return &c
 }

@@ -2,5 +2,22 @@
   "Projects": [
     "ProjectTokens:no-prefix",
     "Secrets"
+  ],
+  "Channels": [
+    "Tokens"
+  ],
+  "Ignite": [
+    "Gateways",
+    "Deployments",
+    "Containers"
+  ],
+  "Pipe": [
+    "Rooms"
+  ],
+  "Registry": [
+    "Images"
+  ],
+  "Users": [
+    "Me"
   ]
 }
