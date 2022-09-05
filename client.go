@@ -5,11 +5,12 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/hopinc/hop-go/types"
 	"io"
 	"net/http"
 	"net/url"
 	"strings"
+
+	"github.com/hopinc/hop-go/types"
 )
 
 // APIBase is used to define the base API URL.
