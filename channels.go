@@ -255,18 +255,18 @@ func (t ClientCategoryChannelsTokens) PublishDirectMessage(ctx context.Context, 
 }
 
 // GetAll gets all the tokens.
-func (c ClientCategoryChannelsTokens) GetAll(ctx context.Context, projectId string) ([]*types.ChannelToken, error) {
-	var t []*types.ChannelToken
-	err := c.c.do(ctx, clientArgs{
+func (t ClientCategoryChannelsTokens) GetAll(ctx context.Context, projectId string) ([]*types.ChannelToken, error) {
+	var a []*types.ChannelToken
+	err := t.c.do(ctx, clientArgs{
 		method:    "GET",
 		path:      "/channels/tokens",
 		resultKey: "tokens",
-		result:    &t,
+		result:    &a,
 		query:     getProjectIdParam(projectId),
 		ignore404: false,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return t, nil
+	return a, nil
 }
