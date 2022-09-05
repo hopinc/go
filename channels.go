@@ -111,23 +111,6 @@ func (c ClientCategoryChannels) SubscribeTokens(ctx context.Context, projectId, 
 	return eg.Wait()
 }
 
-// GetAllTokens gets all the tokens associated with a channel.
-func (c ClientCategoryChannels) GetAllTokens(ctx context.Context, projectId, channelId string) ([]string, error) {
-	var t []string
-	err := c.c.do(ctx, clientArgs{
-		method:    "GET",
-		path:      "/channels/" + url.PathEscape(channelId) + "/tokens",
-		resultKey: "tokens",
-		result:    &t,
-		query:     getProjectIdParam(projectId),
-		ignore404: false,
-	})
-	if err != nil {
-		return nil, err
-	}
-	return t, nil
-}
-
 // SetState is used to set the state of a channel.
 func (c ClientCategoryChannels) SetState(ctx context.Context, projectId, id string, state map[string]any) error {
 	return c.c.do(ctx, clientArgs{
@@ -269,4 +252,21 @@ func (t ClientCategoryChannelsTokens) PublishDirectMessage(ctx context.Context, 
 		query:     getProjectIdParam(projectId),
 		ignore404: false,
 	})
+}
+
+// GetAll gets all the tokens.
+func (c ClientCategoryChannelsTokens) GetAll(ctx context.Context, projectId string) ([]*types.ChannelToken, error) {
+	var t []*types.ChannelToken
+	err := c.c.do(ctx, clientArgs{
+		method:    "GET",
+		path:      "/channels/tokens",
+		resultKey: "tokens",
+		result:    &t,
+		query:     getProjectIdParam(projectId),
+		ignore404: false,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return t, nil
 }
