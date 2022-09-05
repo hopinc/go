@@ -1,6 +1,9 @@
 package types
 
-import "strconv"
+import (
+	"errors"
+	"strconv"
+)
 
 // NotFound is sent when the object is not found. THe string is the error message from the API.
 type NotFound string
@@ -48,3 +51,7 @@ type InvalidToken string
 
 // Error implements the error interface.
 func (i InvalidToken) Error() string { return (string)(i) }
+
+// StopIteration is thrown when we should stop iterating through a list. It is a reference since nothing more needs
+// to be added to the error.
+var StopIteration = errors.New("stop iteration")

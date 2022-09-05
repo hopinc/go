@@ -71,21 +71,16 @@ func (c ClientCategoryChannels) Get(ctx context.Context, projectId, id string) (
 	return &ch, nil
 }
 
-// GetAll is used to get all the channels.
-func (c ClientCategoryChannels) GetAll(ctx context.Context, projectId string) ([]*types.Channel, error) {
-	var chs []*types.Channel
-	err := c.c.do(ctx, clientArgs{
-		method:    "GET",
+// GetAll returns a paginator to get all the channels.
+func (c ClientCategoryChannels) GetAll(projectId string) *Paginator[*types.Channel] {
+	return &Paginator[*types.Channel]{
+		c:         c.c,
+		total:     -1,
 		path:      "/channels",
 		resultKey: "channels",
-		result:    &chs,
+		sortBy:    "created_at",
 		query:     getProjectIdParam(projectId),
-		ignore404: false,
-	})
-	if err != nil {
-		return nil, err
 	}
-	return chs, nil
 }
 
 // SubscribeToken is used to subscribe a token to a channel.

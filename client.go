@@ -5,12 +5,13 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/hopinc/hop-go/types"
 	"io"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
-
-	"github.com/hopinc/hop-go/types"
+	"sync"
 )
 
 // APIBase is used to define the base API URL.
@@ -181,5 +182,91 @@ func (c *Client) do(ctx context.Context, a clientArgs) error {
 	}
 
 	// Success! No errors!
+	return nil
+}
+
+// Paginator is used to create a way to access paginated API routes.
+type Paginator[T any] struct {
+	c         *Client
+	pageIndex int
+	count     int
+	total     int // should be set to -1 on init.
+	mu        sync.Mutex
+
+	path      string
+	resultKey string
+	sortBy    string
+	query     map[string]string
+}
+
+func unJsonInt(j json.RawMessage) (int, error) {
+	var x int
+	err := json.Unmarshal(j, &x)
+	return x, err
+}
+
+// Next is used to get the next page.
+func (p *Paginator[T]) Next(ctx context.Context) ([]T, error) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+
+	if p.total != -1 && p.count >= p.total {
+		return nil, types.StopIteration
+	}
+
+	query := map[string]string{}
+	for k, v := range p.query {
+		query[k] = v
+	}
+	query["page"] = strconv.Itoa(p.pageIndex + 1)
+	query["orderBy"] = "asc"
+	query["sortBy"] = p.sortBy
+
+	var m map[string]json.RawMessage
+	if err := p.c.do(ctx, clientArgs{
+		method:    "GET",
+		path:      p.path,
+		query:     query,
+		result:    &m,
+		ignore404: false,
+	}); err != nil {
+		return nil, err
+	}
+
+	if totalCount, ok := m["total_count"]; !ok {
+		return nil, errors.New("api response error: total_count was not in response - please report this to " +
+			"the go-hop github repository")
+	} else {
+		var err error
+		p.total, err = unJsonInt(totalCount)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	var a []T
+	if err := json.Unmarshal(m[p.resultKey], &a); err != nil {
+		return nil, err
+	}
+	p.count += len(a)
+	p.pageIndex++
+	if len(a) == 0 {
+		// Stop pagination here.
+		return nil, types.StopIteration
+	}
+	return a, nil
+}
+
+// ForChunk is basically the shorthand for calling a function everytime there is a new result. Any errors are passed to
+// the root error result.
+func (p *Paginator[T]) ForChunk(ctx context.Context, f func([]T) error) error {
+	for a, err := p.Next(ctx); err != types.StopIteration; a, err = p.Next(ctx) {
+		if err != nil {
+			return err
+		}
+		if err = f(a); err != nil {
+			return err
+		}
+	}
 	return nil
 }
