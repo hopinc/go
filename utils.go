@@ -32,7 +32,7 @@ func handleErrors(res *http.Response) error {
 	}
 
 	switch r.Error.Code {
-	case "not_found":
+	case "not_found", "project_not_found":
 		return types.NotFound(r.Error.Message)
 	case "invalid_auth":
 		return types.NotAuthorized(r.Error.Message)

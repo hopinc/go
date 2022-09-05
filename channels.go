@@ -2,10 +2,10 @@ package hopgo
 
 import (
 	"context"
+	"golang.org/x/sync/errgroup"
 	"net/url"
 
 	"github.com/hopinc/hop-go/types"
-	"github.com/jakemakesstuff/pinkypromise/promise"
 )
 
 // Create is used to create a channel. The channelType argument should be the type of channel that you want to create, state
@@ -96,15 +96,14 @@ func (c ClientCategoryChannels) SubscribeToken(ctx context.Context, channelId, t
 
 // SubscribeTokens is used to subscribe many tokens to a channel.
 func (c ClientCategoryChannels) SubscribeTokens(ctx context.Context, channelId string, tokens []string) error {
-	promises := make([]*promise.Promise[struct{}], len(tokens))
-	for i, v := range tokens {
+	eg := errgroup.Group{}
+	for _, v := range tokens {
 		token := v
-		promises[i] = promise.NewFn(func() (struct{}, error) {
-			return struct{}{}, c.SubscribeToken(ctx, channelId, token)
+		eg.Go(func() error {
+			return c.SubscribeToken(ctx, channelId, token)
 		})
 	}
-	_, err := promise.All(promises...)
-	return err
+	return eg.Wait()
 }
 
 // GetAllTokens gets all the tokens associated with a channel.
