@@ -2,7 +2,6 @@ package hopgo
 
 import (
 	"context"
-	"errors"
 	"net/url"
 
 	"github.com/hopinc/hop-go/types"
@@ -192,7 +191,7 @@ func (t ClientCategoryChannelsTokens) Delete(ctx context.Context, id string) err
 // projectId is the project ID to associate the token with (this can be empty unless it is bearer or PAT auth).
 func (t ClientCategoryChannelsTokens) Create(ctx context.Context, state map[string]any, projectId string) (*types.ChannelToken, error) {
 	if projectId == "" && t.c.tokenType != "ptk" {
-		return nil, errors.New("project ID must be specified when creating a channel token with bearer or PAT auth")
+		return nil, types.InvalidToken("project ID must be specified when creating a channel token with bearer or PAT auth")
 	}
 	if state == nil {
 		state = map[string]any{}
