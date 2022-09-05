@@ -128,6 +128,7 @@ func (c *Client) do(ctx context.Context, a clientArgs) error {
 	}
 	req.Header.Set("Authorization", c.authorization)
 	req.Header.Set("Accept", "application/json")
+	req.Header.Set("Content-Type", "application/json")
 
 	// Do the request.
 	res, err := c.httpClient.Do(req)
