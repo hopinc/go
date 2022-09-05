@@ -47,14 +47,22 @@ func (c ClientCategoryChannels) Create(
 	return &ch, nil
 }
 
+func getProjectIdParam(projectId string) map[string]string {
+	if projectId != "" {
+		return map[string]string{"project": projectId}
+	}
+	return nil
+}
+
 // Get is used to get a channel. Will throw types.NotFound if it was not found.
-func (c ClientCategoryChannels) Get(ctx context.Context, id string) (*types.Channel, error) {
+func (c ClientCategoryChannels) Get(ctx context.Context, projectId, id string) (*types.Channel, error) {
 	var ch types.Channel
 	err := c.c.do(ctx, clientArgs{
 		method:    "GET",
 		path:      "/channels/" + url.PathEscape(id),
 		resultKey: "channel",
 		result:    &ch,
+		query:     getProjectIdParam(projectId),
 		ignore404: false,
 	})
 	if err != nil {
@@ -65,17 +73,13 @@ func (c ClientCategoryChannels) Get(ctx context.Context, id string) (*types.Chan
 
 // GetAll is used to get all the channels.
 func (c ClientCategoryChannels) GetAll(ctx context.Context, projectId string) ([]*types.Channel, error) {
-	var query map[string]string
-	if projectId != "" {
-		query = map[string]string{"project": projectId}
-	}
 	var chs []*types.Channel
 	err := c.c.do(ctx, clientArgs{
 		method:    "GET",
 		path:      "/channels",
 		resultKey: "channels",
 		result:    &chs,
-		query:     query,
+		query:     getProjectIdParam(projectId),
 		ignore404: false,
 	})
 	if err != nil {
@@ -85,35 +89,37 @@ func (c ClientCategoryChannels) GetAll(ctx context.Context, projectId string) ([
 }
 
 // SubscribeToken is used to subscribe a token to a channel.
-func (c ClientCategoryChannels) SubscribeToken(ctx context.Context, channelId, token string) error {
+func (c ClientCategoryChannels) SubscribeToken(ctx context.Context, projectId, channelId, token string) error {
 	path := "/channels/" + url.PathEscape(channelId) + "/subscribers/" + url.PathEscape(token)
 	return c.c.do(ctx, clientArgs{
 		method:    "PUT",
 		path:      path,
+		query:     getProjectIdParam(projectId),
 		ignore404: false,
 	})
 }
 
 // SubscribeTokens is used to subscribe many tokens to a channel.
-func (c ClientCategoryChannels) SubscribeTokens(ctx context.Context, channelId string, tokens []string) error {
+func (c ClientCategoryChannels) SubscribeTokens(ctx context.Context, projectId, channelId string, tokens []string) error {
 	eg := errgroup.Group{}
 	for _, v := range tokens {
 		token := v
 		eg.Go(func() error {
-			return c.SubscribeToken(ctx, channelId, token)
+			return c.SubscribeToken(ctx, projectId, channelId, token)
 		})
 	}
 	return eg.Wait()
 }
 
 // GetAllTokens gets all the tokens associated with a channel.
-func (c ClientCategoryChannels) GetAllTokens(ctx context.Context, channelId string) ([]string, error) {
+func (c ClientCategoryChannels) GetAllTokens(ctx context.Context, projectId, channelId string) ([]string, error) {
 	var t []string
 	err := c.c.do(ctx, clientArgs{
 		method:    "GET",
 		path:      "/channels/" + url.PathEscape(channelId) + "/tokens",
 		resultKey: "tokens",
 		result:    &t,
+		query:     getProjectIdParam(projectId),
 		ignore404: false,
 	})
 	if err != nil {
@@ -123,52 +129,57 @@ func (c ClientCategoryChannels) GetAllTokens(ctx context.Context, channelId stri
 }
 
 // SetState is used to set the state of a channel.
-func (c ClientCategoryChannels) SetState(ctx context.Context, id string, state map[string]any) error {
+func (c ClientCategoryChannels) SetState(ctx context.Context, projectId, id string, state map[string]any) error {
 	return c.c.do(ctx, clientArgs{
 		method:    "PUT",
 		path:      "/channels/" + url.PathEscape(id) + "/state",
 		body:      state,
+		query:     getProjectIdParam(projectId),
 		ignore404: false,
 	})
 }
 
 // PatchState is used to patch the state of a channel.
-func (c ClientCategoryChannels) PatchState(ctx context.Context, id string, state map[string]any) error {
+func (c ClientCategoryChannels) PatchState(ctx context.Context, projectId, id string, state map[string]any) error {
 	return c.c.do(ctx, clientArgs{
 		method:    "PATCH",
 		path:      "/channels/" + url.PathEscape(id) + "/state",
 		body:      state,
+		query:     getProjectIdParam(projectId),
 		ignore404: false,
 	})
 }
 
 // PublishMessage is used to publish an event to the channel.
-func (c ClientCategoryChannels) PublishMessage(ctx context.Context, channelId, eventName string, data any) error {
+func (c ClientCategoryChannels) PublishMessage(ctx context.Context, projectId, channelId, eventName string, data any) error {
 	return c.c.do(ctx, clientArgs{
 		method:    "POST",
 		path:      "/channels/" + url.PathEscape(channelId) + "/messages",
 		body:      map[string]any{"e": eventName, "d": data},
+		query:     getProjectIdParam(projectId),
 		ignore404: false,
 	})
 }
 
 // Delete is used to delete a channel.
-func (c ClientCategoryChannels) Delete(ctx context.Context, id string) error {
+func (c ClientCategoryChannels) Delete(ctx context.Context, projectId, id string) error {
 	return c.c.do(ctx, clientArgs{
 		method:    "DELETE",
 		path:      "/channels/" + url.PathEscape(id),
+		query:     getProjectIdParam(projectId),
 		ignore404: false,
 	})
 }
 
 // GetStats is used to get the stats of a channel.
-func (c ClientCategoryChannels) GetStats(ctx context.Context, id string) (*types.Stats, error) {
+func (c ClientCategoryChannels) GetStats(ctx context.Context, projectId, id string) (*types.Stats, error) {
 	var s types.Stats
 	err := c.c.do(ctx, clientArgs{
 		method:    "GET",
 		path:      "/channels/" + url.PathEscape(id) + "/stats",
 		resultKey: "stats",
 		result:    &s,
+		query:     getProjectIdParam(projectId),
 		ignore404: false,
 	})
 	if err != nil {
@@ -178,33 +189,30 @@ func (c ClientCategoryChannels) GetStats(ctx context.Context, id string) (*types
 }
 
 // Delete is used to delete a channel token.
-func (t ClientCategoryChannelsTokens) Delete(ctx context.Context, id string) error {
+func (t ClientCategoryChannelsTokens) Delete(ctx context.Context, projectId, id string) error {
 	return t.c.do(ctx, clientArgs{
 		method:    "DELETE",
 		path:      "/channels/tokens/" + url.PathEscape(id),
+		query:     getProjectIdParam(projectId),
 		ignore404: false,
 	})
 }
 
 // Create is used to create a new channel token. State is the map of the state of the token (this can be nil), and
 // projectId is the project ID to associate the token with (this can be empty unless it is bearer or PAT auth).
-func (t ClientCategoryChannelsTokens) Create(ctx context.Context, state map[string]any, projectId string) (*types.ChannelToken, error) {
+func (t ClientCategoryChannelsTokens) Create(ctx context.Context, projectId string, state map[string]any) (*types.ChannelToken, error) {
 	if projectId == "" && t.c.tokenType != "ptk" {
 		return nil, types.InvalidToken("project ID must be specified when creating a channel token with bearer or PAT auth")
 	}
 	if state == nil {
 		state = map[string]any{}
 	}
-	var query map[string]string
-	if projectId != "" {
-		query = map[string]string{"project": projectId}
-	}
 	var ct types.ChannelToken
 	err := t.c.do(ctx, clientArgs{
 		method:    "POST",
 		path:      "/channels/tokens",
 		body:      map[string]any{"state": state},
-		query:     query,
+		query:     getProjectIdParam(projectId),
 		resultKey: "token",
 		result:    &ct,
 		ignore404: false,
@@ -216,23 +224,25 @@ func (t ClientCategoryChannelsTokens) Create(ctx context.Context, state map[stri
 }
 
 // SetState is used to set the state of a channel token.
-func (t ClientCategoryChannelsTokens) SetState(ctx context.Context, id string, state map[string]any) error {
+func (t ClientCategoryChannelsTokens) SetState(ctx context.Context, projectId, id string, state map[string]any) error {
 	return t.c.do(ctx, clientArgs{
 		method:    "PATCH",
 		path:      "/channels/tokens/" + url.PathEscape(id),
 		body:      map[string]any{"state": state},
+		query:     getProjectIdParam(projectId),
 		ignore404: false,
 	})
 }
 
 // Get is used to get a token by its ID.
-func (t ClientCategoryChannelsTokens) Get(ctx context.Context, id string) (*types.ChannelToken, error) {
+func (t ClientCategoryChannelsTokens) Get(ctx context.Context, projectId, id string) (*types.ChannelToken, error) {
 	var ct types.ChannelToken
 	err := t.c.do(ctx, clientArgs{
 		method:    "GET",
 		path:      "/channels/tokens/" + url.PathEscape(id),
 		resultKey: "token",
 		result:    &ct,
+		query:     getProjectIdParam(projectId),
 		ignore404: false,
 	})
 	if err != nil {
@@ -242,8 +252,8 @@ func (t ClientCategoryChannelsTokens) Get(ctx context.Context, id string) (*type
 }
 
 // IsOnline is used to check if a token is online.
-func (t ClientCategoryChannelsTokens) IsOnline(ctx context.Context, id string) (bool, error) {
-	x, err := t.Get(ctx, id)
+func (t ClientCategoryChannelsTokens) IsOnline(ctx context.Context, projectId, id string) (bool, error) {
+	x, err := t.Get(ctx, projectId, id)
 	if err != nil {
 		return false, err
 	}
@@ -251,11 +261,12 @@ func (t ClientCategoryChannelsTokens) IsOnline(ctx context.Context, id string) (
 }
 
 // PublishDirectMessage is used to publish an event to the channel token.
-func (t ClientCategoryChannelsTokens) PublishDirectMessage(ctx context.Context, id, eventName string, data any) error {
+func (t ClientCategoryChannelsTokens) PublishDirectMessage(ctx context.Context, projectId, id, eventName string, data any) error {
 	return t.c.do(ctx, clientArgs{
 		method:    "POST",
 		path:      "/channels/tokens/" + url.PathEscape(id) + "/messages",
 		body:      map[string]any{"e": eventName, "d": data},
+		query:     getProjectIdParam(projectId),
 		ignore404: false,
 	})
 }
