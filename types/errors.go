@@ -42,3 +42,9 @@ type UnknownServerError struct {
 func (u UnknownServerError) Error() string {
 	return "status code " + strconv.Itoa(u.StatusCode) + " (" + u.Code + "): " + u.Message
 }
+
+// InvalidToken is thrown when the authentication token is invalid for the action you are attempting.
+type InvalidToken string
+
+// Error implements the error interface.
+func (i InvalidToken) Error() string { return (string)(i) }

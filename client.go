@@ -5,18 +5,42 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/hopinc/hop-go/types"
 	"io"
 	"net/http"
 	"net/url"
+	"strings"
 )
 
 // APIBase is used to define the base API URL.
 const APIBase = "https://api.hop.io/v1"
 
+// IDPrefixes are allowed ID prefixes.
+var IDPrefixes = []string{
+	"user", "project", "pm", "role", "pi", "ptk", "pat", "container", "pipe_room", "deployment", "bearer",
+	"ptkid", "secret", "gateway", "domain", "leap_token", "build",
+}
+
+// ValidateToken is used to validate a authentication token. Returns an error if the token is invalid.
+func ValidateToken(authorization string) (string, error) {
+	prefixSplit := strings.SplitN(authorization, "_", 2)
+	if len(prefixSplit) != 2 {
+		return "", types.InvalidToken("invalid authorization token format")
+	}
+	prefix := prefixSplit[0]
+	for _, v := range IDPrefixes {
+		if v == prefix {
+			return prefix, nil
+		}
+	}
+	return "", types.InvalidToken("invalid authorization token prefix: " + prefix)
+}
+
 // Client is used to define the Hop client. Please use the NewClient function to create this!
 type Client struct {
 	httpClient    *http.Client
 	authorization string
+	tokenType     string
 
 	Pipe     *ClientCategoryPipe
 	Projects *ClientCategoryProjects
@@ -27,11 +51,20 @@ type Client struct {
 }
 
 // NewClient is used to make a new Hop client.
-func NewClient(authorization string) *Client {
+func NewClient(authorization string) (*Client, error) {
+	prefix, err := ValidateToken(authorization)
+	if err != nil {
+		return nil, err
+	}
+	if prefix != "bearer" && prefix != "pat" && prefix != "ptk" {
+		return nil, types.InvalidToken("invalid authorization token prefix: " + prefix)
+	}
+
 	var c Client
 	c = Client{
 		httpClient:    &http.Client{},
 		authorization: authorization,
+		tokenType:     prefix,
 		Pipe:          newPipe(&c),
 		Projects:      newProjects(&c),
 		Ignite:        newIgnite(&c),
@@ -39,7 +72,7 @@ func NewClient(authorization string) *Client {
 		Registry:      newRegistry(&c),
 		Channels:      newChannels(&c),
 	}
-	return &c
+	return &c, nil
 }
 
 type clientArgs struct {

@@ -39,3 +39,18 @@ type Channel struct {
 type Stats struct {
 	OnlineCount int `json:"online_count"`
 }
+
+// ChannelToken is used to define the token for a channel.
+type ChannelToken struct {
+	// ID is the ID of the token.
+	ID string `json:"id"`
+
+	// State is any state metadata associated with the token.
+	State map[string]any `json:"state"`
+
+	// ProjectID is the project ID associated with the token.
+	ProjectID string `json:"project_id"`
+
+	// IsOnline is whether the token is online (e.g.: active heartbeat and connected to leap).
+	IsOnline bool `json:"is_online"`
+}

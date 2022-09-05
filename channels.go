@@ -2,6 +2,7 @@ package hopgo
 
 import (
 	"context"
+	"errors"
 	"net/url"
 
 	"github.com/hopinc/hop-go/types"
@@ -183,6 +184,80 @@ func (t ClientCategoryChannelsTokens) Delete(ctx context.Context, id string) err
 	return t.c.do(ctx, clientArgs{
 		method:    "DELETE",
 		path:      "/channels/tokens/" + url.PathEscape(id),
+		ignore404: false,
+	})
+}
+
+// Create is used to create a new channel token. State is the map of the state of the token (this can be nil), and
+// projectId is the project ID to associate the token with (this can be empty unless it is bearer or PAT auth).
+func (t ClientCategoryChannelsTokens) Create(ctx context.Context, state map[string]any, projectId string) (*types.ChannelToken, error) {
+	if projectId == "" && t.c.tokenType != "ptk" {
+		return nil, errors.New("project ID must be specified when creating a channel token with bearer or PAT auth")
+	}
+	if state == nil {
+		state = map[string]any{}
+	}
+	var query map[string]string
+	if projectId != "" {
+		query = map[string]string{"project": projectId}
+	}
+	var ct types.ChannelToken
+	err := t.c.do(ctx, clientArgs{
+		method:    "POST",
+		path:      "/channels/tokens",
+		body:      map[string]any{"state": state},
+		query:     query,
+		resultKey: "token",
+		result:    &ct,
+		ignore404: false,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &ct, nil
+}
+
+// SetState is used to set the state of a channel token.
+func (t ClientCategoryChannelsTokens) SetState(ctx context.Context, id string, state map[string]any) error {
+	return t.c.do(ctx, clientArgs{
+		method:    "PATCH",
+		path:      "/channels/tokens/" + url.PathEscape(id),
+		body:      map[string]any{"state": state},
+		ignore404: false,
+	})
+}
+
+// Get is used to get a token by its ID.
+func (t ClientCategoryChannelsTokens) Get(ctx context.Context, id string) (*types.ChannelToken, error) {
+	var ct types.ChannelToken
+	err := t.c.do(ctx, clientArgs{
+		method:    "GET",
+		path:      "/channels/tokens/" + url.PathEscape(id),
+		resultKey: "token",
+		result:    &ct,
+		ignore404: false,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &ct, nil
+}
+
+// IsOnline is used to check if a token is online.
+func (t ClientCategoryChannelsTokens) IsOnline(ctx context.Context, id string) (bool, error) {
+	x, err := t.Get(ctx, id)
+	if err != nil {
+		return false, err
+	}
+	return x.IsOnline, nil
+}
+
+// PublishDirectMessage is used to publish an event to the channel token.
+func (t ClientCategoryChannelsTokens) PublishDirectMessage(ctx context.Context, id, eventName string, data any) error {
+	return t.c.do(ctx, clientArgs{
+		method:    "POST",
+		path:      "/channels/tokens/" + url.PathEscape(id) + "/messages",
+		body:      map[string]any{"e": eventName, "d": data},
 		ignore404: false,
 	})
 }
