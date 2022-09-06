@@ -1,6 +1,9 @@
 package types
 
 import (
+	"errors"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/relvacode/iso8601"
@@ -27,4 +30,52 @@ func StringPointerify(s string) *string {
 		return nil
 	}
 	return &s
+}
+
+// Size is used to define a memory/storage size and allow for easy parsing of it.
+type Size string
+
+type strIntPair struct {
+	str string
+	int int
+}
+
+var multipliers = []strIntPair{
+	{"kb", 1024}, {"mb", 1024 * 1024},
+	{"gb", 1024 * 1024 * 1024}, {"b", 1},
+}
+
+// Bytes returns the size in bytes.
+func (s Size) Bytes() (int, error) {
+	for _, p := range multipliers {
+		if strings.HasSuffix((string)(s), p.str) {
+			// Parse the rest of the content and multiply it by the multiplier.
+			i, err := strconv.Atoi((string)(s)[:len(s)-len(p.str)])
+			if err != nil {
+				return 0, err
+			}
+			return i * p.int, nil
+		}
+	}
+	return 0, errors.New("invalid size")
+}
+
+// Kilobytes returns a size type for the number of kilobytes specified.
+func Kilobytes(kb int) Size {
+	return Size(strconv.Itoa(kb) + "kb")
+}
+
+// Megabytes returns a size type for the number of megabytes specified.
+func Megabytes(mb int) Size {
+	return Size(strconv.Itoa(mb) + "mb")
+}
+
+// Gigabytes returns a size type for the number of gigabytes specified.
+func Gigabytes(gb int) Size {
+	return Size(strconv.Itoa(gb) + "gb")
+}
+
+// Bytes returns a size type for the number of bytes specified.
+func Bytes(b int) Size {
+	return Size(strconv.Itoa(b) + "b")
 }
