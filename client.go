@@ -213,9 +213,14 @@ type Paginator[T any] struct {
 	total     int // should be set to -1 on init.
 	mu        sync.Mutex
 
+	// Defines things required for the offset strategy.
+	offsetStrat bool
+	limit       int
+
 	path      string
 	resultKey string
 	sortBy    string
+	orderBy   string
 	query     map[string]string
 }
 
@@ -238,9 +243,20 @@ func (p *Paginator[T]) Next(ctx context.Context) ([]T, error) {
 	for k, v := range p.query {
 		query[k] = v
 	}
-	query["page"] = strconv.Itoa(p.pageIndex + 1)
-	query["orderBy"] = "asc"
-	query["sortBy"] = p.sortBy
+	if p.offsetStrat {
+		query["offset"] = strconv.Itoa(p.count)
+		query["limit"] = strconv.Itoa(p.limit)
+	} else {
+		query["page"] = strconv.Itoa(p.pageIndex + 1)
+	}
+	if p.orderBy == "" {
+		query["orderBy"] = "asc"
+	} else {
+		query["orderBy"] = p.orderBy
+	}
+	if p.sortBy != "" {
+		query["sortBy"] = p.sortBy
+	}
 
 	var m map[string]json.RawMessage
 	if err := p.c.do(ctx, clientArgs{
@@ -253,10 +269,8 @@ func (p *Paginator[T]) Next(ctx context.Context) ([]T, error) {
 		return nil, err
 	}
 
-	if totalCount, ok := m["total_count"]; !ok {
-		return nil, errors.New("api response error: total_count was not in response - please report this to " +
-			"the go-hop github repository")
-	} else {
+	if totalCount, ok := m["total_count"]; ok {
+		// We have a count to go by. This probably means we are not using the offset strategy.
 		var err error
 		p.total, err = unJsonInt(totalCount)
 		if err != nil {
@@ -268,11 +282,14 @@ func (p *Paginator[T]) Next(ctx context.Context) ([]T, error) {
 	if err := json.Unmarshal(m[p.resultKey], &a); err != nil {
 		return nil, err
 	}
-	p.count += len(a)
-	p.pageIndex++
 	if len(a) == 0 {
 		// Stop pagination here.
 		return nil, types.StopIteration
+	}
+	p.count += len(a)
+	if !p.offsetStrat {
+		// Add 1 to pages since this is not using the offset strategy.
+		p.pageIndex++
 	}
 	return a, nil
 }

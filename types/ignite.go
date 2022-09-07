@@ -1,8 +1,6 @@
 package types
 
-import (
-	"encoding/json"
-)
+import "encoding/json"
 
 // GatewayType is the type of the gateway.
 type GatewayType string
@@ -224,4 +222,112 @@ type Deployment struct {
 
 	// Config is the configuration for this deployment.
 	Config *DeploymentConfig `json:"config"`
+}
+
+// Region is used to define a Hop datacenter region.
+type Region string
+
+const (
+	// RegionUSEast1 is used to define the US East 1 region.
+	RegionUSEast1 Region = "us-east-1"
+)
+
+// ContainerUptime is the structure that contains information about a containers uptime.
+type ContainerUptime struct {
+	// LastStart is the last time the container was started.
+	LastStart Timestamp `json:"last_start"`
+}
+
+// ContainerState is used to define the current status of a container.
+type ContainerState string
+
+const (
+	// ContainerStatePending is used to define a container that is pending.
+	ContainerStatePending ContainerState = "pending"
+
+	// ContainerStateRunning is used to define a container that is running.
+	ContainerStateRunning ContainerState = "running"
+
+	// ContainerStateStopped is used to define a container that is stopped.
+	ContainerStateStopped ContainerState = "stopped"
+
+	// ContainerStateFailed is used to define a container that has failed (e.g. exited with a non-zero exit code).
+	ContainerStateFailed ContainerState = "failed"
+
+	// ContainerStateTerminating is used to define a container that is terminating.
+	ContainerStateTerminating ContainerState = "terminating"
+
+	// ContainerStateExited is used to define a container that has exited.
+	ContainerStateExited ContainerState = "exited"
+)
+
+// Container is used to define a container in Ignite.
+type Container struct {
+	// ID is the ID of the container.
+	ID string `json:"id"`
+
+	// CreatedAt defines when this container was created.
+	CreatedAt Timestamp `json:"created_at"`
+
+	// Region is the region that this container is running in.
+	Region Region `json:"region"`
+
+	// Uptime is used to define uptime/downtime information for this container.
+	Uptime ContainerUptime `json:"uptime"`
+
+	// Type is the runtime type of this container.
+	Type RuntimeType `json:"type"`
+
+	// InternalIP is the internal IP address of this container.
+	InternalIP string `json:"internal_ip"`
+
+	// DeploymentID is the ID of the deployment that this container is a part of.
+	DeploymentID string `json:"deployment_id"`
+
+	// State is the state of this container.
+	State ContainerState `json:"state"`
+}
+
+// GatewayCreationOptions is used to define the options for creating a gateway.
+type GatewayCreationOptions struct {
+	// ProjectID is the ID of the project that this gateway is for. Can be blank if using a project token.
+	ProjectID string `json:"-"`
+
+	// DeploymentID is the ID of the deployment that this gateway is for.
+	DeploymentID string `json:"-"`
+
+	// Type is the type of gateway to create, either internal or external.
+	Type GatewayType `json:"type"`
+
+	// Protocol is the protocol to use for the gateway.
+	Protocol GatewayProtocol `json:"protocol"`
+
+	// TargetPort is the port to listen on.
+	TargetPort int `json:"target_port"`
+}
+
+// LoggingLevel is used to define the logging level.
+type LoggingLevel string
+
+const (
+	// LoggingLevelInfo is used to define the level of logging as informative. Stdout becomes info.
+	LoggingLevelInfo LoggingLevel = "info"
+
+	// LoggingLevelStderr is used to define the level of logging as an error.
+	LoggingLevelStderr LoggingLevel = "stderr"
+)
+
+// ContainerLog is used to define a container log message.
+type ContainerLog struct {
+	// Timestamp is the timestamp of the log message.
+	Timestamp Timestamp `json:"timestamp"`
+
+	// Message is the log message.
+	Message string `json:"message"`
+
+	// Nonce is the ID of the document in Elasticsearch. This can be safely used to map state.
+	Nonce string `json:"nonce"`
+
+	// Level is the logging level.
+	Level LoggingLevel `json:"level"`
 }
