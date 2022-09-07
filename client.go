@@ -15,8 +15,8 @@ import (
 	"github.com/hopinc/hop-go/types"
 )
 
-// APIBase is used to define the base API URL.
-const APIBase = "https://api.hop.io/v1"
+// DefaultAPIBase is used to define the default base API URL.
+const DefaultAPIBase = "https://api.hop.io/v1"
 
 // IDPrefixes are allowed ID prefixes.
 var IDPrefixes = []string{
@@ -44,6 +44,7 @@ type Client struct {
 	httpClient    *http.Client
 	authorization string
 	tokenType     string
+	apiBase       string
 
 	Pipe     *ClientCategoryPipe
 	Projects *ClientCategoryProjects
@@ -76,6 +77,20 @@ func NewClient(authorization string) (*Client, error) {
 		Channels:      newChannels(&c),
 	}
 	return &c, nil
+}
+
+// SetAPIBase is used to set the base API URL. This is probably something you do not need to use, however it is useful
+// in testing the SDK. The base URL contains the domain and ends with /v1.
+func (c *Client) SetAPIBase(apiBase string) *Client {
+	if !strings.HasPrefix(apiBase, "http://") && !strings.HasPrefix(apiBase, "https://") {
+		apiBase = "https://" + apiBase
+	}
+	if strings.HasSuffix(apiBase, "/") {
+		// Remove the trailing slash.
+		apiBase = apiBase[:len(apiBase)-1]
+	}
+	c.apiBase = apiBase
+	return c
 }
 
 type clientArgs struct {
@@ -124,7 +139,11 @@ func (c *Client) do(ctx context.Context, a clientArgs) error {
 			suffix += chunk + url.QueryEscape(k) + "=" + url.QueryEscape(v)
 		}
 	}
-	req, err := http.NewRequestWithContext(ctx, a.method, APIBase+a.path+suffix, r)
+	apiBase := c.apiBase
+	if apiBase == "" {
+		apiBase = DefaultAPIBase
+	}
+	req, err := http.NewRequestWithContext(ctx, a.method, apiBase+a.path+suffix, r)
 	if err != nil {
 		return err
 	}
