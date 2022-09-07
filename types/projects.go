@@ -108,7 +108,7 @@ type ProjectRole struct {
 	Name string `json:"name"`
 
 	// Flags is the flags for this role.
-	Flags int `json:"flags"`
+	Flags string `json:"flags"`
 }
 
 // ProjectMember is used to define a member of a project.
