@@ -146,9 +146,9 @@ type VGPU struct {
 
 // Resources is used to define the resources used by a deployment.
 type Resources struct {
-	VCPU int    `json:"vcpu"`
-	RAM  Size   `json:"ram"`
-	VGPU []VGPU `json:"vgpu"`
+	VCPU float64 `json:"vcpu"`
+	RAM  Size    `json:"ram"`
+	VGPU []VGPU  `json:"vgpu"`
 }
 
 // MarshalJSON is used to marshal the resources into JSON.

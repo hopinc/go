@@ -31,15 +31,16 @@ func handleErrors(res *http.Response) error {
 			"the go-hop github repository")
 	}
 
-	switch r.Error.Code {
-	case "not_found", "project_not_found":
-		return types.NotFound(r.Error.Message)
-	case "invalid_auth":
+	if r.Error.Code == "invalid_auth" {
 		return types.NotAuthorized(r.Error.Message)
 	}
 	if res.StatusCode == 400 {
 		// As a special case, for 400s return the r.Error object.
 		return r.Error
+	}
+	if res.StatusCode == 404 {
+		// Infer that this is a not found error.
+		return types.NotFound(r.Error.Message)
 	}
 	if res.StatusCode >= 500 {
 		// Infer that this is a internal server error.

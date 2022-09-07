@@ -93,6 +93,8 @@ func (c *Client) SetAPIBase(apiBase string) *Client {
 	return c
 }
 
+type plainText []byte
+
 type clientArgs struct {
 	method    string
 	path      string
@@ -111,8 +113,12 @@ type responseBody struct {
 func (c *Client) do(ctx context.Context, a clientArgs) error {
 	// Handle getting the body bytes.
 	var r io.Reader
+	textPlain := false
 	if a.method != "GET" && a.body != nil {
 		switch x := a.body.(type) {
+		case plainText:
+			textPlain = true
+			r = bytes.NewReader(x)
 		case []byte:
 			r = bytes.NewReader(x)
 		default:
@@ -150,7 +156,12 @@ func (c *Client) do(ctx context.Context, a clientArgs) error {
 	req.Header.Set("Authorization", c.authorization)
 	req.Header.Set("Accept", "application/json")
 	if r != nil {
-		req.Header.Set("Content-Type", "application/json")
+		// This means we have a body of some description. What content type should we use?
+		if textPlain {
+			req.Header.Set("Content-Type", "text/plain")
+		} else {
+			req.Header.Set("Content-Type", "application/json")
+		}
 	}
 
 	// Do the request.
