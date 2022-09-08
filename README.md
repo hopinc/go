@@ -16,7 +16,7 @@ import (
 
 func main() {
 	myToken := "ptk_xxx"
-	c, err := hopgo.NewClient(myToken)
+	c, err := hop.NewClient(myToken)
 	if err != nil {
 		// Handle errors how you wish here.
 		panic(err)
