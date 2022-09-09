@@ -2,12 +2,14 @@ package hop
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"io"
 	"net/http"
 	"strings"
 	"testing"
 
+	"github.com/hopinc/hop-go/types"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -84,6 +86,21 @@ func (h mockHttpRoundTripper) RoundTrip(req *http.Request) (*http.Response, erro
 	}, nil
 }
 
+func makeJsonSyntaxError(offset int) error {
+	x := make([]byte, offset)
+	for i := range x {
+		x[i] = '1'
+	}
+	x[offset-1] = '{'
+	return json.Unmarshal(x, &struct{}{})
+}
+
+type marshalFail struct{}
+
+func (marshalFail) MarshalJSON() ([]byte, error) {
+	return nil, errors.New("marshal fail")
+}
+
 func TestClient_do(t *testing.T) {
 	tests := []struct {
 		name string
@@ -96,13 +113,14 @@ func TestClient_do(t *testing.T) {
 		returnsBody   string
 		returnsError  error
 
-		baseUrl   string
-		method    string
-		path      string
-		resultKey string
-		query     map[string]string
-		body      any
-		ignore404 bool
+		baseUrl      string
+		method       string
+		path         string
+		resultKey    string
+		query        map[string]string
+		body         any
+		ignore404    bool
+		expectsError error
 	}{
 		{
 			name: "http client error",
@@ -112,6 +130,7 @@ func TestClient_do(t *testing.T) {
 			},
 			wantUrl:      "https://api.hop.io/v1/test",
 			returnsError: errors.New("hamster tripped on wire"),
+			expectsError: errors.New("hamster tripped on wire"),
 			method:       "GET",
 			path:         "/test",
 		},
@@ -170,6 +189,19 @@ func TestClient_do(t *testing.T) {
 			path:          "/test",
 		},
 		{
+			name: "get ignore 404",
+			wantHeaders: http.Header{
+				"Accept":        {"application/json"},
+				"Authorization": {"testing"},
+			},
+			wantUrl:       "https://api.hop.io/v1/test",
+			returnsBody:   `{"data":{"foo":"bar"}}`,
+			returnsStatus: 404,
+			method:        "GET",
+			path:          "/test",
+			ignore404:     true,
+		},
+		{
 			name: "get ignore body",
 			wantHeaders: http.Header{
 				"Accept":        {"application/json"},
@@ -197,7 +229,21 @@ func TestClient_do(t *testing.T) {
 			body:          map[string]string{},
 		},
 		{
-			name: "post request",
+			name: "bad response json",
+			wantHeaders: http.Header{
+				"Accept":        {"application/json"},
+				"Authorization": {"testing"},
+			},
+			wantUrl:       "https://api.hop.io/v1/test",
+			returnsBody:   "{",
+			returnsStatus: 200,
+			expectsError:  makeJsonSyntaxError(1),
+			resultKey:     "pog",
+			method:        "GET",
+			path:          "/test",
+		},
+		{
+			name: "marshalled json post request",
 			wantHeaders: http.Header{
 				"Accept":        {"application/json"},
 				"Authorization": {"testing"},
@@ -210,6 +256,56 @@ func TestClient_do(t *testing.T) {
 			method:        "POST",
 			path:          "/test",
 			body:          map[string]string{"hello": "world"},
+		},
+		{
+			name: "json bytes post request",
+			wantHeaders: http.Header{
+				"Accept":        {"application/json"},
+				"Authorization": {"testing"},
+				"Content-Type":  {"application/json"},
+			},
+			wantUrl:       "https://api.hop.io/v1/test",
+			wantBody:      `{"hello":"world"}`,
+			returnsBody:   `{"data":{"foo":"bar"}}`,
+			returnsStatus: 200,
+			method:        "POST",
+			path:          "/test",
+			body:          []byte(`{"hello":"world"}`),
+		},
+		{
+			name: "plain text post request",
+			wantHeaders: http.Header{
+				"Accept":        {"application/json"},
+				"Authorization": {"testing"},
+				"Content-Type":  {"text/plain"},
+			},
+			wantUrl:       "https://api.hop.io/v1/test",
+			wantBody:      "hello world",
+			returnsBody:   `{"data":{"foo":"bar"}}`,
+			returnsStatus: 200,
+			method:        "POST",
+			path:          "/test",
+			body:          plainText("hello world"),
+		},
+		{
+			name:         "body marshal error",
+			expectsError: errors.New("marshal fail"),
+			method:       "POST",
+			path:         "/test",
+			body:         marshalFail{},
+		},
+		{
+			name: "calls handleErrors",
+			wantHeaders: http.Header{
+				"Accept":        {"application/json"},
+				"Authorization": {"testing"},
+			},
+			wantUrl:       "https://api.hop.io/v1/test",
+			returnsBody:   `{"error":{"message":"fail","code":"not_found"}}`,
+			expectsError:  types.NotFound("fail"),
+			returnsStatus: 404,
+			method:        "GET",
+			path:          "/test",
 		},
 	}
 	for _, tt := range tests {
@@ -247,10 +343,13 @@ func TestClient_do(t *testing.T) {
 				result:    ptr,
 				ignore404: tt.ignore404,
 			})
-			if tt.returnsError == nil {
+			if tt.expectsError == nil {
 				assert.NoError(t, err)
 			} else {
-				assert.Equal(t, tt.returnsError, errors.Unwrap(err))
+				if err2 := errors.Unwrap(err); err2 != nil {
+					err = err2
+				}
+				assert.Equal(t, tt.expectsError, err)
 				return
 			}
 			if ptr != nil {
