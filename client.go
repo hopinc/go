@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"sort"
 	"strconv"
 	"strings"
 	"sync"
@@ -45,6 +46,7 @@ type Client struct {
 	authorization string
 	tokenType     string
 	apiBase       string
+	isTest        bool
 
 	Pipe     *ClientCategoryPipe
 	Projects *ClientCategoryProjects
@@ -134,8 +136,9 @@ func (c *Client) do(ctx context.Context, a clientArgs) error {
 	suffix := ""
 	if a.query != nil {
 		suffix = "?"
-		first := false
-		for k, v := range a.query {
+		first := true
+
+		addChunk := func(k, v string) {
 			chunk := ""
 			if first {
 				first = false
@@ -143,6 +146,25 @@ func (c *Client) do(ctx context.Context, a clientArgs) error {
 				chunk = "&"
 			}
 			suffix += chunk + url.QueryEscape(k) + "=" + url.QueryEscape(v)
+		}
+
+		if c.isTest {
+			// Order all the keys for unit testing reasons.
+			keys := make([]string, len(a.query))
+			i := 0
+			for k := range a.query {
+				keys[i] = k
+				i++
+			}
+			sort.Strings(keys)
+			for _, k := range keys {
+				addChunk(k, a.query[k])
+			}
+		} else {
+			// Just proceed as usual.
+			for k, v := range a.query {
+				addChunk(k, v)
+			}
 		}
 	}
 	apiBase := c.apiBase
