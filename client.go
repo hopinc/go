@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"runtime"
 	"sort"
 	"strconv"
 	"strings"
@@ -15,6 +16,8 @@ import (
 
 	"github.com/hopinc/hop-go/types"
 )
+
+var userAgent = "hop-go/" + Version + " (go/" + runtime.Version() + ")"
 
 // DefaultAPIBase is used to define the default base API URL.
 const DefaultAPIBase = "https://api.hop.io/v1"
@@ -174,6 +177,7 @@ func (c *Client) do(ctx context.Context, a clientArgs) error {
 	}
 	req.Header.Set("Authorization", c.authorization)
 	req.Header.Set("Accept", "application/json")
+	req.Header.Set("User-Agent", userAgent)
 	if r != nil {
 		// This means we have a body of some description. What content type should we use?
 		if textPlain {

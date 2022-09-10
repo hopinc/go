@@ -304,6 +304,7 @@ func TestClient_do(t *testing.T) {
 			wantHeaders: http.Header{
 				"Accept":        {"application/json"},
 				"Authorization": {"testing"},
+				"User-Agent":    {userAgent},
 			},
 			wantUrl:      "https://api.hop.io/v1/test",
 			returnsError: errors.New("hamster tripped on wire"),
@@ -316,6 +317,7 @@ func TestClient_do(t *testing.T) {
 			wantHeaders: http.Header{
 				"Accept":        {"application/json"},
 				"Authorization": {"testing"},
+				"User-Agent":    {userAgent},
 			},
 			wantUrl:       "https://api.hop.io/v1/test?foo=bar",
 			returnsBody:   `{"data":{"foo":"bar"}}`,
@@ -331,6 +333,7 @@ func TestClient_do(t *testing.T) {
 			wantHeaders: http.Header{
 				"Accept":        {"application/json"},
 				"Authorization": {"testing"},
+				"User-Agent":    {userAgent},
 			},
 			wantUrl:       "https://api.hop.io/v1/test?foo=bar&foo2=bar2",
 			returnsBody:   `{"data":{"foo":"bar"}}`,
@@ -347,6 +350,7 @@ func TestClient_do(t *testing.T) {
 			wantHeaders: http.Header{
 				"Accept":        {"application/json"},
 				"Authorization": {"testing"},
+				"User-Agent":    {userAgent},
 			},
 			wantUrl:       "https://api.hop.io/v1/test",
 			returnsBody:   `{"data":{"foo":"bar"}}`,
@@ -359,6 +363,7 @@ func TestClient_do(t *testing.T) {
 			wantHeaders: http.Header{
 				"Accept":        {"application/json"},
 				"Authorization": {"testing"},
+				"User-Agent":    {userAgent},
 			},
 			wantUrl:       "https://api.hop.io/v1/test",
 			returnsStatus: 204,
@@ -370,6 +375,7 @@ func TestClient_do(t *testing.T) {
 			wantHeaders: http.Header{
 				"Accept":        {"application/json"},
 				"Authorization": {"testing"},
+				"User-Agent":    {userAgent},
 			},
 			baseUrl:       "https://example.com/v9999",
 			wantUrl:       "https://example.com/v9999/test",
@@ -382,6 +388,7 @@ func TestClient_do(t *testing.T) {
 			wantHeaders: http.Header{
 				"Accept":        {"application/json"},
 				"Authorization": {"testing"},
+				"User-Agent":    {userAgent},
 			},
 			wantUrl:       "https://api.hop.io/v1/test",
 			returnsBody:   `{"data":{"foo":"bar"}}`,
@@ -395,6 +402,7 @@ func TestClient_do(t *testing.T) {
 			wantHeaders: http.Header{
 				"Accept":        {"application/json"},
 				"Authorization": {"testing"},
+				"User-Agent":    {userAgent},
 			},
 			wantUrl:       "https://api.hop.io/v1/test",
 			returnsBody:   `{"data":{"foo":"bar"}}`,
@@ -408,6 +416,7 @@ func TestClient_do(t *testing.T) {
 			wantHeaders: http.Header{
 				"Accept":        {"application/json"},
 				"Authorization": {"testing"},
+				"User-Agent":    {userAgent},
 			},
 			wantUrl:       "https://api.hop.io/v1/test",
 			returnsBody:   `{"data":{"pog":{"foo":"bar"}}}`,
@@ -422,6 +431,7 @@ func TestClient_do(t *testing.T) {
 			wantHeaders: http.Header{
 				"Accept":        {"application/json"},
 				"Authorization": {"testing"},
+				"User-Agent":    {userAgent},
 			},
 			wantUrl:       "https://api.hop.io/v1/test",
 			returnsBody:   "{",
@@ -437,6 +447,7 @@ func TestClient_do(t *testing.T) {
 				"Accept":        {"application/json"},
 				"Authorization": {"testing"},
 				"Content-Type":  {"application/json"},
+				"User-Agent":    {userAgent},
 			},
 			wantUrl:       "https://api.hop.io/v1/test",
 			wantBody:      `{"hello":"world"}`,
@@ -452,6 +463,7 @@ func TestClient_do(t *testing.T) {
 				"Accept":        {"application/json"},
 				"Authorization": {"testing"},
 				"Content-Type":  {"application/json"},
+				"User-Agent":    {userAgent},
 			},
 			wantUrl:       "https://api.hop.io/v1/test",
 			wantBody:      `{"hello":"world"}`,
@@ -467,6 +479,7 @@ func TestClient_do(t *testing.T) {
 				"Accept":        {"application/json"},
 				"Authorization": {"testing"},
 				"Content-Type":  {"text/plain"},
+				"User-Agent":    {userAgent},
 			},
 			wantUrl:       "https://api.hop.io/v1/test",
 			wantBody:      "hello world",
@@ -488,6 +501,7 @@ func TestClient_do(t *testing.T) {
 			wantHeaders: http.Header{
 				"Accept":        {"application/json"},
 				"Authorization": {"testing"},
+				"User-Agent":    {userAgent},
 			},
 			wantUrl:       "https://api.hop.io/v1/test",
 			returnsBody:   `{"error":{"message":"fail","code":"not_found"}}`,
