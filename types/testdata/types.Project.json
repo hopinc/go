@@ -1,0 +1,20 @@
+{
+	"id": "abc",
+	"name": "def",
+	"tier": "ghi",
+	"created_at": "jkl",
+	"icon": "mno",
+	"namespace": "pqr",
+	"type": "stu",
+	"default_quotas": {
+		"vcpu": 7,
+		"ram": 8
+	},
+	"quota_overrides": {
+		"vwx": 10
+	},
+	"quota_usage": {
+		"vcpu": 11,
+		"ram": 12
+	}
+}

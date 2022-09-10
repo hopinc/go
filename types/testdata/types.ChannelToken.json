@@ -1,0 +1,8 @@
+{
+	"id": "abc",
+	"state": {
+		"def": "ghi"
+	},
+	"project_id": "jkl",
+	"is_online": true
+}

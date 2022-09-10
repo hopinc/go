@@ -1,0 +1,12 @@
+{
+	"id": "abc",
+	"name": "def",
+	"created_at": "ghi",
+	"ingest_protocol": "jkl",
+	"delivery_protocols": [
+		"mno"
+	],
+	"join_token": "pqr",
+	"ingest_region": "stu",
+	"state": "vwx"
+}

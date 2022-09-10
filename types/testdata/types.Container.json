@@ -1,0 +1,12 @@
+{
+	"id": "abc",
+	"created_at": "def",
+	"region": "ghi",
+	"uptime": {
+		"last_start": "jkl"
+	},
+	"type": "mno",
+	"internal_ip": "pqr",
+	"deployment_id": "stu",
+	"state": "vwx"
+}

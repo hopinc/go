@@ -1,0 +1,19 @@
+{
+	"id": "abc",
+	"type": "def",
+	"name": "ghi",
+	"protocol": "jkl",
+	"deployment_id": "mno",
+	"created_at": "pqr",
+	"hopsh_domain": "stu",
+	"internal_domain": "vwx",
+	"target_port": 8,
+	"domains": [
+		{
+			"id": "abc",
+			"domain": "def",
+			"state": "ghi",
+			"created_at": "jkl"
+		}
+	]
+}

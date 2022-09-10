@@ -1,0 +1,29 @@
+{
+	"id": "abc",
+	"project": {
+		"id": "def",
+		"name": "ghi",
+		"tier": "jkl",
+		"created_at": "mno",
+		"icon": "pqr",
+		"namespace": "stu",
+		"type": "vwx",
+		"default_quotas": {
+			"vcpu": 8,
+			"ram": 9
+		},
+		"quota_overrides": {
+			"abc": 11
+		},
+		"quota_usage": {
+			"vcpu": 12,
+			"ram": 13
+		}
+	},
+	"state": {
+		"def": "ghi"
+	},
+	"capabilities": 16,
+	"created_at": "jkl",
+	"type": "mno"
+}

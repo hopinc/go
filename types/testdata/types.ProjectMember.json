@@ -1,0 +1,11 @@
+{
+	"id": "abc",
+	"name": "def",
+	"username": "ghi",
+	"role": {
+		"id": "jkl",
+		"name": "mno",
+		"flags": "pqr"
+	},
+	"joined_at": "stu"
+}

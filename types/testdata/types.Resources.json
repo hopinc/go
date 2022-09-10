@@ -1,0 +1,10 @@
+{
+	"ram": "abc",
+	"vcpu": 0,
+	"vgpu": [
+		{
+			"type": "def",
+			"count": 3
+		}
+	]
+}

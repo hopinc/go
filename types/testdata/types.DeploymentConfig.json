@@ -1,0 +1,31 @@
+{
+	"container_strategy": "def",
+	"env": {
+		"def": "ghi"
+	},
+	"image": {
+		"name": "mno",
+		"auth": {
+			"username": "pqr",
+			"password": "stu"
+		},
+		"github_repo": {
+			"repo_id": 7,
+			"full_name": "vwx",
+			"branch": "abc"
+		}
+	},
+	"name": "abc",
+	"resources": {
+		"ram": "jkl",
+		"vcpu": 12,
+		"vgpu": [
+			{
+				"type": "mno",
+				"count": 15
+			}
+		]
+	},
+	"type": "ghi",
+	"version": "jkl"
+}
