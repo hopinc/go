@@ -14,3 +14,6 @@ If you add a new function, you will likely desire to test it. Please place the t
 
 ## Adding/updating JSON validation tests to types
 If you make/edit a type in the `types` package, you will probably want to add the structure to the test suite and update it. To do so, simply open `types/types_test.go` and find the comment for the file specified. If the file isn't present, make `// <filename>.go` and then add under that in the slice (`reflect.TypeOf(<value>)`). From here, simply run `make update-types` and the JSON types will be added/updated.
+
+## Tagging a release (maintainers only)
+When you tag a release, make sure to update `version.go` before you do so.
