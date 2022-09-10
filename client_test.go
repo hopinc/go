@@ -14,6 +14,182 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestValidateToken(t *testing.T) {
+	tests := []struct {
+		name string
+
+		token         string
+		expectsPrefix string
+		expectsErr    string
+	}{
+		{
+			name:          "user",
+			token:         "user_xyz",
+			expectsPrefix: "user",
+		},
+		{
+			name:          "project",
+			token:         "project_xyz",
+			expectsPrefix: "project",
+		},
+		{
+			name:          "pm",
+			token:         "pm_xyz",
+			expectsPrefix: "pm",
+		},
+		{
+			name:          "role",
+			token:         "role_xyz",
+			expectsPrefix: "role",
+		},
+		{
+			name:          "pi",
+			token:         "pi_xyz",
+			expectsPrefix: "pi",
+		},
+		{
+			name:          "ptk",
+			token:         "ptk_xyz",
+			expectsPrefix: "ptk",
+		},
+		{
+			name:          "pat",
+			token:         "pat_xyz",
+			expectsPrefix: "pat",
+		},
+		{
+			name:          "container",
+			token:         "container_xyz",
+			expectsPrefix: "container",
+		},
+		{
+			name:          "pipe_room",
+			token:         "pipe_room_xyz",
+			expectsPrefix: "pipe_room",
+		},
+		{
+			name:          "deployment",
+			token:         "deployment_xyz",
+			expectsPrefix: "deployment",
+		},
+		{
+			name:          "bearer",
+			token:         "bearer_xyz",
+			expectsPrefix: "bearer",
+		},
+		{
+			name:          "ptkid",
+			token:         "ptkid_xyz",
+			expectsPrefix: "ptkid",
+		},
+		{
+			name:          "secret",
+			token:         "secret_xyz",
+			expectsPrefix: "secret",
+		},
+		{
+			name:          "gateway",
+			token:         "gateway_xyz",
+			expectsPrefix: "gateway",
+		},
+		{
+			name:          "domain",
+			token:         "domain_xyz",
+			expectsPrefix: "domain",
+		},
+		{
+			name:          "leap_token",
+			token:         "leap_token_xyz",
+			expectsPrefix: "leap_token",
+		},
+		{
+			name:          "build",
+			token:         "build_xyz",
+			expectsPrefix: "build",
+		},
+		{
+			name:       "invalid",
+			token:      "invalid_xyz",
+			expectsErr: "invalid authorization token prefix: invalid_xyz",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			prefix, err := ValidateToken(tt.token)
+			if tt.expectsErr == "" {
+				assert.NoError(t, err)
+			} else {
+				assert.EqualError(t, err, tt.expectsErr)
+			}
+			assert.Equal(t, tt.expectsPrefix, prefix)
+		})
+	}
+}
+
+func noNilPointers(x any) bool {
+	v := reflect.Indirect(reflect.ValueOf(x))
+	for i := 0; i < v.NumField(); i++ {
+		field := v.Field(i)
+		if field.CanSet() && field.Kind() == reflect.Ptr {
+			if field.IsNil() {
+				return false
+			}
+			if !noNilPointers(field.Interface()) {
+				return false
+			}
+		}
+	}
+	return true
+}
+
+func TestNewClient(t *testing.T) {
+	tests := []struct {
+		name string
+
+		token      string
+		tokenType  string
+		expectsErr string
+	}{
+		{
+			name:      "bearer",
+			token:     "bearer_xyz",
+			tokenType: "bearer",
+		},
+		{
+			name:      "pat",
+			token:     "pat_xyz",
+			tokenType: "pat",
+		},
+		{
+			name:      "ptk",
+			token:     "ptk_xyz",
+			tokenType: "ptk",
+		},
+		{
+			name:       "invalid",
+			token:      "invalid_xyz",
+			expectsErr: "invalid authorization token prefix: invalid_xyz",
+		},
+		{
+			name:       "disallowed token type",
+			token:      "user_xyz",
+			expectsErr: "invalid authorization token prefix: user",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c, err := NewClient(tt.token)
+			if tt.expectsErr == "" {
+				assert.NoError(t, err)
+				assert.Equal(t, tt.tokenType, c.getTokenType())
+				assert.True(t, noNilPointers(c))
+			} else {
+				assert.EqualError(t, err, tt.expectsErr)
+			}
+		})
+	}
+}
+
 func TestClient_SetAPIBase(t *testing.T) {
 	tests := []struct {
 		name string

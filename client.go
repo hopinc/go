@@ -27,17 +27,12 @@ var IDPrefixes = []string{
 
 // ValidateToken is used to validate a authentication token. Returns an error if the token is invalid.
 func ValidateToken(authorization string) (string, error) {
-	prefixSplit := strings.SplitN(authorization, "_", 2)
-	if len(prefixSplit) != 2 {
-		return "", types.InvalidToken("invalid authorization token format")
-	}
-	prefix := prefixSplit[0]
 	for _, v := range IDPrefixes {
-		if v == prefix {
-			return prefix, nil
+		if strings.HasPrefix(authorization, v+"_") {
+			return v, nil
 		}
 	}
-	return "", types.InvalidToken("invalid authorization token prefix: " + prefix)
+	return "", types.InvalidToken("invalid authorization token prefix: " + authorization)
 }
 
 // Client is used to define the Hop client. Please use the NewClient function to create this!
