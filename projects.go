@@ -9,7 +9,7 @@ import (
 
 // Delete is used to delete a token.
 func (c ClientCategoryProjectsTokens) Delete(ctx context.Context, projectId, id string) error {
-	if c.c.tokenType == "ptk" {
+	if c.c.getTokenType() == "ptk" {
 		return types.InvalidToken("project tokens cannot be retrieved with a project token")
 	}
 	return c.c.do(ctx, clientArgs{
@@ -20,7 +20,7 @@ func (c ClientCategoryProjectsTokens) Delete(ctx context.Context, projectId, id 
 
 // GetAll is used to get all tokens associated with a project.
 func (c ClientCategoryProjectsTokens) GetAll(ctx context.Context, projectId string) ([]*types.ProjectToken, error) {
-	if c.c.tokenType == "ptk" {
+	if c.c.getTokenType() == "ptk" {
 		return nil, types.InvalidToken("project tokens cannot be retrieved with a project token")
 	}
 	var tokens []*types.ProjectToken
@@ -38,7 +38,7 @@ func (c ClientCategoryProjectsTokens) GetAll(ctx context.Context, projectId stri
 
 // Create is used to create a token.
 func (c ClientCategoryProjectsTokens) Create(ctx context.Context, projectId string, permissions []types.ProjectPermission) (*types.ProjectToken, error) {
-	if c.c.tokenType == "ptk" {
+	if c.c.getTokenType() == "ptk" {
 		return nil, types.InvalidToken("project tokens cannot be created with a project token")
 	}
 	if permissions == nil {
@@ -60,7 +60,7 @@ func (c ClientCategoryProjectsTokens) Create(ctx context.Context, projectId stri
 
 // GetAllMembers is used to get all members associated with a project.
 func (c ClientCategoryProjects) GetAllMembers(ctx context.Context, projectId string) ([]*types.ProjectMember, error) {
-	if c.c.tokenType == "ptk" {
+	if c.c.getTokenType() == "ptk" {
 		projectId = "@this"
 	} else {
 		if projectId == "" {
@@ -83,7 +83,7 @@ func (c ClientCategoryProjects) GetAllMembers(ctx context.Context, projectId str
 
 // GetCurrentMember is used to get the current member associated with a project. You cannot use this method with a project token.
 func (c ClientCategoryProjects) GetCurrentMember(ctx context.Context, projectId string) (*types.ProjectMember, error) {
-	if c.c.tokenType == "ptk" {
+	if c.c.getTokenType() == "ptk" {
 		return nil, types.InvalidToken("current member cannot be retrieved with a project token")
 	}
 	if projectId == "" {
@@ -105,7 +105,7 @@ func (c ClientCategoryProjects) GetCurrentMember(ctx context.Context, projectId 
 
 // GetAll is used to get all project secrets.
 func (c ClientCategoryProjectsSecrets) GetAll(ctx context.Context, projectId string) ([]*types.ProjectSecret, error) {
-	if c.c.tokenType == "ptk" {
+	if c.c.getTokenType() == "ptk" {
 		return nil, types.InvalidToken("project secrets cannot be retrieved with a project token")
 	}
 	var secrets []*types.ProjectSecret
@@ -123,7 +123,7 @@ func (c ClientCategoryProjectsSecrets) GetAll(ctx context.Context, projectId str
 
 // Create is used to create a project secret.
 func (c ClientCategoryProjectsSecrets) Create(ctx context.Context, projectId string, key, value string) (*types.ProjectSecret, error) {
-	if c.c.tokenType == "ptk" {
+	if c.c.getTokenType() == "ptk" {
 		return nil, types.InvalidToken("project secrets cannot be created with a project token")
 	}
 	var secret types.ProjectSecret
@@ -142,7 +142,7 @@ func (c ClientCategoryProjectsSecrets) Create(ctx context.Context, projectId str
 
 // Delete is used to delete a project secret.
 func (c ClientCategoryProjectsSecrets) Delete(ctx context.Context, projectId, id string) error {
-	if c.c.tokenType == "ptk" {
+	if c.c.getTokenType() == "ptk" {
 		return types.InvalidToken("project secrets cannot be deleted with a project token")
 	}
 	return c.c.do(ctx, clientArgs{

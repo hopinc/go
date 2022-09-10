@@ -111,6 +111,8 @@ type responseBody struct {
 	Data json.RawMessage `json:"data"`
 }
 
+func (c *Client) getTokenType() string { return c.tokenType }
+
 // Does the specified HTTP request.
 func (c *Client) do(ctx context.Context, a clientArgs) error {
 	// Handle getting the body bytes.
@@ -238,9 +240,14 @@ func (c *Client) do(ctx context.Context, a clientArgs) error {
 	return nil
 }
 
+type clientDoer interface {
+	do(ctx context.Context, a clientArgs) error
+	getTokenType() string
+}
+
 // Paginator is used to create a way to access paginated API routes.
 type Paginator[T any] struct {
-	c         *Client
+	c         clientDoer
 	pageIndex int
 	count     int
 	total     int // should be set to -1 on init.

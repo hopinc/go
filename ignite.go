@@ -35,11 +35,11 @@ func (c ClientCategoryIgniteGateways) Get(ctx context.Context, id string) (*type
 // Create is used to create a deployment.
 func (c ClientCategoryIgniteDeployments) Create(ctx context.Context, projectId string, deployment *types.DeploymentConfig) (*types.Deployment, error) {
 	if projectId == "" {
-		if c.c.tokenType != "ptk" {
+		if c.c.getTokenType() != "ptk" {
 			return nil, types.InvalidToken("project ID must be specified when using bearer authentication to make deployments")
 		}
 	} else {
-		if c.c.tokenType != "bearer" && c.c.tokenType != "pat" {
+		if c.c.getTokenType() != "bearer" && c.c.getTokenType() != "pat" {
 			return nil, types.InvalidToken("project ID must not be specified if it is implied")
 		}
 	}

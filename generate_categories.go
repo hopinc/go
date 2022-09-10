@@ -17,7 +17,7 @@ const categoryTemplate = `// {{ .StructName }} is an auto-generated struct which
 // It is public since it may be desired to store a reference to this somewhere, however, do NOT create a instance of this
 // directly. Instead, call NewClient and then go to the field {{ .FieldPath }}.
 type {{ .StructName }} struct {
-	c *Client{{ .AdditionalFields }}
+	c clientDoer{{ .AdditionalFields }}
 }`
 
 func buildStruct(name, fieldPath, fields string) string {
@@ -112,7 +112,7 @@ func main() {
 		goCode = append(goCode, rootStruct)
 
 		// Build the root initializer.
-		initFunc := "func new" + rootCat + "(c *Client) *ClientCategory" + rootCat + " {"
+		initFunc := "func new" + rootCat + "(c clientDoer) *ClientCategory" + rootCat + " {"
 		if len(fields) == 0 {
 			// Do a simple inline init here.
 			initFunc += "\n\treturn &ClientCategory" + rootCat + "{c}\n}"

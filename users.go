@@ -8,7 +8,7 @@ import (
 
 // Get is used to get the current user.
 func (c ClientCategoryUsersMe) Get(ctx context.Context) (*types.UserMeInfo, error) {
-	if c.c.tokenType == "ptk" {
+	if c.c.getTokenType() == "ptk" {
 		return nil, types.InvalidToken("cannot get user with project token")
 	}
 	var u types.UserMeInfo
@@ -25,7 +25,7 @@ func (c ClientCategoryUsersMe) Get(ctx context.Context) (*types.UserMeInfo, erro
 
 // CreatePat is used to create a personal access token for the current user.
 func (c ClientCategoryUsersMe) CreatePat(ctx context.Context, name string) (*types.UserPat, error) {
-	if c.c.tokenType == "ptk" {
+	if c.c.getTokenType() == "ptk" {
 		return nil, types.InvalidToken("cannot create users tokens with project token")
 	}
 	var pat types.UserPat
@@ -44,7 +44,7 @@ func (c ClientCategoryUsersMe) CreatePat(ctx context.Context, name string) (*typ
 
 // GetAllPats is used to get all personal access tokens for the current user.
 func (c ClientCategoryUsersMe) GetAllPats(ctx context.Context) ([]*types.UserPat, error) {
-	if c.c.tokenType == "ptk" {
+	if c.c.getTokenType() == "ptk" {
 		return nil, types.InvalidToken("cannot get users tokens with project token")
 	}
 	var pats []*types.UserPat
@@ -62,7 +62,7 @@ func (c ClientCategoryUsersMe) GetAllPats(ctx context.Context) ([]*types.UserPat
 
 // DeletePat is used to delete a personal access token for the current user.
 func (c ClientCategoryUsersMe) DeletePat(ctx context.Context, id string) error {
-	if c.c.tokenType == "ptk" {
+	if c.c.getTokenType() == "ptk" {
 		return types.InvalidToken("cannot delete users tokens with project token")
 	}
 	return c.c.do(ctx, clientArgs{

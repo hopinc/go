@@ -9,7 +9,7 @@ import (
 
 // GetAll is used to get all rooms associated with a pipe.
 func (c ClientCategoryPipeRooms) GetAll(ctx context.Context, projectId string) ([]*types.Room, error) {
-	if projectId == "" && c.c.tokenType != "ptk" {
+	if projectId == "" && c.c.getTokenType() != "ptk" {
 		return nil, types.InvalidToken("project ID must be specified when using bearer authentication to get rooms")
 	}
 	var rooms []*types.Room

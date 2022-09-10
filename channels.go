@@ -179,7 +179,7 @@ func (t ClientCategoryChannelsTokens) Delete(ctx context.Context, projectId, id 
 // Create is used to create a new channel token. State is the map of the state of the token (this can be nil), and
 // projectId is the project ID to associate the token with (this can be empty unless it is bearer or PAT auth).
 func (t ClientCategoryChannelsTokens) Create(ctx context.Context, projectId string, state map[string]any) (*types.ChannelToken, error) {
-	if projectId == "" && t.c.tokenType != "ptk" {
+	if projectId == "" && t.c.getTokenType() != "ptk" {
 		return nil, types.InvalidToken("project ID must be specified when creating a channel token with bearer or PAT auth")
 	}
 	if state == nil {
