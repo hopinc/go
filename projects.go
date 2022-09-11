@@ -89,7 +89,7 @@ func (c ClientCategoryProjects) GetCurrentMember(ctx context.Context, projectId 
 	if projectId == "" {
 		return nil, types.InvalidToken("project ID must be specified when using bearer authentication to get current member")
 	}
-	var projectMember *types.ProjectMember
+	var projectMember types.ProjectMember
 	err := c.c.do(ctx, clientArgs{
 		method:    "GET",
 		path:      "/projects/" + url.PathEscape(projectId) + "/members/@me",
@@ -100,7 +100,7 @@ func (c ClientCategoryProjects) GetCurrentMember(ctx context.Context, projectId 
 	if err != nil {
 		return nil, err
 	}
-	return projectMember, nil
+	return &projectMember, nil
 }
 
 // GetAll is used to get all project secrets.
@@ -122,7 +122,7 @@ func (c ClientCategoryProjectsSecrets) GetAll(ctx context.Context, projectId str
 }
 
 // Create is used to create a project secret.
-func (c ClientCategoryProjectsSecrets) Create(ctx context.Context, projectId string, key, value string) (*types.ProjectSecret, error) {
+func (c ClientCategoryProjectsSecrets) Create(ctx context.Context, projectId, key, value string) (*types.ProjectSecret, error) {
 	if c.c.getTokenType() == "ptk" {
 		return nil, types.InvalidToken("project secrets cannot be created with a project token")
 	}

@@ -3,6 +3,7 @@ package hop
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"reflect"
 	"testing"
 
@@ -20,6 +21,7 @@ type mockClientDoer struct {
 	wantIgnore404 bool
 	tokenType     string
 
+	// If you are using testApiSingleton, ignore these values.
 	returnsResult any
 	returnsErr    error
 }
@@ -43,7 +45,7 @@ func (c *mockClientDoer) do(ctx context.Context, a clientArgs) error {
 		assert.Nil(c.t, a.result)
 	} else {
 		// Ensure that the result is a pointer to the type of the return result.
-		if assert.Equal(c.t, reflect.PtrTo(reflect.TypeOf(c.returnsResult)), reflect.TypeOf(a.result)) {
+		if assert.Equal(c.t, reflect.PtrTo(reflect.TypeOf(c.returnsResult)).String(), reflect.TypeOf(a.result).String()) {
 			// Set the value of the result pointer to the return result.
 			reflect.ValueOf(a.result).Elem().Set(reflect.ValueOf(c.returnsResult))
 		}
@@ -65,4 +67,98 @@ func rawify(m map[string]any) map[string]json.RawMessage {
 		r[k], _ = json.Marshal(v)
 	}
 	return r
+}
+
+func testApiSingleton(m *mockClientDoer, obj any, funcName string, args []any, result any) {
+	t := m.t
+	t.Helper()
+	objReflect := reflect.Indirect(reflect.ValueOf(obj))
+	funcResult := objReflect.MethodByName(funcName)
+	if !funcResult.IsValid() {
+		// The function doesn't exist.
+		t.Fatalf("Function %s doesn't exist", funcName)
+		return
+	}
+
+	// Check if this outputs 1 or 2 results. It should always end with a error.
+	funcResultType := funcResult.Type()
+	if funcResultType.NumOut() != 1 && funcResultType.NumOut() != 2 {
+		t.Fatalf("Function %s should have 1 or 2 results", funcName)
+		return
+	}
+
+	// Check the type of the last output is error.
+	errType := reflect.TypeOf((*error)(nil)).Elem()
+	if !funcResultType.Out(funcResultType.NumOut() - 1).Implements(errType) {
+		t.Fatalf("Function %s should have an error as its last result", funcName)
+		return
+	}
+
+	// Do 2 tests. One for client errors, one for no errors.
+	runTest := func(testName string, err error) {
+		t.Helper()
+		t.Run(testName, func(t *testing.T) {
+			m.returnsErr = err
+
+			if result != nil {
+				r := reflect.ValueOf(result)
+				if result != nil && r.Type().Kind() == reflect.Ptr {
+					// Dereference the result.
+					r = r.Elem()
+				}
+				m.returnsResult = r.Interface()
+			}
+
+			reflectedArgs := make([]reflect.Value, len(args))
+			for i, arg := range args {
+				reflectedArgs[i] = reflect.ValueOf(arg)
+			}
+			results := funcResult.Call(append([]reflect.Value{reflect.ValueOf(context.Background())}, reflectedArgs...))
+			var errValue reflect.Value
+			if len(results) == 1 {
+				errValue = results[0]
+			} else {
+				errValue = results[1]
+			}
+			assert.Equal(t, err, errValue.Interface())
+			if err == nil && len(results) != 1 {
+				// Check the result.
+				assert.Equal(t, result, results[0].Interface())
+			}
+		})
+	}
+	runTest("client error", errors.New("cat tripped on wire"))
+	runTest("no error", nil)
+}
+
+// Used to run a test to make sure it errors for token type.
+func errorForTokenType(m *mockClientDoer, obj any, funcName string, args []any, tokenType string) {
+	oldTokenType := m.tokenType
+	defer func() { m.tokenType = oldTokenType }()
+	m.tokenType = tokenType
+	m.returnsErr = errors.New("shouldn't hit here")
+	t := m.t
+	t.Helper()
+	objReflect := reflect.Indirect(reflect.ValueOf(obj))
+	funcResult := objReflect.MethodByName(funcName)
+	if !funcResult.IsValid() {
+		// The function doesn't exist.
+		t.Fatalf("Function %s doesn't exist", funcName)
+		return
+	}
+	funcResultType := funcResult.Type()
+	if funcResultType.NumOut() == 0 || funcResultType.Out(funcResultType.NumOut()-1).String() != "error" {
+		t.Fatalf("Function %s should have an error as its last result", funcName)
+		return
+	}
+
+	t.Run("bad token type", func(t *testing.T) {
+		reflectedArgs := make([]reflect.Value, len(args))
+		for i, arg := range args {
+			reflectedArgs[i] = reflect.ValueOf(arg)
+		}
+		results := funcResult.Call(append([]reflect.Value{reflect.ValueOf(context.Background())}, reflectedArgs...))
+		errValue := results[funcResultType.NumOut()-1]
+		assert.NotNil(t, errValue.Interface())
+	})
 }

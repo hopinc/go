@@ -2,6 +2,7 @@ package hop
 
 import (
 	"context"
+	"net/url"
 
 	"github.com/hopinc/hop-go/types"
 )
@@ -67,6 +68,6 @@ func (c ClientCategoryUsersMe) DeletePat(ctx context.Context, id string) error {
 	}
 	return c.c.do(ctx, clientArgs{
 		method: "DELETE",
-		path:   "/users/@me/pats/" + id,
+		path:   "/users/@me/pats/" + url.PathEscape(id),
 	})
 }
