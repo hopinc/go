@@ -23,7 +23,7 @@ func handleErrors(res *http.Response) error {
 	var r errorResponse
 	err = json.Unmarshal(b, &r)
 	if err != nil {
-		return types.ServerError("status code " + strconv.Itoa(res.StatusCode) + " (cannot turn into json): " +
+		return types.ServerError("status code " + strconv.Itoa(res.StatusCode) + " (cannot unmarshal from json): " +
 			string(b))
 	}
 	if r.Success {
