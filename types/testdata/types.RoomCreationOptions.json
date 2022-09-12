@@ -1,14 +1,14 @@
 {
-	"name": "def",
+	"name": "abc",
 	"delivery_protocols": [
-		"ghi"
+		"def"
 	],
 	"ephemeral": true,
-	"region": "jkl",
-	"ingest_protocol": "mno",
+	"region": "ghi",
+	"ingest_protocol": "jkl",
 	"llhls_config": {
-		"wcl_delay": 5,
-		"artificial_delay": 6,
-		"max_playout_bitrate_preset": "pqr"
+		"wcl_delay": 4,
+		"artificial_delay": 5,
+		"max_playout_bitrate_preset": "mno"
 	}
 }
