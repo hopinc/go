@@ -45,6 +45,7 @@ type Client struct {
 	tokenType     string
 	apiBase       string
 	isTest        bool
+	opts          []ClientOption
 
 	Pipe     *ClientCategoryPipe
 	Projects *ClientCategoryProjects
@@ -52,6 +53,18 @@ type Client struct {
 	Users    *ClientCategoryUsers
 	Registry *ClientCategoryRegistry
 	Channels *ClientCategoryChannels
+}
+
+// Runs through all options in the client and then any additional options passed through.
+func (c *Client) forOption(f func(any), opts []ClientOption) {
+	if c.opts != nil {
+		for _, v := range c.opts {
+			f(v)
+		}
+	}
+	for _, v := range opts {
+		f(v)
+	}
 }
 
 // NewClient is used to make a new Hop client.
@@ -77,6 +90,11 @@ func NewClient(authorization string) (*Client, error) {
 		Channels:      newChannels(&c),
 	}
 	return &c, nil
+}
+
+// AddClientOptions is used to add any client options. These will be added before any others specified in functions.
+func (c *Client) AddClientOptions(opts ...ClientOption) {
+	c.opts = append(c.opts, opts...)
 }
 
 // SetAPIBase is used to set the base API URL. This is probably something you do not need to use, however it is useful
@@ -111,8 +129,19 @@ type responseBody struct {
 
 func (c *Client) getTokenType() string { return c.tokenType }
 
+// Resolves the project ID from the client options. Will be a blank string if this is not specified.
+func (c *Client) getProjectId(opts []ClientOption) string {
+	projectId := ""
+	c.forOption(func(x any) {
+		if x, ok := x.(projectIdOption); ok {
+			projectId = x.projectId
+		}
+	}, opts)
+	return projectId
+}
+
 // Does the specified HTTP request.
-func (c *Client) do(ctx context.Context, a clientArgs) error {
+func (c *Client) do(ctx context.Context, a clientArgs, clientOpts []ClientOption) error {
 	// Handle getting the body bytes.
 	var r io.Reader
 	textPlain := false
@@ -130,6 +159,14 @@ func (c *Client) do(ctx context.Context, a clientArgs) error {
 			}
 			r = bytes.NewReader(bodyBytes)
 		}
+	}
+
+	// Add project ID to the query if it is specified.
+	if projectId := c.getProjectId(clientOpts); projectId != "" {
+		if a.query == nil {
+			a.query = map[string]string{}
+		}
+		a.query["project"] = projectId
 	}
 
 	// Create the request.
@@ -240,8 +277,9 @@ func (c *Client) do(ctx context.Context, a clientArgs) error {
 }
 
 type clientDoer interface {
-	do(ctx context.Context, a clientArgs) error
+	do(ctx context.Context, a clientArgs, opts []ClientOption) error
 	getTokenType() string
+	getProjectId([]ClientOption) string
 }
 
 // Paginator is used to create a way to access paginated API routes.
@@ -270,7 +308,7 @@ func unJsonInt(j json.RawMessage) (int, error) {
 }
 
 // Next is used to get the next page.
-func (p *Paginator[T]) Next(ctx context.Context) ([]T, error) {
+func (p *Paginator[T]) Next(ctx context.Context, opts ...ClientOption) ([]T, error) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
@@ -304,7 +342,7 @@ func (p *Paginator[T]) Next(ctx context.Context) ([]T, error) {
 		query:     query,
 		result:    &m,
 		ignore404: false,
-	}); err != nil {
+	}, opts); err != nil {
 		return nil, err
 	}
 
@@ -335,8 +373,8 @@ func (p *Paginator[T]) Next(ctx context.Context) ([]T, error) {
 
 // ForChunk is basically the shorthand for calling a function everytime there is a new result. Any errors are passed to
 // the root error result.
-func (p *Paginator[T]) ForChunk(ctx context.Context, f func([]T) error) error {
-	for a, err := p.Next(ctx); err != types.StopIteration; a, err = p.Next(ctx) {
+func (p *Paginator[T]) ForChunk(ctx context.Context, f func([]T) error, opts ...ClientOption) error {
+	for a, err := p.Next(ctx, opts...); err != types.StopIteration; a, err = p.Next(ctx) {
 		if err != nil {
 			return err
 		}

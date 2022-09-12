@@ -8,18 +8,18 @@ import (
 
 func TestClient_Pipe_Rooms_GetAll(t *testing.T) {
 	c := &mockClientDoer{
-		t:             t,
-		wantMethod:    "GET",
-		wantPath:      "/pipe/rooms",
-		wantQuery:     map[string]string{"project": "test123"},
-		wantResultKey: "rooms",
-		wantIgnore404: false,
-		tokenType:     "pat",
+		t:              t,
+		wantMethod:     "GET",
+		wantPath:       "/pipe/rooms",
+		wantClientOpts: []ClientOption{WithProjectID("test123")},
+		wantResultKey:  "rooms",
+		wantIgnore404:  false,
+		tokenType:      "pat",
 	}
 	testApiSingleton(c,
 		&ClientCategoryPipeRooms{c: c},
 		"GetAll",
-		[]any{"test123"},
+		[]any{WithProjectID("test123")},
 		[]*types.Room{{Name: "hello"}})
 }
 
@@ -42,16 +42,16 @@ func TestClient_Pipe_Rooms_Create(t *testing.T) {
 
 func TestClient_Pipe_Rooms_Delete(t *testing.T) {
 	c := &mockClientDoer{
-		t:             t,
-		wantMethod:    "DELETE",
-		wantPath:      "/pipe/rooms/test%20test",
-		wantQuery:     map[string]string{"project": "test123"},
-		wantIgnore404: false,
-		tokenType:     "pat",
+		t:              t,
+		wantMethod:     "DELETE",
+		wantPath:       "/pipe/rooms/test%20test",
+		wantClientOpts: []ClientOption{WithProjectID("test123")},
+		wantIgnore404:  false,
+		tokenType:      "pat",
 	}
 	testApiSingleton(c,
 		&ClientCategoryPipeRooms{c: c},
 		"Delete",
-		[]any{"test123", "test test"},
+		[]any{"test test", WithProjectID("test123")},
 		nil)
 }

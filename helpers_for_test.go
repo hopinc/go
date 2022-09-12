@@ -13,22 +13,33 @@ import (
 type mockClientDoer struct {
 	t *testing.T
 
-	wantMethod    string
-	wantPath      string
-	wantQuery     map[string]string
-	wantBody      any
-	wantResultKey string
-	wantIgnore404 bool
-	tokenType     string
+	wantMethod     string
+	wantPath       string
+	wantQuery      map[string]string
+	wantBody       any
+	wantResultKey  string
+	wantIgnore404  bool
+	wantClientOpts []ClientOption
+	tokenType      string
 
 	// If you are using testApiSingleton, ignore these values.
 	returnsResult any
 	returnsErr    error
 }
 
+func (c *mockClientDoer) getProjectId(opts []ClientOption) string {
+	projectId := ""
+	for _, v := range opts {
+		if v, ok := v.(projectIdOption); ok {
+			projectId = v.projectId
+		}
+	}
+	return projectId
+}
+
 func (c *mockClientDoer) getTokenType() string { return c.tokenType }
 
-func (c *mockClientDoer) do(ctx context.Context, a clientArgs) error {
+func (c *mockClientDoer) do(ctx context.Context, a clientArgs, opts []ClientOption) error {
 	c.t.Helper()
 	assert.NotNil(c.t, ctx)
 	assert.Equal(c.t, c.wantMethod, a.method)
@@ -37,6 +48,14 @@ func (c *mockClientDoer) do(ctx context.Context, a clientArgs) error {
 	assert.Equal(c.t, c.wantBody, a.body)
 	assert.Equal(c.t, c.wantResultKey, a.resultKey)
 	assert.Equal(c.t, c.wantIgnore404, a.ignore404)
+	wantClientOpts := c.wantClientOpts
+	if wantClientOpts == nil {
+		wantClientOpts = []ClientOption{}
+	}
+	if opts == nil {
+		opts = []ClientOption{}
+	}
+	assert.Equal(c.t, wantClientOpts, opts)
 	if c.returnsErr != nil {
 		return c.returnsErr
 	}

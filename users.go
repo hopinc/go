@@ -8,7 +8,7 @@ import (
 )
 
 // Get is used to get the current user.
-func (c ClientCategoryUsersMe) Get(ctx context.Context) (*types.UserMeInfo, error) {
+func (c ClientCategoryUsersMe) Get(ctx context.Context, opts ...ClientOption) (*types.UserMeInfo, error) {
 	if c.c.getTokenType() == "ptk" {
 		return nil, types.InvalidToken("cannot get user with project token")
 	}
@@ -17,7 +17,7 @@ func (c ClientCategoryUsersMe) Get(ctx context.Context) (*types.UserMeInfo, erro
 		method: "GET",
 		path:   "/users/@me",
 		result: &u,
-	})
+	}, opts)
 	if err != nil {
 		return nil, err
 	}
@@ -25,7 +25,7 @@ func (c ClientCategoryUsersMe) Get(ctx context.Context) (*types.UserMeInfo, erro
 }
 
 // CreatePat is used to create a personal access token for the current user.
-func (c ClientCategoryUsersMe) CreatePat(ctx context.Context, name string) (*types.UserPat, error) {
+func (c ClientCategoryUsersMe) CreatePat(ctx context.Context, name string, opts ...ClientOption) (*types.UserPat, error) {
 	if c.c.getTokenType() == "ptk" {
 		return nil, types.InvalidToken("cannot create users tokens with project token")
 	}
@@ -36,7 +36,7 @@ func (c ClientCategoryUsersMe) CreatePat(ctx context.Context, name string) (*typ
 		resultKey: "pat",
 		body:      map[string]string{"name": name},
 		result:    &pat,
-	})
+	}, opts)
 	if err != nil {
 		return nil, err
 	}
@@ -44,7 +44,7 @@ func (c ClientCategoryUsersMe) CreatePat(ctx context.Context, name string) (*typ
 }
 
 // GetAllPats is used to get all personal access tokens for the current user.
-func (c ClientCategoryUsersMe) GetAllPats(ctx context.Context) ([]*types.UserPat, error) {
+func (c ClientCategoryUsersMe) GetAllPats(ctx context.Context, opts ...ClientOption) ([]*types.UserPat, error) {
 	if c.c.getTokenType() == "ptk" {
 		return nil, types.InvalidToken("cannot get users tokens with project token")
 	}
@@ -54,7 +54,7 @@ func (c ClientCategoryUsersMe) GetAllPats(ctx context.Context) ([]*types.UserPat
 		path:      "/users/@me/pats",
 		resultKey: "pats",
 		result:    &pats,
-	})
+	}, opts)
 	if err != nil {
 		return nil, err
 	}
@@ -62,12 +62,12 @@ func (c ClientCategoryUsersMe) GetAllPats(ctx context.Context) ([]*types.UserPat
 }
 
 // DeletePat is used to delete a personal access token for the current user.
-func (c ClientCategoryUsersMe) DeletePat(ctx context.Context, id string) error {
+func (c ClientCategoryUsersMe) DeletePat(ctx context.Context, id string, opts ...ClientOption) error {
 	if c.c.getTokenType() == "ptk" {
 		return types.InvalidToken("cannot delete users tokens with project token")
 	}
 	return c.c.do(ctx, clientArgs{
 		method: "DELETE",
 		path:   "/users/@me/pats/" + url.PathEscape(id),
-	})
+	}, opts)
 }

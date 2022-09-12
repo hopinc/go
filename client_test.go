@@ -227,6 +227,14 @@ func TestClient_SetAPIBase(t *testing.T) {
 	}
 }
 
+func TestClient_AddClientOptions(t *testing.T) {
+	c := &Client{}
+	c.AddClientOptions(WithProjectID("a"))
+	c.AddClientOptions(WithProjectID("b"), WithProjectID("c"))
+	assert.Equal(t, []ClientOption{projectIdOption{projectId: "a"}, projectIdOption{projectId: "b"},
+		projectIdOption{projectId: "c"}}, c.opts)
+}
+
 type mockHttpRoundTripper struct {
 	t *testing.T
 
@@ -297,6 +305,8 @@ func TestClient_do(t *testing.T) {
 		query        map[string]string
 		body         any
 		ignore404    bool
+		clientOpts   []ClientOption
+		funcOpts     []ClientOption
 		expectsError error
 	}{
 		{
@@ -369,6 +379,46 @@ func TestClient_do(t *testing.T) {
 			returnsStatus: 204,
 			method:        "GET",
 			path:          "/test",
+		},
+		{
+			name: "client project id option applied",
+			wantHeaders: http.Header{
+				"Accept":        {"application/json"},
+				"Authorization": {"testing"},
+				"User-Agent":    {userAgent},
+			},
+			wantUrl:       "https://api.hop.io/v1/test?project=test",
+			returnsStatus: 204,
+			method:        "GET",
+			path:          "/test",
+			clientOpts:    []ClientOption{projectIdOption{projectId: "test"}},
+		},
+		{
+			name: "function project id option applied",
+			wantHeaders: http.Header{
+				"Accept":        {"application/json"},
+				"Authorization": {"testing"},
+				"User-Agent":    {userAgent},
+			},
+			wantUrl:       "https://api.hop.io/v1/test?project=test",
+			returnsStatus: 204,
+			method:        "GET",
+			path:          "/test",
+			funcOpts:      []ClientOption{projectIdOption{projectId: "test"}},
+		},
+		{
+			name: "function project id option overrides client option",
+			wantHeaders: http.Header{
+				"Accept":        {"application/json"},
+				"Authorization": {"testing"},
+				"User-Agent":    {userAgent},
+			},
+			wantUrl:       "https://api.hop.io/v1/test?project=test2",
+			returnsStatus: 204,
+			method:        "GET",
+			path:          "/test",
+			clientOpts:    []ClientOption{projectIdOption{projectId: "test1"}},
+			funcOpts:      []ClientOption{projectIdOption{projectId: "test2"}},
 		},
 		{
 			name: "custom base url",
@@ -527,6 +577,7 @@ func TestClient_do(t *testing.T) {
 				},
 				authorization: "testing",
 				isTest:        true,
+				opts:          tt.clientOpts,
 			}
 			if tt.baseUrl != "" {
 				c.SetAPIBase(tt.baseUrl)
@@ -545,7 +596,7 @@ func TestClient_do(t *testing.T) {
 				body:      tt.body,
 				result:    ptr,
 				ignore404: tt.ignore404,
-			})
+			}, tt.funcOpts)
 			if tt.expectsError == nil {
 				assert.NoError(t, err)
 			} else {

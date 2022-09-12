@@ -66,9 +66,6 @@ type HLSConfig struct {
 
 // RoomCreationOptions is used to define the options for creating a room.
 type RoomCreationOptions struct {
-	// ProjectID is the ID of the project that this gateway is for. Can be blank if using a project token.
-	ProjectID string `json:"-"`
-
 	// Name is the name of the room.
 	Name string `json:"name"`
 

@@ -9,23 +9,23 @@ import (
 
 // AddDomain is used to add a domain to the gateway. The parameter gatewayId is the ID of the gateway to add the domain to,
 // and domain is the full name of the domain.
-func (c ClientCategoryIgniteGateways) AddDomain(ctx context.Context, gatewayId string, domain string) error {
+func (c ClientCategoryIgniteGateways) AddDomain(ctx context.Context, gatewayId string, domain string, opts ...ClientOption) error {
 	return c.c.do(ctx, clientArgs{
 		method: "POST",
 		path:   "/ignite/gateways/" + url.PathEscape(gatewayId) + "/domains",
 		body:   map[string]any{"domain": domain},
-	})
+	}, opts)
 }
 
 // Get is used to get a gateway by its ID.
-func (c ClientCategoryIgniteGateways) Get(ctx context.Context, id string) (*types.Gateway, error) {
+func (c ClientCategoryIgniteGateways) Get(ctx context.Context, id string, opts ...ClientOption) (*types.Gateway, error) {
 	var gw types.Gateway
 	err := c.c.do(ctx, clientArgs{
 		method:    "GET",
 		path:      "/ignite/gateways/" + url.PathEscape(id),
 		resultKey: "gateway",
 		result:    &gw,
-	})
+	}, opts)
 	if err != nil {
 		return nil, err
 	}
@@ -33,8 +33,8 @@ func (c ClientCategoryIgniteGateways) Get(ctx context.Context, id string) (*type
 }
 
 // Create is used to create a deployment.
-func (c ClientCategoryIgniteDeployments) Create(ctx context.Context, projectId string, deployment *types.DeploymentConfig) (*types.Deployment, error) {
-	if projectId == "" {
+func (c ClientCategoryIgniteDeployments) Create(ctx context.Context, deployment *types.DeploymentConfig, opts ...ClientOption) (*types.Deployment, error) {
+	if c.c.getProjectId(opts) == "" {
 		if c.c.getTokenType() != "ptk" {
 			return nil, types.InvalidToken("project ID must be specified when using bearer authentication to make deployments")
 		}
@@ -57,11 +57,10 @@ func (c ClientCategoryIgniteDeployments) Create(ctx context.Context, projectId s
 		method:    "POST",
 		path:      "/ignite/deployments",
 		resultKey: "deployment",
-		query:     getProjectIdParam(projectId),
 		body:      deployment,
 		result:    &d,
 		ignore404: false,
-	})
+	}, opts)
 	if err != nil {
 		return nil, err
 	}
@@ -69,15 +68,14 @@ func (c ClientCategoryIgniteDeployments) Create(ctx context.Context, projectId s
 }
 
 // Get is used to get a deployment by its ID.
-func (c ClientCategoryIgniteDeployments) Get(ctx context.Context, projectId, id string) (*types.Deployment, error) {
+func (c ClientCategoryIgniteDeployments) Get(ctx context.Context, id string, opts ...ClientOption) (*types.Deployment, error) {
 	var d types.Deployment
 	err := c.c.do(ctx, clientArgs{
 		method:    "GET",
 		path:      "/ignite/deployments/" + url.PathEscape(id),
-		query:     getProjectIdParam(projectId),
 		resultKey: "deployment",
 		result:    &d,
-	})
+	}, opts)
 	if err != nil {
 		return nil, err
 	}
@@ -85,20 +83,15 @@ func (c ClientCategoryIgniteDeployments) Get(ctx context.Context, projectId, id 
 }
 
 // GetByName is used to get a deployment by its name.
-func (c ClientCategoryIgniteDeployments) GetByName(ctx context.Context, projectId, name string) (*types.Deployment, error) {
-	query := map[string]string{"name": name}
-	if projectId != "" {
-		query["project"] = projectId
-	}
-
+func (c ClientCategoryIgniteDeployments) GetByName(ctx context.Context, name string, opts ...ClientOption) (*types.Deployment, error) {
 	var d types.Deployment
 	err := c.c.do(ctx, clientArgs{
 		method:    "GET",
 		path:      "/ignite/deployments/search",
-		query:     query,
+		query:     map[string]string{"name": name},
 		resultKey: "deployment",
 		result:    &d,
-	})
+	}, opts)
 	if err != nil {
 		return nil, err
 	}
@@ -106,15 +99,14 @@ func (c ClientCategoryIgniteDeployments) GetByName(ctx context.Context, projectI
 }
 
 // GetContainers is used to get the containers of a deployment.
-func (c ClientCategoryIgniteDeployments) GetContainers(ctx context.Context, projectId, id string) ([]*types.Container, error) {
+func (c ClientCategoryIgniteDeployments) GetContainers(ctx context.Context, id string, opts ...ClientOption) ([]*types.Container, error) {
 	var containers []*types.Container
 	err := c.c.do(ctx, clientArgs{
 		method:    "GET",
 		path:      "/ignite/deployments/" + url.PathEscape(id) + "/containers",
-		query:     getProjectIdParam(projectId),
 		resultKey: "containers",
 		result:    &containers,
-	})
+	}, opts)
 	if err != nil {
 		return nil, err
 	}
@@ -122,15 +114,14 @@ func (c ClientCategoryIgniteDeployments) GetContainers(ctx context.Context, proj
 }
 
 // GetAll is used to get all deployments.
-func (c ClientCategoryIgniteDeployments) GetAll(ctx context.Context, projectId string) ([]*types.Deployment, error) {
+func (c ClientCategoryIgniteDeployments) GetAll(ctx context.Context, opts ...ClientOption) ([]*types.Deployment, error) {
 	var deployments []*types.Deployment
 	err := c.c.do(ctx, clientArgs{
 		method:    "GET",
 		path:      "/ignite/deployments",
-		query:     getProjectIdParam(projectId),
 		resultKey: "deployments",
 		result:    &deployments,
-	})
+	}, opts)
 	if err != nil {
 		return nil, err
 	}
@@ -138,24 +129,22 @@ func (c ClientCategoryIgniteDeployments) GetAll(ctx context.Context, projectId s
 }
 
 // Delete is used to delete a deployment by its ID.
-func (c ClientCategoryIgniteDeployments) Delete(ctx context.Context, projectId, id string) error {
+func (c ClientCategoryIgniteDeployments) Delete(ctx context.Context, id string, opts ...ClientOption) error {
 	return c.c.do(ctx, clientArgs{
 		method: "DELETE",
 		path:   "/ignite/deployments/" + url.PathEscape(id),
-		query:  getProjectIdParam(projectId),
-	})
+	}, opts)
 }
 
 // GetAllGateways is used to get all gateways attached to a deployment.
-func (c ClientCategoryIgniteDeployments) GetAllGateways(ctx context.Context, projectId, id string) ([]*types.Gateway, error) {
+func (c ClientCategoryIgniteDeployments) GetAllGateways(ctx context.Context, id string, opts ...ClientOption) ([]*types.Gateway, error) {
 	var gateways []*types.Gateway
 	err := c.c.do(ctx, clientArgs{
 		method:    "GET",
 		path:      "/ignite/deployments/" + url.PathEscape(id) + "/gateways",
-		query:     getProjectIdParam(projectId),
 		resultKey: "gateways",
 		result:    &gateways,
-	})
+	}, opts)
 	if err != nil {
 		return nil, err
 	}
@@ -163,16 +152,15 @@ func (c ClientCategoryIgniteDeployments) GetAllGateways(ctx context.Context, pro
 }
 
 // CreateGateway is used to create a gateway attached to a deployment.
-func (c ClientCategoryIgniteDeployments) CreateGateway(ctx context.Context, opts types.GatewayCreationOptions) (*types.Gateway, error) {
+func (c ClientCategoryIgniteDeployments) CreateGateway(ctx context.Context, opts types.GatewayCreationOptions, clientOpts ...ClientOption) (*types.Gateway, error) {
 	var gw types.Gateway
 	err := c.c.do(ctx, clientArgs{
 		method:    "POST",
 		path:      "/ignite/deployments/" + url.PathEscape(opts.DeploymentID) + "/gateways",
-		query:     getProjectIdParam(opts.ProjectID),
 		body:      opts,
 		resultKey: "gateway",
 		result:    &gw,
-	})
+	}, clientOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -180,16 +168,15 @@ func (c ClientCategoryIgniteDeployments) CreateGateway(ctx context.Context, opts
 }
 
 // Delete is used to delete a container by its ID.
-func (c ClientCategoryIgniteContainers) Delete(ctx context.Context, projectId, id string) error {
+func (c ClientCategoryIgniteContainers) Delete(ctx context.Context, id string, opts ...ClientOption) error {
 	return c.c.do(ctx, clientArgs{
 		method: "DELETE",
 		path:   "/ignite/containers/" + url.PathEscape(id),
-		query:  getProjectIdParam(projectId),
-	})
+	}, opts)
 }
 
 // GetLogs is used to get a paginator for the logs of a container.
-func (c ClientCategoryIgniteContainers) GetLogs(projectId, id string, limit int, ascOrder bool) *Paginator[*types.ContainerLog] {
+func (c ClientCategoryIgniteContainers) GetLogs(id string, limit int, ascOrder bool) *Paginator[*types.ContainerLog] {
 	orderBy := "desc"
 	if ascOrder {
 		orderBy = "asc"
@@ -203,40 +190,37 @@ func (c ClientCategoryIgniteContainers) GetLogs(projectId, id string, limit int,
 		resultKey:   "logs",
 		sortBy:      "timestamp",
 		orderBy:     orderBy,
-		query:       getProjectIdParam(projectId),
 	}
 }
 
 // Used to update the container state.
-func (c ClientCategoryIgniteContainers) updateContainerState(ctx context.Context, projectId, id string, state types.ContainerState) error {
+func (c ClientCategoryIgniteContainers) updateContainerState(ctx context.Context, id string, state types.ContainerState, opts []ClientOption) error {
 	return c.c.do(ctx, clientArgs{
 		method: "PUT",
 		path:   "/ignite/containers/" + url.PathEscape(id) + "/state",
 		body:   map[string]types.ContainerState{"preferred_state": state},
-		query:  getProjectIdParam(projectId),
-	})
+	}, opts)
 }
 
 // Stop is used to stop a container by its ID.
-func (c ClientCategoryIgniteContainers) Stop(ctx context.Context, projectId, id string) error {
-	return c.updateContainerState(ctx, projectId, id, types.ContainerStateStopped)
+func (c ClientCategoryIgniteContainers) Stop(ctx context.Context, id string, opts ...ClientOption) error {
+	return c.updateContainerState(ctx, id, types.ContainerStateStopped, opts)
 }
 
 // Start is used to start a container by its ID.
-func (c ClientCategoryIgniteContainers) Start(ctx context.Context, projectId, id string) error {
-	return c.updateContainerState(ctx, projectId, id, types.ContainerStateRunning)
+func (c ClientCategoryIgniteContainers) Start(ctx context.Context, id string, opts ...ClientOption) error {
+	return c.updateContainerState(ctx, id, types.ContainerStateRunning, opts)
 }
 
 // Create is used to create a container.
-func (c ClientCategoryIgniteContainers) Create(ctx context.Context, projectId, deploymentId string) (*types.Container, error) {
+func (c ClientCategoryIgniteContainers) Create(ctx context.Context, deploymentId string, opts ...ClientOption) (*types.Container, error) {
 	var a []*types.Container
 	err := c.c.do(ctx, clientArgs{
 		method:    "POST",
 		path:      "/ignite/deployments/" + url.PathEscape(deploymentId) + "/containers",
-		query:     getProjectIdParam(projectId),
 		resultKey: "containers",
 		result:    &a,
-	})
+	}, opts)
 	if err != nil {
 		return nil, err
 	}
