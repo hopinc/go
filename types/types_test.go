@@ -75,6 +75,10 @@ var types = []reflect.Type{
 	reflect.TypeOf(User{}),
 	reflect.TypeOf(UserMeInfo{}),
 	reflect.TypeOf(UserPat{}),
+
+	// leap.go
+	reflect.TypeOf(LeapScope("")),
+	reflect.TypeOf(LeapConnectionState("")),
 }
 
 type stuffer struct {

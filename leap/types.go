@@ -7,26 +7,6 @@ import (
 	"github.com/hopinc/hop-go/types"
 )
 
-// ConnectionState is used to define the state of the connection.
-type ConnectionState string
-
-const (
-	// ConnectionStateIdle is the state when the connection is idle.
-	ConnectionStateIdle ConnectionState = "idle"
-
-	// ConnectionStateConnecting is the state when the connection is connecting.
-	ConnectionStateConnecting ConnectionState = "connecting"
-
-	// ConnectionStateAuthenticating is the state when the connection is authenticating.
-	ConnectionStateAuthenticating ConnectionState = "authenticating"
-
-	// ConnectionStateConnected is the state when the connection is connected.
-	ConnectionStateConnected ConnectionState = "connected"
-
-	// ConnectionStateErrored is the state when the connection is errored.
-	ConnectionStateErrored ConnectionState = "errored"
-)
-
 // DispatchEventDetails is used to easily pass through some of the data from the dispatch event.
 type DispatchEventDetails struct {
 	// ChannelID is the ID of the channel.
@@ -47,17 +27,6 @@ type dispatchEvent struct {
 	Data json.RawMessage `json:"d"`
 }
 
-// Scope is used to define the connection scope.
-type Scope string
-
-const (
-	// ScopeProject is the scope for project connections.
-	ScopeProject Scope = "project"
-
-	// ScopeToken is the scope for token connections.
-	ScopeToken Scope = "token"
-)
-
 // InitEvent is used to define the init event.
 type InitEvent struct {
 	DispatchEventDetails `json:"-"`
@@ -69,7 +38,7 @@ type InitEvent struct {
 	Metadata map[string]any `json:"metadata"`
 
 	// Scope is the scope of the connection.
-	Scope Scope `json:"scope"`
+	Scope types.LeapScope `json:"scope"`
 
 	// Channels is the channels the connection is subscribed to.
 	Channels []*types.ChannelPartial `json:"channels"`
