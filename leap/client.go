@@ -81,28 +81,42 @@ type Client struct {
 
 	channelWaiter eventWaiter[*types.ChannelPartial]
 
+	channelQueue     []*queueDispatcher[types.LeapChannelEvent]
+	channelQueueLock sync.RWMutex
+
 	messageQueue     []*queueDispatcher[types.LeapMessageEvent]
 	messageQueueLock sync.RWMutex
 }
 
 // MessageEventChannel is used to get a channel that will receive all message events.
-func (w *Client) MessageEventChannel() <-chan types.LeapMessageEvent {
+func (c *Client) MessageEventChannel() <-chan types.LeapMessageEvent {
 	ch := make(chan types.LeapMessageEvent)
-	w.messageQueueLock.Lock()
-	w.messageQueue = append(w.messageQueue, newQueueDispatcher(ch))
-	w.messageQueueLock.Unlock()
+	c.messageQueueLock.Lock()
+	c.messageQueue = append(c.messageQueue, newQueueDispatcher(ch))
+	c.messageQueueLock.Unlock()
+	return ch
+}
+
+// ChannelEventChannel is used to get a channel that will receive all channel events. The only exception to this is events
+// that are a reply to functions in this package. Those will be returned from the function.
+func (c *Client) ChannelEventChannel() <-chan types.LeapChannelEvent {
+	ch := make(chan types.LeapChannelEvent)
+	c.channelQueueLock.Lock()
+	c.channelQueue = append(c.channelQueue, newQueueDispatcher(ch))
+	c.channelQueueLock.Unlock()
 	return ch
 }
 
 // Close closes the connection and all channels for events.
-func (w *Client) Close() error {
-	w.wsLock.Lock()
-	defer w.wsLock.Unlock()
-	err := w.ws.Close()
-	w.channelWaiter.close(net.ErrClosed)
-	w.messageQueueLock.Lock()
-	q := w.messageQueue
-	w.messageQueueLock.Unlock()
+func (c *Client) Close() error {
+	c.wsLock.Lock()
+	defer c.wsLock.Unlock()
+	err := c.ws.Close()
+	c.channelWaiter.close(net.ErrClosed)
+	c.messageQueueLock.Lock()
+	q := c.messageQueue
+	c.messageQueue = nil
+	c.messageQueueLock.Unlock()
 	for _, v := range q {
 		close(v.channel)
 	}
@@ -121,12 +135,12 @@ func rawify(data any) json.RawMessage {
 
 // If payload and error is both nil, this means there was an error, but it was handled. Just call this again (unless
 // it is in connect, then return)!
-func (w *Client) readPayload(heartbeatWriteDuration time.Duration) (*payload, error) {
-	err := w.ws.SetReadDeadline(time.Now().Add(heartbeatWriteDuration))
+func (c *Client) readPayload(heartbeatWriteDuration time.Duration) (*payload, error) {
+	err := c.ws.SetReadDeadline(time.Now().Add(heartbeatWriteDuration))
 	if err != nil {
 		return nil, err
 	}
-	t, r, err := w.ws.NextReader()
+	t, r, err := c.ws.NextReader()
 	if err != nil {
 		return nil, err
 	}
@@ -144,10 +158,10 @@ func (w *Client) readPayload(heartbeatWriteDuration time.Duration) (*payload, er
 	return &p, nil
 }
 
-func (w *Client) writePayload(ws webSocketImpl, p *payload) error {
+func (c *Client) writePayload(ws webSocketImpl, p *payload) error {
 	// Ensure we are only doing 1 write at a time.
-	w.writeLock.Lock()
-	defer w.writeLock.Unlock()
+	c.writeLock.Lock()
+	defer c.writeLock.Unlock()
 
 	// Get the next writer.
 	wr, err := ws.NextWriter(websocket.TextMessage)
@@ -167,11 +181,11 @@ func (w *Client) writePayload(ws webSocketImpl, p *payload) error {
 	return nil
 }
 
-func (w *Client) handleWsError(code int, text string, err error) {
+func (c *Client) handleWsError(code int, text string, err error) {
 	// Make sure the websocket is killed and set to nil.
-	w.wsLock.Lock()
-	_ = w.ws.Close()
-	w.ws = nil
+	c.wsLock.Lock()
+	_ = c.ws.Close()
+	c.ws = nil
 
 	// Turn a code 4001 into a AuthorizationError.
 	if code == 4001 {
@@ -179,36 +193,37 @@ func (w *Client) handleWsError(code int, text string, err error) {
 	}
 
 	// Set the state to error.
-	w.state.set(types.LeapStateInfo{
+	c.state.set(types.LeapStateInfo{
 		ConnectionState: types.LeapConnectionStateErrored,
 		Err:             err,
 		WillReconnect:   code != 4001,
 	})
 
 	// Make sure all channel waiters are closed.
-	w.channelWaiter.close(err)
+	c.channelWaiter.close(err)
 
 	// Unlock the websocket. We will relock it in just a second.
-	w.wsLock.Unlock()
+	c.wsLock.Unlock()
 
 	// Check if this is a close error.
 	if code == 4006 {
 		// Change the url before reconnect.
-		w.url = text
+		c.url = text
 	}
 	if code == 4001 {
 		// If the code is 4001, this means that the connection was closed on purpose. This is not something we should
 		// reconnect for.
-		w.messageQueueLock.Lock()
-		q := w.messageQueue
-		w.messageQueueLock.Unlock()
+		c.messageQueueLock.Lock()
+		q := c.messageQueue
+		c.messageQueue = nil
+		c.messageQueueLock.Unlock()
 		for _, v := range q {
 			close(v.channel)
 		}
 	} else {
 		// Attempt looping until we reconnect.
 		for {
-			err = w.connect(true)
+			err = c.connect(true)
 			if err == nil {
 				// We are ready to rumble!
 				return
@@ -241,12 +256,12 @@ func unmarshalPacket(e dispatchEvent, x any) error {
 }
 
 // InitEvent is used to return the init event. Can be nil if it is not sent.
-func (w *Client) InitEvent() *types.LeapInitEvent {
-	return w.initEvent.get()
+func (c *Client) InitEvent() *types.LeapInitEvent {
+	return c.initEvent.get()
 }
 
 // Used to handle dispatching events.
-func (w *Client) dispatchEvent(r json.RawMessage) {
+func (c *Client) dispatchEvent(r json.RawMessage) {
 	var x dispatchEvent
 	err := json.Unmarshal(r, &x)
 	if err != nil {
@@ -260,49 +275,65 @@ func (w *Client) dispatchEvent(r json.RawMessage) {
 		if err = unmarshalPacket(x, &e); err != nil {
 			return
 		}
-		w.initEvent.set(&e)
-		w.state.set(types.LeapStateInfo{ConnectionState: types.LeapConnectionStateConnected})
+		c.initEvent.set(&e)
+		c.state.set(types.LeapStateInfo{ConnectionState: types.LeapConnectionStateConnected})
 	case "AVAILABLE":
 		var e types.LeapAvailableEvent
 		if err = unmarshalPacket(x, &e); err != nil {
 			return
 		}
-		w.channelWaiter.signal(e.Channel.ID, e.Channel, nil)
+		if ok := c.channelWaiter.signal(e.Channel.ID, e.Channel, nil); !ok {
+			c.channelQueueLock.RLock()
+			for _, v := range c.channelQueue {
+				v.dispatch(e)
+			}
+			c.channelQueueLock.RUnlock()
+		}
 	case "UNAVAILABLE":
 		var e types.LeapUnavailableEvent
 		if err = unmarshalPacket(x, &e); err != nil {
 			return
 		}
 		// TODO: Make this a better error.
-		w.channelWaiter.signal(e.ChannelID, nil, fmt.Errorf("%v", e))
+		if ok := c.channelWaiter.signal(e.ChannelID, nil, fmt.Errorf("%v", e)); !ok {
+			c.channelQueueLock.RLock()
+			for _, v := range c.channelQueue {
+				v.dispatch(e)
+			}
+			c.channelQueueLock.RUnlock()
+		}
 	case "MESSAGE", "DIRECT_MESSAGE": // MESSAGE and DIRECT_MESSAGE are the same packet.
 		var e types.LeapMessageEvent
 		if err = unmarshalPacket(x, &e); err != nil {
 			return
 		}
-		w.messageQueueLock.RLock()
-		for _, v := range w.messageQueue {
+		c.messageQueueLock.RLock()
+		for _, v := range c.messageQueue {
 			v.dispatch(e)
 		}
-		w.messageQueueLock.RUnlock()
+		c.messageQueueLock.RUnlock()
 	case "STATE_UPDATE":
 		var e types.LeapChannelStateUpdateEvent
 		if err = unmarshalPacket(x, &e); err != nil {
 			return
 		}
-		fmt.Println(e)
+		c.channelQueueLock.RLock()
+		for _, v := range c.channelQueue {
+			v.dispatch(e)
+		}
+		c.channelQueueLock.RUnlock()
 	}
 }
 
 // Subscribe subscribes to a channel.
-func (w *Client) Subscribe(channelId string) (*types.ChannelPartial, error) {
-	w.wsLock.RLock()
-	ws := w.ws
-	w.wsLock.RUnlock()
+func (c *Client) Subscribe(channelId string) (*types.ChannelPartial, error) {
+	c.wsLock.RLock()
+	ws := c.ws
+	c.wsLock.RUnlock()
 	if ws == nil {
 		return nil, net.ErrClosed
 	}
-	err := w.writePayload(ws, &payload{
+	err := c.writePayload(ws, &payload{
 		Op: 0,
 		Data: rawify(dispatchEvent{
 			LeapDispatchEventDetails: types.LeapDispatchEventDetails{
@@ -315,18 +346,18 @@ func (w *Client) Subscribe(channelId string) (*types.ChannelPartial, error) {
 	if err != nil {
 		return nil, err
 	}
-	return w.channelWaiter.wait(channelId)
+	return c.channelWaiter.wait(channelId)
 }
 
 // Defines the read loop.
-func (w *Client) readLoop(ws webSocketImpl, d time.Duration) {
+func (c *Client) readLoop(ws webSocketImpl, d time.Duration) {
 	for {
 		// Read the payload.
-		p, err := w.readPayload(d)
+		p, err := c.readPayload(d)
 		if err != nil {
 			if closeErr, ok := err.(*websocket.CloseError); ok {
 				// Call the close handler and then return.
-				w.handleWsError(closeErr.Code, closeErr.Text, err)
+				c.handleWsError(closeErr.Code, closeErr.Text, err)
 				return
 			}
 
@@ -338,7 +369,7 @@ func (w *Client) readLoop(ws webSocketImpl, d time.Duration) {
 			if _, ok := err.(net.Error); ok {
 				// Call the close handler with -1 and then return. This technically is not a close, but we want to
 				// handle it the same way.
-				w.handleWsError(-1, "", err)
+				c.handleWsError(-1, "", err)
 				return
 			}
 
@@ -350,11 +381,11 @@ func (w *Client) readLoop(ws webSocketImpl, d time.Duration) {
 		switch p.Op {
 		case 0:
 			// Dispatch the event.
-			w.dispatchEvent(p.Data)
+			c.dispatchEvent(p.Data)
 		case 3:
 			// Reply with a heartbeat.
 			go func() {
-				_ = w.writePayload(ws, &payload{
+				_ = c.writePayload(ws, &payload{
 					Op:   3,
 					Data: p.Data,
 				})
@@ -364,12 +395,12 @@ func (w *Client) readLoop(ws webSocketImpl, d time.Duration) {
 }
 
 // Defines the heartbeat loop.
-func (w *Client) heartbeatLoop(ws webSocketImpl, interval int) {
+func (c *Client) heartbeatLoop(ws webSocketImpl, interval int) {
 	t := time.NewTicker(time.Duration(interval) * time.Millisecond)
 	go func() {
 		for {
 			go func() {
-				err := w.writePayload(ws, &payload{
+				err := c.writePayload(ws, &payload{
 					Op:   3,
 					Data: rawify(map[string]string{"tag": ""}),
 				})
@@ -386,40 +417,44 @@ func (w *Client) heartbeatLoop(ws webSocketImpl, interval int) {
 	}()
 }
 
-func (w *Client) connect(reconnect bool) error {
+func (c *Client) connect(reconnect bool) error {
 	// Take the websocket mutex.
-	w.wsLock.Lock()
-	defer w.wsLock.Unlock()
+	c.wsLock.Lock()
+	defer c.wsLock.Unlock()
 
 	// Check if we are already connected.
-	if w.ws != nil {
+	if c.ws != nil {
 		return nil
 	}
 
 	// Set the state to connecting.
-	w.state.set(types.LeapStateInfo{ConnectionState: types.LeapConnectionStateConnecting})
+	c.state.set(types.LeapStateInfo{ConnectionState: types.LeapConnectionStateConnecting})
 
 	// Make a new websocket.
 	var err error
-	w.ws, err = w.wsMaker(w.url)
+	c.ws, err = c.wsMaker(c.url)
 	if err != nil {
-		w.state.set(types.LeapStateInfo{ConnectionState: types.LeapConnectionStateErrored, Err: err, WillReconnect: reconnect})
+		_ = c.ws.Close()
+		c.ws = nil
+		c.state.set(types.LeapStateInfo{ConnectionState: types.LeapConnectionStateErrored, Err: err, WillReconnect: reconnect})
 		return err
 	}
 
 	// Read the first payload.
-	p, err := w.readPayload(time.Second * 10)
+	p, err := c.readPayload(time.Second * 10)
 	if err != nil {
 		// Unable to recover from whatever happened in the read event.
-		w.state.set(types.LeapStateInfo{ConnectionState: types.LeapConnectionStateErrored, Err: err, WillReconnect: reconnect})
+		_ = c.ws.Close()
+		c.ws = nil
+		c.state.set(types.LeapStateInfo{ConnectionState: types.LeapConnectionStateErrored, Err: err, WillReconnect: reconnect})
 		return err
 	}
 
 	// Validate this is a hello message.
 	if p.Op != 1 {
-		_ = w.ws.Close()
-		w.ws = nil
-		w.state.set(types.LeapStateInfo{ConnectionState: types.LeapConnectionStateErrored, Err: types.ExpectedHello, WillReconnect: reconnect})
+		_ = c.ws.Close()
+		c.ws = nil
+		c.state.set(types.LeapStateInfo{ConnectionState: types.LeapConnectionStateErrored, Err: types.ExpectedHello, WillReconnect: reconnect})
 		return types.ExpectedHello
 	}
 	type hello struct {
@@ -427,49 +462,51 @@ func (w *Client) connect(reconnect bool) error {
 	}
 	var h hello
 	if err = json.Unmarshal(p.Data, &h); err != nil {
-		w.state.set(types.LeapStateInfo{ConnectionState: types.LeapConnectionStateErrored, Err: err, WillReconnect: reconnect})
-		_ = w.ws.Close()
-		w.ws = nil
+		c.state.set(types.LeapStateInfo{ConnectionState: types.LeapConnectionStateErrored, Err: err, WillReconnect: reconnect})
+		_ = c.ws.Close()
+		c.ws = nil
 		return err
 	}
 
 	// Send the identify payload.
-	w.state.set(types.LeapStateInfo{ConnectionState: types.LeapConnectionStateAuthenticating})
-	err = w.writePayload(w.ws, &payload{
+	c.state.set(types.LeapStateInfo{ConnectionState: types.LeapConnectionStateAuthenticating})
+	err = c.writePayload(c.ws, &payload{
 		Op: 2,
 		Data: rawify(map[string]string{
-			"token":      w.token,
-			"project_id": w.projectId,
+			"token":      c.token,
+			"project_id": c.projectId,
 		}),
 	})
 	if err != nil {
-		w.state.set(types.LeapStateInfo{ConnectionState: types.LeapConnectionStateErrored, Err: err, WillReconnect: reconnect})
+		c.state.set(types.LeapStateInfo{ConnectionState: types.LeapConnectionStateErrored, Err: err, WillReconnect: reconnect})
+		_ = c.ws.Close()
+		c.ws = nil
 		return err
 	}
 
 	// Start the reading loop.
-	go w.readLoop(w.ws, (time.Millisecond*time.Duration(h.HeartbeatInterval))+(time.Second*5))
+	go c.readLoop(c.ws, (time.Millisecond*time.Duration(h.HeartbeatInterval))+(time.Second*5))
 
 	// Start the heartbeat loop.
-	w.heartbeatLoop(w.ws, h.HeartbeatInterval)
+	c.heartbeatLoop(c.ws, h.HeartbeatInterval)
 
 	// Return no errors.
 	return nil
 }
 
 // Connect is used to connect to the Leap server.
-func (w *Client) Connect() error {
-	return w.connect(false)
+func (c *Client) Connect() error {
+	return c.connect(false)
 }
 
 // State returns the state of the websocket.
-func (w *Client) State() types.LeapStateInfo {
-	return w.state.get()
+func (c *Client) State() types.LeapStateInfo {
+	return c.state.get()
 }
 
 // AddStateUpdateListener adds a handler to be called when the state changes.
-func (w *Client) AddStateUpdateListener(handler func(types.LeapStateInfo)) {
-	w.state.addListener(handler)
+func (c *Client) AddStateUpdateListener(handler func(types.LeapStateInfo)) {
+	c.state.addListener(handler)
 }
 
 // NewClient is used to create a new client.

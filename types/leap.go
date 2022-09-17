@@ -44,7 +44,7 @@ type LeapDispatchEventDetails struct {
 
 // LeapInitEvent is used to define the Leap init event.
 type LeapInitEvent struct {
-	LeapDispatchEventDetails `json:"-"`
+	LeapDispatchEventDetails `json:",inline"`
 
 	// ConnectionID is the ID of the connection.
 	ConnectionID string `json:"cid"`
@@ -61,7 +61,7 @@ type LeapInitEvent struct {
 
 // LeapAvailableEvent is used to define the event when a channel is available.
 type LeapAvailableEvent struct {
-	LeapDispatchEventDetails `json:"-"`
+	LeapDispatchEventDetails `json:",inline"`
 
 	// Channel is the channel that is available.
 	Channel *ChannelPartial `json:"channel"`
@@ -69,7 +69,7 @@ type LeapAvailableEvent struct {
 
 // LeapUnavailableEvent is used to define the event when a channel is unavailable.
 type LeapUnavailableEvent struct {
-	LeapDispatchEventDetails `json:"-"`
+	LeapDispatchEventDetails `json:",inline"`
 
 	// Graceful is if the channel was gracefully unavailable.
 	Graceful bool `json:"graceful"`
@@ -81,7 +81,7 @@ type LeapUnavailableEvent struct {
 // LeapMessageEvent is used to define the Leap message event. When this is sent, if this is a direct message, ChannelID will
 // be blank.
 type LeapMessageEvent struct {
-	LeapDispatchEventDetails `json:"-"`
+	LeapDispatchEventDetails `json:",inline"`
 
 	// Data is the user provided event data for the message.
 	Data map[string]any `json:"d"`
@@ -106,7 +106,7 @@ func (e LeapAuthorizationError) Error() string { return e.Data }
 
 // LeapChannelStateUpdateEvent is used to define the channel state update event.
 type LeapChannelStateUpdateEvent struct {
-	LeapDispatchEventDetails `json:"-"`
+	LeapDispatchEventDetails `json:",inline"`
 
 	// State is the state of the channel.
 	State map[string]any `json:"state"`
@@ -123,3 +123,7 @@ type LeapStateInfo struct {
 	// WillReconnect is set if the connection state is errored to define if a reconnection will be attempted.
 	WillReconnect bool
 }
+
+// LeapChannelEvent is an any type that can be one of LeapUnavailableEvent, LeapAvailableEvent, LeapChannelStateUpdateEvent,
+// TODO
+type LeapChannelEvent any
