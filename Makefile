@@ -4,13 +4,13 @@ generate:
 
 .PHONY: cov-html
 cov-html:
-	go test -coverprofile=coverage.out ./...
+	go test -race -coverprofile=coverage.out ./...
 	go tool cover -html=coverage.out
 	rm coverage.out
 
 .PHONY: test
 test:
-	go test -cover ./...
+	go test -race -cover ./...
 
 .PHONY: update-types
 update-types:
