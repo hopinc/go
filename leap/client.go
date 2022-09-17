@@ -515,7 +515,6 @@ func (c *Client) connect(reconnect bool) error {
 	var err error
 	c.ws, err = c.wsMaker(c.url)
 	if err != nil {
-		_ = c.ws.Close()
 		c.ws = nil
 		c.state.set(types.LeapStateInfo{ConnectionState: types.LeapConnectionStateErrored, Err: err, WillReconnect: reconnect})
 		return err
