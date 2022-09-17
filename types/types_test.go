@@ -15,6 +15,7 @@ var types = []reflect.Type{
 	// channels.go
 	reflect.TypeOf(ChannelType("")),
 	reflect.TypeOf(Channel{}),
+	reflect.TypeOf(ChannelPartial{}),
 	reflect.TypeOf(Stats{}),
 	reflect.TypeOf(ChannelToken{}),
 

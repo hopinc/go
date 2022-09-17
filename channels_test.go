@@ -23,7 +23,7 @@ func TestClient_Channels_Create(t *testing.T) {
 		&ClientCategoryChannels{c: c},
 		"Create",
 		[]any{types.ChannelTypePrivate, map[string]any{"do_you_like_waffles": true}, "", WithProjectID("test123")},
-		&types.Channel{ID: "hello"})
+		&types.Channel{ChannelPartial: types.ChannelPartial{ID: "hello"}})
 }
 
 func TestClient_Channels_Get(t *testing.T) {
@@ -40,7 +40,7 @@ func TestClient_Channels_Get(t *testing.T) {
 		&ClientCategoryChannels{c: c},
 		"Get",
 		[]any{"test test", WithProjectID("test123")},
-		&types.Channel{ID: "hello"})
+		&types.Channel{ChannelPartial: types.ChannelPartial{ID: "hello"}})
 }
 
 func TestClient_Channels_GetAll(t *testing.T) {

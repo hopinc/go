@@ -1,29 +1,29 @@
 {
 	"id": "abc",
-	"project": {
-		"id": "def",
-		"name": "ghi",
-		"tier": "jkl",
-		"created_at": "mno",
-		"icon": "pqr",
-		"namespace": "stu",
-		"type": "vwx",
-		"default_quotas": {
-			"vcpu": 8,
-			"ram": 9
-		},
-		"quota_overrides": {
-			"abc": 11
-		},
-		"quota_usage": {
-			"vcpu": 12,
-			"ram": 13
-		}
-	},
 	"state": {
 		"def": "ghi"
 	},
-	"capabilities": 16,
-	"created_at": "jkl",
-	"type": "mno"
+	"type": "jkl",
+	"project": {
+		"id": "mno",
+		"name": "pqr",
+		"tier": "stu",
+		"created_at": "vwx",
+		"icon": "abc",
+		"namespace": "def",
+		"type": "ghi",
+		"default_quotas": {
+			"vcpu": 11,
+			"ram": 12
+		},
+		"quota_overrides": {
+			"jkl": 14
+		},
+		"quota_usage": {
+			"vcpu": 15,
+			"ram": 16
+		}
+	},
+	"capabilities": 17,
+	"created_at": "mno"
 }
