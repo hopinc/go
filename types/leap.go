@@ -111,3 +111,15 @@ type LeapChannelStateUpdateEvent struct {
 	// State is the state of the channel.
 	State map[string]any `json:"state"`
 }
+
+// LeapStateInfo is the information about the state of the connection.
+type LeapStateInfo struct {
+	// ConnectionState is the string representation of the connection state.
+	ConnectionState LeapConnectionState
+
+	// Err is set if the connection state is errored to define the error that triggered this.
+	Err error
+
+	// WillReconnect is set if the connection state is errored to define if a reconnection will be attempted.
+	WillReconnect bool
+}

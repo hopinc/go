@@ -62,18 +62,6 @@ func (r *rwLocker[T]) addListener(f func(T)) {
 	r.mu.Unlock()
 }
 
-// StateInfo is the information about the state of the connection.
-type StateInfo struct {
-	// ConnectionState is the string representation of the connection state.
-	ConnectionState types.LeapConnectionState
-
-	// Err is set if the connection state is errored to define the error that triggered this.
-	Err error
-
-	// WillReconnect is set if the connection state is errored to define if a reconnection will be attempted.
-	WillReconnect bool
-}
-
 // Client is used to define a Leap client. Please use NewClient to create a new client.
 type Client struct {
 	projectId string
@@ -88,7 +76,7 @@ type Client struct {
 	// but we need a solution here. This is that.
 	writeLock sync.Mutex
 
-	state     rwLocker[StateInfo]
+	state     rwLocker[types.LeapStateInfo]
 	initEvent rwLocker[*types.LeapInitEvent]
 
 	channelWaiter eventWaiter[*types.ChannelPartial]
@@ -191,7 +179,7 @@ func (w *Client) handleWsError(code int, text string, err error) {
 	}
 
 	// Set the state to error.
-	w.state.set(StateInfo{
+	w.state.set(types.LeapStateInfo{
 		ConnectionState: types.LeapConnectionStateErrored,
 		Err:             err,
 		WillReconnect:   code != 4001,
@@ -273,7 +261,7 @@ func (w *Client) dispatchEvent(r json.RawMessage) {
 			return
 		}
 		w.initEvent.set(&e)
-		w.state.set(StateInfo{ConnectionState: types.LeapConnectionStateConnected})
+		w.state.set(types.LeapStateInfo{ConnectionState: types.LeapConnectionStateConnected})
 	case "AVAILABLE":
 		var e types.LeapAvailableEvent
 		if err = unmarshalPacket(x, &e); err != nil {
@@ -365,10 +353,12 @@ func (w *Client) readLoop(ws webSocketImpl, d time.Duration) {
 			w.dispatchEvent(p.Data)
 		case 3:
 			// Reply with a heartbeat.
-			_ = w.writePayload(ws, &payload{
-				Op:   3,
-				Data: p.Data,
-			})
+			go func() {
+				_ = w.writePayload(ws, &payload{
+					Op:   3,
+					Data: p.Data,
+				})
+			}()
 		}
 	}
 }
@@ -407,13 +397,13 @@ func (w *Client) connect(reconnect bool) error {
 	}
 
 	// Set the state to connecting.
-	w.state.set(StateInfo{ConnectionState: types.LeapConnectionStateConnecting})
+	w.state.set(types.LeapStateInfo{ConnectionState: types.LeapConnectionStateConnecting})
 
 	// Make a new websocket.
 	var err error
 	w.ws, err = w.wsMaker(w.url)
 	if err != nil {
-		w.state.set(StateInfo{ConnectionState: types.LeapConnectionStateErrored, Err: err, WillReconnect: reconnect})
+		w.state.set(types.LeapStateInfo{ConnectionState: types.LeapConnectionStateErrored, Err: err, WillReconnect: reconnect})
 		return err
 	}
 
@@ -421,7 +411,7 @@ func (w *Client) connect(reconnect bool) error {
 	p, err := w.readPayload(time.Second * 10)
 	if err != nil {
 		// Unable to recover from whatever happened in the read event.
-		w.state.set(StateInfo{ConnectionState: types.LeapConnectionStateErrored, Err: err, WillReconnect: reconnect})
+		w.state.set(types.LeapStateInfo{ConnectionState: types.LeapConnectionStateErrored, Err: err, WillReconnect: reconnect})
 		return err
 	}
 
@@ -429,7 +419,7 @@ func (w *Client) connect(reconnect bool) error {
 	if p.Op != 1 {
 		_ = w.ws.Close()
 		w.ws = nil
-		w.state.set(StateInfo{ConnectionState: types.LeapConnectionStateErrored, Err: types.ExpectedHello, WillReconnect: reconnect})
+		w.state.set(types.LeapStateInfo{ConnectionState: types.LeapConnectionStateErrored, Err: types.ExpectedHello, WillReconnect: reconnect})
 		return types.ExpectedHello
 	}
 	type hello struct {
@@ -437,14 +427,14 @@ func (w *Client) connect(reconnect bool) error {
 	}
 	var h hello
 	if err = json.Unmarshal(p.Data, &h); err != nil {
-		w.state.set(StateInfo{ConnectionState: types.LeapConnectionStateErrored, Err: err, WillReconnect: reconnect})
+		w.state.set(types.LeapStateInfo{ConnectionState: types.LeapConnectionStateErrored, Err: err, WillReconnect: reconnect})
 		_ = w.ws.Close()
 		w.ws = nil
 		return err
 	}
 
 	// Send the identify payload.
-	w.state.set(StateInfo{ConnectionState: types.LeapConnectionStateAuthenticating})
+	w.state.set(types.LeapStateInfo{ConnectionState: types.LeapConnectionStateAuthenticating})
 	err = w.writePayload(w.ws, &payload{
 		Op: 2,
 		Data: rawify(map[string]string{
@@ -453,7 +443,7 @@ func (w *Client) connect(reconnect bool) error {
 		}),
 	})
 	if err != nil {
-		w.state.set(StateInfo{ConnectionState: types.LeapConnectionStateErrored, Err: err, WillReconnect: reconnect})
+		w.state.set(types.LeapStateInfo{ConnectionState: types.LeapConnectionStateErrored, Err: err, WillReconnect: reconnect})
 		return err
 	}
 
@@ -473,12 +463,12 @@ func (w *Client) Connect() error {
 }
 
 // State returns the state of the websocket.
-func (w *Client) State() StateInfo {
+func (w *Client) State() types.LeapStateInfo {
 	return w.state.get()
 }
 
 // AddStateUpdateListener adds a handler to be called when the state changes.
-func (w *Client) AddStateUpdateListener(handler func(StateInfo)) {
+func (w *Client) AddStateUpdateListener(handler func(types.LeapStateInfo)) {
 	w.state.addListener(handler)
 }
 
@@ -487,8 +477,10 @@ func NewClient(projectId, token string) *Client {
 	return &Client{
 		projectId: projectId,
 		token:     token,
-		state:     rwLocker[StateInfo]{unsafeValue: StateInfo{ConnectionState: types.LeapConnectionStateIdle}},
-		wsMaker:   newWebSocketImpl,
-		url:       "wss://leap.hop.io/ws?encoding=json&compression=zlib",
+		state: rwLocker[types.LeapStateInfo]{unsafeValue: types.LeapStateInfo{
+			ConnectionState: types.LeapConnectionStateIdle,
+		}},
+		wsMaker: newWebSocketImpl,
+		url:     "wss://leap.hop.io/ws?encoding=json&compression=zlib",
 	}
 }
