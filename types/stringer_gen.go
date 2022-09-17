@@ -18,3 +18,13 @@ func (x LeapAvailableEvent) String() string {
 func (x LeapChannelStateUpdateEvent) String() string {
 	return stringifyValue(x)
 }
+
+// String returns the string representation of this value. This function is auto-generated.
+func (x LeapPipeRoomAvailableEvent) String() string {
+	return stringifyValue(x)
+}
+
+// String returns the string representation of this value. This function is auto-generated.
+func (x LeapPipeRoomUpdateEvent) String() string {
+	return stringifyValue(x)
+}

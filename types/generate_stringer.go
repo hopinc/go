@@ -12,11 +12,12 @@ import (
 
 // Defines the types that the string function is generated for.
 var types = []string{
-	"x LeapUnavailableEvent", "x LeapAvailableEvent", "x LeapChannelStateUpdateEvent",
+	"LeapUnavailableEvent", "LeapAvailableEvent", "LeapChannelStateUpdateEvent",
+	"LeapPipeRoomAvailableEvent", "LeapPipeRoomUpdateEvent",
 }
 
 const stringTemplate = `// String returns the string representation of this value. This function is auto-generated.
-func ({{.TypeData}}) String() string {
+func (x {{.TypeData}}) String() string {
 	return stringifyValue(x)
 }`
 

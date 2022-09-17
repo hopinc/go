@@ -78,6 +78,17 @@ type LeapUnavailableEvent struct {
 	ErrorCode string `json:"error_code"`
 }
 
+// Error returns the error message.
+func (x LeapUnavailableEvent) Error() string {
+	v := "error=" + x.ErrorCode
+	if x.Graceful {
+		v += ", graceful=true"
+	} else {
+		v += ", graceful=false"
+	}
+	return v
+}
+
 // LeapMessageEvent is used to define the Leap message event. When this is sent, if this is a direct message, ChannelID will
 // be blank.
 type LeapMessageEvent struct {
@@ -124,6 +135,33 @@ type LeapStateInfo struct {
 	WillReconnect bool
 }
 
+// PipeConnection is used to define a Pipe connection.
+type PipeConnection struct {
+	EdgeEndpoint string           `json:"edge_endpoint"`
+	Type         DeliveryProtocol `json:"type"`
+	ServingPOP   string           `json:"serving_pop"`
+}
+
+// PipeConnectionMap is used to define a map of Pipe connections.
+type PipeConnectionMap struct {
+	WebRTC *PipeConnection `json:"webrtc"`
+	LLHLS  *PipeConnection `json:"llhls"`
+}
+
+// LeapPipeRoomAvailableEvent is used to define the event when a pipe room is available.
+type LeapPipeRoomAvailableEvent struct {
+	LeapDispatchEventDetails `json:",inline"`
+
+	// PipeRoom is the pipe room that is available.
+	PipeRoom Room `json:"pipe_room"`
+
+	// Connection is a map that contains the connection information. Everything inside will be nil if the room is offline.
+	Connection PipeConnectionMap `json:"connection"`
+}
+
+// LeapPipeRoomUpdateEvent contains the same data as LeapPipeRoomAvailableEvent.
+type LeapPipeRoomUpdateEvent LeapPipeRoomAvailableEvent
+
 // LeapChannelEvent is an any type that can be one of LeapUnavailableEvent, LeapAvailableEvent, LeapChannelStateUpdateEvent,
-// TODO
+// LeapPipeRoomAvailableEvent, and LeapPipeRoomUpdateEvent.
 type LeapChannelEvent any

@@ -4,7 +4,6 @@ import (
 	"compress/zlib"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"net"
 	"reflect"
@@ -29,8 +28,6 @@ func newWebSocketImpl(url string) (webSocketImpl, error) {
 	}
 	return ws, nil
 }
-
-// TODO: support logging why it does things
 
 type rwLocker[T any] struct {
 	unsafeValue T
@@ -66,6 +63,8 @@ func (r *rwLocker[T]) addListener(f func(T)) {
 type Client struct {
 	projectId string
 	token     string
+
+	logger Logger
 
 	ws      webSocketImpl
 	wsLock  sync.RWMutex
@@ -107,19 +106,41 @@ func (c *Client) ChannelEventChannel() <-chan types.LeapChannelEvent {
 	return ch
 }
 
-// Close closes the connection and all channels for events.
-func (c *Client) Close() error {
-	c.wsLock.Lock()
-	defer c.wsLock.Unlock()
-	err := c.ws.Close()
-	c.channelWaiter.close(net.ErrClosed)
-	c.messageQueueLock.Lock()
-	q := c.messageQueue
-	c.messageQueue = nil
-	c.messageQueueLock.Unlock()
+// Closes all queues in the client.
+func (c *Client) closeAllQueues() {
+	c.channelQueueLock.Lock()
+	q := c.channelQueue
+	c.channelQueue = nil
+	c.channelQueueLock.Unlock()
 	for _, v := range q {
 		close(v.channel)
 	}
+
+	c.messageQueueLock.Lock()
+	x := c.messageQueue
+	c.messageQueue = nil
+	c.messageQueueLock.Unlock()
+	for _, v := range x {
+		close(v.channel)
+	}
+}
+
+// Close closes the connection and all channels for events.
+func (c *Client) Close() error {
+	// Ensure that the websocket is unusable whilst it is being shut down.
+	c.wsLock.Lock()
+	defer c.wsLock.Unlock()
+
+	// Close the websocket. Keep this error for later.
+	err := c.ws.Close()
+
+	// Send any clients waiting for channel relating events that the socket is closed.
+	c.channelWaiter.close(net.ErrClosed)
+
+	// Destroy every queue item.
+	c.closeAllQueues()
+
+	// Return the error from closing the websocket.
 	return err
 }
 
@@ -147,12 +168,18 @@ func (c *Client) readPayload(heartbeatWriteDuration time.Duration) (*payload, er
 	var p payload
 	if t == websocket.BinaryMessage {
 		r, err = zlib.NewReader(r)
-		if err != nil {
+		if err == nil {
+			c.logger.Debug("binary message read - using zlib", nil)
+		} else {
+			c.logger.Error("binary message read - unable to use zlib", err, nil)
 			return nil, err
 		}
+	} else {
+		c.logger.Debug("text message read - not using zlib", nil)
 	}
 	err = json.NewDecoder(r).Decode(&p)
 	if err != nil {
+		c.logger.Error("unable to decode json", err, nil)
 		return nil, err
 	}
 	return &p, nil
@@ -193,10 +220,16 @@ func (c *Client) handleWsError(code int, text string, err error) {
 	}
 
 	// Set the state to error.
-	c.state.set(types.LeapStateInfo{
+	stateInfo := types.LeapStateInfo{
 		ConnectionState: types.LeapConnectionStateErrored,
 		Err:             err,
 		WillReconnect:   code != 4001,
+	}
+	c.state.set(stateInfo)
+
+	// Error log the information.
+	c.logger.Error("connection failure", err, map[string]any{
+		"will_reconnect": stateInfo.WillReconnect,
 	})
 
 	// Make sure all channel waiters are closed.
@@ -213,21 +246,18 @@ func (c *Client) handleWsError(code int, text string, err error) {
 	if code == 4001 {
 		// If the code is 4001, this means that the connection was closed on purpose. This is not something we should
 		// reconnect for.
-		c.messageQueueLock.Lock()
-		q := c.messageQueue
-		c.messageQueue = nil
-		c.messageQueueLock.Unlock()
-		for _, v := range q {
-			close(v.channel)
-		}
+		c.closeAllQueues()
 	} else {
 		// Attempt looping until we reconnect.
 		for {
+			c.logger.Warn("connection dropped - attempting to reconnect", nil)
 			err = c.connect(true)
 			if err == nil {
 				// We are ready to rumble!
+				c.logger.Info("reconnected", nil)
 				return
 			}
+			c.logger.Error("failed to reconnect - backing off for a second", err, nil)
 			time.Sleep(time.Second)
 		}
 	}
@@ -268,7 +298,13 @@ func (c *Client) dispatchEvent(r json.RawMessage) {
 		return
 	}
 
-	// TODO: make a nicer channel events system for if a channel randomly becomes available/unavailable.
+	c.logger.Debug("dispatch event", map[string]any{
+		"event_code": x.DispatchEventCode,
+		"channel_id": x.ChannelID,
+		"unicast":    x.Unicast,
+		"data":       x.Data,
+	})
+
 	switch x.DispatchEventCode {
 	case "INIT":
 		var e types.LeapInitEvent
@@ -277,6 +313,7 @@ func (c *Client) dispatchEvent(r json.RawMessage) {
 		}
 		c.initEvent.set(&e)
 		c.state.set(types.LeapStateInfo{ConnectionState: types.LeapConnectionStateConnected})
+		c.logger.Info("init event received - we are connected", nil)
 	case "AVAILABLE":
 		var e types.LeapAvailableEvent
 		if err = unmarshalPacket(x, &e); err != nil {
@@ -294,15 +331,14 @@ func (c *Client) dispatchEvent(r json.RawMessage) {
 		if err = unmarshalPacket(x, &e); err != nil {
 			return
 		}
-		// TODO: Make this a better error.
-		if ok := c.channelWaiter.signal(e.ChannelID, nil, fmt.Errorf("%v", e)); !ok {
+		if ok := c.channelWaiter.signal(e.ChannelID, nil, e); !ok {
 			c.channelQueueLock.RLock()
 			for _, v := range c.channelQueue {
 				v.dispatch(e)
 			}
 			c.channelQueueLock.RUnlock()
 		}
-	case "MESSAGE", "DIRECT_MESSAGE": // MESSAGE and DIRECT_MESSAGE are the same packet.
+	case "MESSAGE", "DIRECT_MESSAGE": // MESSAGE and DIRECT_MESSAGE are the same inside packet.
 		var e types.LeapMessageEvent
 		if err = unmarshalPacket(x, &e); err != nil {
 			return
@@ -322,6 +358,30 @@ func (c *Client) dispatchEvent(r json.RawMessage) {
 			v.dispatch(e)
 		}
 		c.channelQueueLock.RUnlock()
+	case "PIPE_ROOM_AVAILABLE":
+		var e types.LeapPipeRoomAvailableEvent
+		if err = unmarshalPacket(x, &e); err != nil {
+			return
+		}
+		c.channelQueueLock.RLock()
+		for _, v := range c.channelQueue {
+			v.dispatch(e)
+		}
+		c.channelQueueLock.RUnlock()
+	case "PIPE_ROOM_UPDATE":
+		var e types.LeapPipeRoomUpdateEvent
+		if err = unmarshalPacket(x, &e); err != nil {
+			return
+		}
+		c.channelQueueLock.RLock()
+		for _, v := range c.channelQueue {
+			v.dispatch(e)
+		}
+		c.channelQueueLock.RUnlock()
+	default:
+		c.logger.Warn("unknown dispatch event", map[string]any{
+			"event_code": x.DispatchEventCode,
+		})
 	}
 }
 
@@ -374,6 +434,7 @@ func (c *Client) readLoop(ws webSocketImpl, d time.Duration) {
 			}
 
 			// Loop around again.
+			c.logger.Error("unknown error reading payload - looping around", err, nil)
 			continue
 		}
 
@@ -381,15 +442,28 @@ func (c *Client) readLoop(ws webSocketImpl, d time.Duration) {
 		switch p.Op {
 		case 0:
 			// Dispatch the event.
+			c.logger.Debug("opcode 0 received", map[string]any{
+				"data": p.Data,
+			})
 			c.dispatchEvent(p.Data)
 		case 3:
 			// Reply with a heartbeat.
+			c.logger.Debug("heartbeat received", nil)
 			go func() {
 				_ = c.writePayload(ws, &payload{
 					Op:   3,
 					Data: p.Data,
 				})
+				c.logger.Debug("heartbeat reply - sent", nil)
 			}()
+		case 4:
+			c.logger.Debug("heartbeat ack received", nil)
+		default:
+			// Unknown op code.
+			c.logger.Warn("unknown packet received", map[string]any{
+				"op":   p.Op,
+				"data": p.Data,
+			})
 		}
 	}
 }
@@ -399,12 +473,19 @@ func (c *Client) heartbeatLoop(ws webSocketImpl, interval int) {
 	t := time.NewTicker(time.Duration(interval) * time.Millisecond)
 	go func() {
 		for {
+			c.logger.Debug("heartbeat ticker - loop", nil)
 			go func() {
 				err := c.writePayload(ws, &payload{
 					Op:   3,
 					Data: rawify(map[string]string{"tag": ""}),
 				})
-				if err != nil {
+				if err == nil {
+					// Log that it was sent.
+					c.logger.Debug("heartbeat ticker - sent", nil)
+				} else {
+					// Log that it failed.
+					c.logger.Error("heartbeat ticker - failed", err, nil)
+
 					// Stop this heart beating. The read loop will take over error handling.
 					t.Stop()
 				}
@@ -509,11 +590,15 @@ func (c *Client) AddStateUpdateListener(handler func(types.LeapStateInfo)) {
 	c.state.addListener(handler)
 }
 
-// NewClient is used to create a new client.
-func NewClient(projectId, token string) *Client {
+// NewClient is used to create a new client. If the specified logger is nil, the library will not log any data.
+func NewClient(projectId, token string, l Logger) *Client {
+	if l == nil {
+		l = NopLogger{}
+	}
 	return &Client{
 		projectId: projectId,
 		token:     token,
+		logger:    l,
 		state: rwLocker[types.LeapStateInfo]{unsafeValue: types.LeapStateInfo{
 			ConnectionState: types.LeapConnectionStateIdle,
 		}},
