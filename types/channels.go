@@ -14,25 +14,31 @@ const (
 	ChannelTypeUnprotected ChannelType = "unprotected"
 )
 
-// Channel is used to define the main structure of a channel.
-type Channel struct {
+// ChannelPartial is used to define a partial channel. Whilst currently not used by the hop-go library,
+// this may be desirable for things importing the types package such as a leap client.
+type ChannelPartial struct {
 	// ID is the ID of the channel.
 	ID string `json:"id"`
 
-	// Project is the project it is associated with.
-	Project *Project `json:"project"`
-
 	// State is any state metadata associated with the channel.
 	State map[string]any `json:"state"`
+
+	// Type is the type of this channel.
+	Type ChannelType `json:"type"`
+}
+
+// Channel is used to define the main structure of a channel.
+type Channel struct {
+	ChannelPartial `json:",inline"`
+
+	// Project is the project it is associated with.
+	Project *Project `json:"project"`
 
 	// Capabilities is the capabilities of this channel.
 	Capabilities int `json:"capabilities"`
 
 	// CreatedAt is when this channel was created.
 	CreatedAt Timestamp `json:"created_at"`
-
-	// Type is the type of this channel.
-	Type ChannelType `json:"type"`
 }
 
 // Stats is used to define the stats for a channel.
