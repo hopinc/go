@@ -89,17 +89,17 @@ type Client struct {
 	writeLock sync.Mutex
 
 	state     rwLocker[StateInfo]
-	initEvent rwLocker[*InitEvent]
+	initEvent rwLocker[*types.LeapInitEvent]
 
 	channelWaiter eventWaiter[*types.ChannelPartial]
 
-	messageQueue     []*queueDispatcher[MessageEvent]
+	messageQueue     []*queueDispatcher[types.LeapMessageEvent]
 	messageQueueLock sync.RWMutex
 }
 
 // MessageEventChannel is used to get a channel that will receive all message events.
-func (w *Client) MessageEventChannel() <-chan MessageEvent {
-	ch := make(chan MessageEvent)
+func (w *Client) MessageEventChannel() <-chan types.LeapMessageEvent {
+	ch := make(chan types.LeapMessageEvent)
 	w.messageQueueLock.Lock()
 	w.messageQueue = append(w.messageQueue, newQueueDispatcher(ch))
 	w.messageQueueLock.Unlock()
@@ -187,7 +187,7 @@ func (w *Client) handleWsError(code int, text string, err error) {
 
 	// Turn a code 4001 into a AuthorizationError.
 	if code == 4001 {
-		err = AuthorizationError{data: text}
+		err = types.LeapAuthorizationError{Data: text}
 	}
 
 	// Set the state to error.
@@ -230,19 +230,30 @@ func (w *Client) handleWsError(code int, text string, err error) {
 	}
 }
 
+// This is used to define an event for channel messages.
+type dispatchEvent struct {
+	types.LeapDispatchEventDetails `json:",inline"`
+
+	// DispatchEventCode is the code of the dispatch event.
+	DispatchEventCode string `json:"e"`
+
+	// Data is the data of the dispatch event.
+	Data json.RawMessage `json:"d"`
+}
+
 // Unmarshals the data into the given interface.
 func unmarshalPacket(e dispatchEvent, x any) error {
 	err := json.Unmarshal(e.Data, x)
 	if err != nil {
 		return err
 	}
-	reflect.Indirect(reflect.ValueOf(x)).FieldByName("DispatchEventDetails").
-		Set(reflect.ValueOf(e.DispatchEventDetails))
+	reflect.Indirect(reflect.ValueOf(x)).FieldByName("LeapDispatchEventDetails").
+		Set(reflect.ValueOf(e.LeapDispatchEventDetails))
 	return nil
 }
 
 // InitEvent is used to return the init event. Can be nil if it is not sent.
-func (w *Client) InitEvent() *InitEvent {
+func (w *Client) InitEvent() *types.LeapInitEvent {
 	return w.initEvent.get()
 }
 
@@ -257,27 +268,27 @@ func (w *Client) dispatchEvent(r json.RawMessage) {
 	// TODO: make a nicer channel events system for if a channel randomly becomes available/unavailable.
 	switch x.DispatchEventCode {
 	case "INIT":
-		var e InitEvent
+		var e types.LeapInitEvent
 		if err = unmarshalPacket(x, &e); err != nil {
 			return
 		}
 		w.initEvent.set(&e)
 		w.state.set(StateInfo{ConnectionState: types.LeapConnectionStateConnected})
 	case "AVAILABLE":
-		var e AvailableEvent
+		var e types.LeapAvailableEvent
 		if err = unmarshalPacket(x, &e); err != nil {
 			return
 		}
 		w.channelWaiter.signal(e.Channel.ID, e.Channel, nil)
 	case "UNAVAILABLE":
-		var e UnavailableEvent
+		var e types.LeapUnavailableEvent
 		if err = unmarshalPacket(x, &e); err != nil {
 			return
 		}
 		// TODO: Make this a better error.
 		w.channelWaiter.signal(e.ChannelID, nil, fmt.Errorf("%v", e))
 	case "MESSAGE", "DIRECT_MESSAGE": // MESSAGE and DIRECT_MESSAGE are the same packet.
-		var e MessageEvent
+		var e types.LeapMessageEvent
 		if err = unmarshalPacket(x, &e); err != nil {
 			return
 		}
@@ -287,7 +298,7 @@ func (w *Client) dispatchEvent(r json.RawMessage) {
 		}
 		w.messageQueueLock.RUnlock()
 	case "STATE_UPDATE":
-		var e ChannelStateUpdateEvent
+		var e types.LeapChannelStateUpdateEvent
 		if err = unmarshalPacket(x, &e); err != nil {
 			return
 		}
@@ -306,7 +317,7 @@ func (w *Client) Subscribe(channelId string) (*types.ChannelPartial, error) {
 	err := w.writePayload(ws, &payload{
 		Op: 0,
 		Data: rawify(dispatchEvent{
-			DispatchEventDetails: DispatchEventDetails{
+			LeapDispatchEventDetails: types.LeapDispatchEventDetails{
 				ChannelID: channelId,
 				Unicast:   false,
 			},
@@ -418,8 +429,8 @@ func (w *Client) connect(reconnect bool) error {
 	if p.Op != 1 {
 		_ = w.ws.Close()
 		w.ws = nil
-		w.state.set(StateInfo{ConnectionState: types.LeapConnectionStateErrored, Err: ExpectedHello, WillReconnect: reconnect})
-		return ExpectedHello
+		w.state.set(StateInfo{ConnectionState: types.LeapConnectionStateErrored, Err: types.ExpectedHello, WillReconnect: reconnect})
+		return types.ExpectedHello
 	}
 	type hello struct {
 		HeartbeatInterval int `json:"heartbeat_interval"`
@@ -442,7 +453,7 @@ func (w *Client) connect(reconnect bool) error {
 		}),
 	})
 	if err != nil {
-		w.state.set(StateInfo{ConnectionState: types.LeapConnectionStateErrored, Err: ExpectedHello, WillReconnect: reconnect})
+		w.state.set(StateInfo{ConnectionState: types.LeapConnectionStateErrored, Err: err, WillReconnect: reconnect})
 		return err
 	}
 
