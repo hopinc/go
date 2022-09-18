@@ -15,3 +15,7 @@ test:
 .PHONY: update-types
 update-types:
 	TYPES_UPDATE=1 go test -cover ./...
+
+.PHONY: examples
+examples: examples/*
+	FILES="$^" go run compile_examples.go
