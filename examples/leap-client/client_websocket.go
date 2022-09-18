@@ -31,7 +31,7 @@ func (w *wsWrapper) readLoop() {
 			}
 			return
 		}
-		m, b, err := w.ws.ReadMessage()
+		_, _, err = w.ws.ReadMessage()
 		if err != nil {
 			w.onCloseMu.Lock()
 			x := w.onClose
@@ -40,12 +40,6 @@ func (w *wsWrapper) readLoop() {
 				x()
 			}
 			return
-		}
-		if m != websocket.BinaryMessage {
-			continue
-		}
-		if len(b) != 0 && b[0] == 0 {
-			_ = w.ws.WriteMessage(websocket.BinaryMessage, []byte{0})
 		}
 	}
 }
