@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Leap Client Demo</title>
+    </head>
+
+    <body>
+        <label for="socket-data">Socket Data:</label>
+        <textarea id="socket-data" readonly style="max-height: 500px"></textarea>
+
+        <form id="channel-form">
+            <label for="channel-id">Channel ID:</label>
+            <input type="text" id="channel-id" placeholder="Channel ID" />
+            <input type="submit" value="Join" />
+        </form>
+        <p id="join-result"></p>
+
+        <script src="/client.js"></script>
+    </body>
+</html>
