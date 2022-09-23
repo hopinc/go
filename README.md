@@ -1,6 +1,6 @@
 # hop-go
 
-[View Hop Documentation](https://docs.hop.io/sdks/server/go) | [View Source Documentation](https://pkg.go.dev/github.com/hopinc/hop-go)
+[View Hop Documentation](https://docs.hop.io/sdks/server/go/api_client) | [View Source Documentation](https://pkg.go.dev/github.com/hopinc/hop-go)
 
 Hop's Go library. Requires Go 1.18+.
 
