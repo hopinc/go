@@ -1,3 +1,3 @@
-# leap-client-go
+# Leap Client
 
-Very work in progress. Very unusable right now.
+The Leap client for the Go SDK. Documentation [can be found here](https://docs.hop.io/sdks/server/go/leap_client).
