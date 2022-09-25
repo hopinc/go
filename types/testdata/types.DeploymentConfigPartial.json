@@ -15,7 +15,6 @@
 			"branch": "vwx"
 		}
 	},
-	"name": "pqr",
 	"resources": {
 		"ram": "ghi",
 		"vcpu": 11,
@@ -28,10 +27,5 @@
 	},
 	"restart_policy": "mno",
 	"type": "def",
-	"version": "ghi",
-	"volume": {
-		"fs": "stu",
-		"size": "vwx",
-		"mount_path": "abc"
-	}
+	"version": "ghi"
 }

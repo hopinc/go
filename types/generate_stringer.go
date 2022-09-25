@@ -13,7 +13,9 @@ import (
 // Defines the types that the string function is generated for.
 var types = []string{
 	"LeapUnavailableEvent", "LeapAvailableEvent", "LeapChannelStateUpdateEvent",
-	"LeapPipeRoomAvailableEvent", "LeapPipeRoomUpdateEvent",
+	"LeapPipeRoomAvailableEvent", "LeapPipeRoomUpdateEvent", "IgniteDeploymentPatchOpts",
+	"Container", "ContainerMetadata", "DeploymentConfig", "DeploymentConfigPartial",
+	"VolumeDefinition", "VolumeFormat",
 }
 
 const stringTemplate = `// String returns the string representation of this value. This function is auto-generated.

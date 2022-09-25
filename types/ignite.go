@@ -2,6 +2,29 @@ package types
 
 import "encoding/json"
 
+// VolumeFormat is used to define the format of a volume.
+type VolumeFormat string
+
+const (
+	// VolumeFormatExt4 defines a volume format of ext4.
+	VolumeFormatExt4 VolumeFormat = "ext4"
+
+	// VolumeFormatXFS defines a volume format of xfs.
+	VolumeFormatXFS VolumeFormat = "xfs"
+)
+
+// VolumeDefinition is used to define a volume definition.
+type VolumeDefinition struct {
+	// FS is the filesystem of the volume.
+	FS VolumeFormat `json:"fs"`
+
+	// Size is the size of the volume.
+	Size Size `json:"size"`
+
+	// MountPath is the mount path of the volume.
+	MountPath string `json:"mount_path"`
+}
+
 // GatewayType is the type of the gateway.
 type GatewayType string
 
@@ -100,6 +123,9 @@ const (
 
 	// RuntimeTypePersistent will restart if they exit. They can also be started and stopped programmatically.
 	RuntimeTypePersistent RuntimeType = "persistent"
+
+	// RuntimeTypeStateful is for deployments/containers can only run one container at a time, and will have a persistent volume attached.
+	RuntimeTypeStateful RuntimeType = "stateful"
 )
 
 // DockerAuth is used to define the authentication information for a Docker registry.
@@ -163,11 +189,22 @@ func (r Resources) MarshalJSON() ([]byte, error) {
 	})
 }
 
-// DeploymentConfig is used to define the configuration for a deployment.
-type DeploymentConfig struct {
-	// Name is the name of the deployment.
-	Name string `json:"name"`
+// RestartPolicy is used to define the restart policy of a deployment.
+type RestartPolicy string
 
+const (
+	// RestartPolicyNever is used to define a deployment that never restarts.
+	RestartPolicyNever RestartPolicy = "never"
+
+	// RestartPolicyAlways is used to define a deployment that always restarts.
+	RestartPolicyAlways RestartPolicy = "always"
+
+	// RestartPolicyOnFailure is used to define a deployment that restarts on failure.
+	RestartPolicyOnFailure RestartPolicy = "on-failure"
+)
+
+// DeploymentConfigPartial is the partial configuration of a deployment.
+type DeploymentConfigPartial struct {
 	// ContainerStrategy is the strategy used to scale a container.
 	ContainerStrategy ContainerStrategy `json:"container_strategy"`
 
@@ -185,25 +222,54 @@ type DeploymentConfig struct {
 
 	// Resources is the resources for this deployment.
 	Resources Resources `json:"resources"`
+
+	// RestartPolicy is the restart policy for this deployment.
+	RestartPolicy RestartPolicy `json:"restart_policy"`
+}
+
+func (x DeploymentConfigPartial) makeMap() map[string]any {
+	if x.Version == "" {
+		x.Version = "2022-05-17"
+	}
+	if x.Env == nil {
+		x.Env = map[string]string{}
+	}
+	return map[string]any{
+		"container_strategy": x.ContainerStrategy,
+		"type":               x.Type,
+		"version":            x.Version,
+		"image":              x.Image,
+		"env":                x.Env,
+		"resources":          x.Resources,
+		"restart_policy":     x.RestartPolicy,
+	}
 }
 
 // MarshalJSON is used to marshal the deployment config into JSON.
-func (c DeploymentConfig) MarshalJSON() ([]byte, error) {
-	if c.Version == "" {
-		c.Version = "2022-05-17"
+func (x DeploymentConfigPartial) MarshalJSON() ([]byte, error) {
+	return json.Marshal(x.makeMap())
+}
+
+// DeploymentConfig is used to define the configuration for a deployment.
+type DeploymentConfig struct {
+	// DeploymentConfigPartial is the partial configuration of a deployment that this is based on.
+	DeploymentConfigPartial `json:",inline"`
+
+	// Name is the name of the deployment.
+	Name string `json:"name"`
+
+	// Volume is the volume that this deployment is using. This can only be used when Type is RuntimeTypeStateful.
+	Volume *VolumeDefinition `json:"volume,omitempty"`
+}
+
+// MarshalJSON is used to marshal the deployment config into JSON.
+func (x DeploymentConfig) MarshalJSON() ([]byte, error) {
+	m := x.makeMap()
+	m["name"] = x.Name
+	if x.Volume != nil {
+		m["volume"] = x.Volume
 	}
-	if c.Env == nil {
-		c.Env = map[string]string{}
-	}
-	return json.Marshal(map[string]any{
-		"name":               c.Name,
-		"container_strategy": c.ContainerStrategy,
-		"type":               c.Type,
-		"version":            c.Version,
-		"image":              c.Image,
-		"env":                c.Env,
-		"resources":          c.Resources,
-	})
+	return json.Marshal(m)
 }
 
 // Deployment is used to define a deployment in Ignite.
@@ -221,7 +287,7 @@ type Deployment struct {
 	CreatedAt Timestamp `json:"created_at"`
 
 	// Config is the configuration for this deployment.
-	Config *DeploymentConfig `json:"config"`
+	Config DeploymentConfigPartial `json:"config"`
 }
 
 // Region is used to define a Hop datacenter region.
@@ -261,6 +327,12 @@ const (
 	ContainerStateExited ContainerState = "exited"
 )
 
+// ContainerMetadata is used to define the metadata for a container.
+type ContainerMetadata struct {
+	// LastExitCode is used to define the last exit code of the container. It is nil if the container has never exited.
+	LastExitCode *int `json:"last_exit_code"`
+}
+
 // Container is used to define a container in Ignite.
 type Container struct {
 	// ID is the ID of the container.
@@ -286,6 +358,12 @@ type Container struct {
 
 	// State is the state of this container.
 	State ContainerState `json:"state"`
+
+	// Metadata is the metadata for this container.
+	Metadata ContainerMetadata `json:"metadata"`
+
+	// Volume is the volume definition for this container. This can be nil.
+	Volume *VolumeDefinition `json:"volume"`
 }
 
 // GatewayCreationOptions is used to define the options for creating a gateway.
@@ -313,8 +391,8 @@ const (
 	// LoggingLevelInfo is used to define the level of logging as informative. Stdout becomes info.
 	LoggingLevelInfo LoggingLevel = "info"
 
-	// LoggingLevelStderr is used to define the level of logging as an error.
-	LoggingLevelStderr LoggingLevel = "stderr"
+	// LoggingLevelError is used to define the level of logging as an error.
+	LoggingLevelError LoggingLevel = "error"
 )
 
 // ContainerLog is used to define a container log message.
@@ -330,4 +408,25 @@ type ContainerLog struct {
 
 	// Level is the logging level.
 	Level LoggingLevel `json:"level"`
+}
+
+// IgniteDeploymentPatchOpts is used to define the options for patching a deployment.
+type IgniteDeploymentPatchOpts struct {
+	// Name is the name of the deployment. If this is not blank, it will be updated.
+	Name string `json:"name,omitempty"`
+
+	// Image is the image to use for the deployment. If this is not nil, it will be updated.
+	Image *Image `json:"image,omitempty"`
+
+	// RestartPolicy is the restart policy for the deployment. If this is not blank, it will be updated.
+	RestartPolicy RestartPolicy `json:"restart_policy,omitempty"`
+
+	// ContainerStrategy is the container strategy for the deployment. If this is not blank, it will be updated.
+	ContainerStrategy ContainerStrategy `json:"container_strategy,omitempty"`
+
+	// Type is the runtime type for the deployment. If this is not blank, it will be updated.
+	Type RuntimeType `json:"type,omitempty"`
+
+	// Resources is the resources for the deployment. If this is not nil, it will be updated.
+	Resources *Resources `json:"resources,omitempty"`
 }
