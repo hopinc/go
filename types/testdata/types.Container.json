@@ -8,5 +8,13 @@
 	"type": "mno",
 	"internal_ip": "pqr",
 	"deployment_id": "stu",
-	"state": "vwx"
+	"state": "vwx",
+	"metadata": {
+		"last_exit_code": 8
+	},
+	"volume": {
+		"fs": "abc",
+		"size": "def",
+		"mount_path": "ghi"
+	}
 }

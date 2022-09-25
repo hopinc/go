@@ -1,0 +1,28 @@
+{
+	"name": "abc",
+	"image": {
+		"name": "def",
+		"auth": {
+			"username": "ghi",
+			"password": "jkl"
+		},
+		"github_repo": {
+			"repo_id": 4,
+			"full_name": "mno",
+			"branch": "pqr"
+		}
+	},
+	"restart_policy": "stu",
+	"container_strategy": "vwx",
+	"type": "abc",
+	"resources": {
+		"ram": "def",
+		"vcpu": 10,
+		"vgpu": [
+			{
+				"type": "ghi",
+				"count": 13
+			}
+		]
+	}
+}

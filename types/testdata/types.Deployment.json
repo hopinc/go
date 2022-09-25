@@ -4,34 +4,34 @@
 	"container_count": 2,
 	"created_at": "ghi",
 	"config": {
-		"container_strategy": "mno",
+		"container_strategy": "jkl",
 		"env": {
-			"mno": "pqr"
+			"jkl": "mno"
 		},
 		"image": {
-			"name": "vwx",
+			"name": "stu",
 			"auth": {
-				"username": "abc",
-				"password": "def"
+				"username": "vwx",
+				"password": "abc"
 			},
 			"github_repo": {
-				"repo_id": 11,
-				"full_name": "ghi",
-				"branch": "jkl"
+				"repo_id": 10,
+				"full_name": "def",
+				"branch": "ghi"
 			}
 		},
-		"name": "jkl",
 		"resources": {
-			"ram": "stu",
-			"vcpu": 16,
+			"ram": "pqr",
+			"vcpu": 15,
 			"vgpu": [
 				{
-					"type": "vwx",
-					"count": 19
+					"type": "stu",
+					"count": 18
 				}
 			]
 		},
-		"type": "pqr",
-		"version": "stu"
+		"restart_policy": "vwx",
+		"type": "mno",
+		"version": "pqr"
 	}
 }

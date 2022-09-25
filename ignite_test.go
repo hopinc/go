@@ -41,8 +41,10 @@ func TestClient_Ignite_Gateways_Get(t *testing.T) {
 
 func TestClient_Ignite_Deployments_Create(t *testing.T) {
 	deploymentConfig := &types.DeploymentConfig{
-		Resources: types.Resources{
-			RAM: "1gb",
+		DeploymentConfigPartial: types.DeploymentConfigPartial{
+			Resources: types.Resources{
+				RAM: "1gb",
+			},
 		},
 	}
 	c := &mockClientDoer{
@@ -94,6 +96,24 @@ func TestClient_Ignite_Deployments_GetByName(t *testing.T) {
 		&ClientCategoryIgniteDeployments{c: c},
 		"GetByName",
 		[]any{"test test", WithProjectID("test123")},
+		&types.Deployment{ID: "hello"})
+}
+
+func TestClient_Ignite_Deployments_Patch(t *testing.T) {
+	c := &mockClientDoer{
+		t:              t,
+		wantMethod:     "PATCH",
+		wantPath:       "/ignite/deployments/test%20test",
+		wantResultKey:  "deployment",
+		wantIgnore404:  false,
+		wantClientOpts: []ClientOption{WithProjectID("test123")},
+		wantBody:       types.IgniteDeploymentPatchOpts{Name: "new name"},
+		tokenType:      "pat",
+	}
+	testApiSingleton(c,
+		&ClientCategoryIgniteDeployments{c: c},
+		"Patch",
+		[]any{"test test", types.IgniteDeploymentPatchOpts{Name: "new name"}, WithProjectID("test123")},
 		&types.Deployment{ID: "hello"})
 }
 
