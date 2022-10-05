@@ -5,7 +5,7 @@ import (
 	"golang.org/x/sync/errgroup"
 	"net/url"
 
-	"github.com/hopinc/hop-go/types"
+	"go.hop.io/sdk/types"
 )
 
 // Create is used to create a channel. The channelType argument should be the type of channel that you want to create, state

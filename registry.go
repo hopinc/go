@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/url"
 
-	"github.com/hopinc/hop-go/types"
+	"go.hop.io/sdk/types"
 )
 
 // GetAll is used to get all images in a project.

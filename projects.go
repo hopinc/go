@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/url"
 
-	"github.com/hopinc/hop-go/types"
+	"go.hop.io/sdk/types"
 )
 
 // Delete is used to delete a token. The project ID MUST be specified in client options (either at a client or function level).

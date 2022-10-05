@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
-	"github.com/hopinc/hop-go/types"
+	"go.hop.io/sdk/types"
 )
 
 type webSocketImpl interface {

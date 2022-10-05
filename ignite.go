@@ -3,7 +3,7 @@ package hop
 import (
 	"context"
 	"errors"
-	"github.com/hopinc/hop-go/types"
+	"go.hop.io/sdk/types"
 	"net/url"
 )
 

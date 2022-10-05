@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/url"
 
-	"github.com/hopinc/hop-go/types"
+	"go.hop.io/sdk/types"
 )
 
 // Get is used to get the current user.

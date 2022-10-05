@@ -28,3 +28,38 @@ func (x LeapPipeRoomAvailableEvent) String() string {
 func (x LeapPipeRoomUpdateEvent) String() string {
 	return stringifyValue(x)
 }
+
+// String returns the string representation of this value. This function is auto-generated.
+func (x IgniteDeploymentPatchOpts) String() string {
+	return stringifyValue(x)
+}
+
+// String returns the string representation of this value. This function is auto-generated.
+func (x Container) String() string {
+	return stringifyValue(x)
+}
+
+// String returns the string representation of this value. This function is auto-generated.
+func (x ContainerMetadata) String() string {
+	return stringifyValue(x)
+}
+
+// String returns the string representation of this value. This function is auto-generated.
+func (x DeploymentConfig) String() string {
+	return stringifyValue(x)
+}
+
+// String returns the string representation of this value. This function is auto-generated.
+func (x DeploymentConfigPartial) String() string {
+	return stringifyValue(x)
+}
+
+// String returns the string representation of this value. This function is auto-generated.
+func (x VolumeDefinition) String() string {
+	return stringifyValue(x)
+}
+
+// String returns the string representation of this value. This function is auto-generated.
+func (x VolumeFormat) String() string {
+	return stringifyValue(x)
+}

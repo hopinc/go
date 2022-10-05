@@ -6,8 +6,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/hopinc/hop-go/leap"
-	"github.com/hopinc/hop-go/types"
+	"go.hop.io/sdk/leap"
+	"go.hop.io/sdk/types"
 )
 
 func subscribeChannel(w http.ResponseWriter, channel string, c *leap.Client) {

@@ -2,9 +2,10 @@ package main
 
 import (
 	_ "embed"
-	"github.com/hopinc/hop-go/leap"
 	"net/http"
 	"sync/atomic"
+
+	"go.hop.io/sdk/leap"
 )
 
 // A very crude http router implementation for the demo. It is just meant to be real simple.

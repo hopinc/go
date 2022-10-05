@@ -14,7 +14,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/hopinc/hop-go/types"
+	"go.hop.io/sdk/types"
 )
 
 var userAgent = "hop-go/" + Version + " (go/" + runtime.Version() + ")"

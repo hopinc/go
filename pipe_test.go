@@ -3,7 +3,7 @@ package hop
 import (
 	"testing"
 
-	"github.com/hopinc/hop-go/types"
+	"go.hop.io/sdk/types"
 )
 
 func TestClient_Pipe_Rooms_GetAll(t *testing.T) {

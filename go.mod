@@ -1,4 +1,4 @@
-module github.com/hopinc/hop-go
+module go.hop.io/sdk
 
 go 1.18
 
