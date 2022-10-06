@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"testing"
 
-	"go.hop.io/sdk/types"
 	"github.com/stretchr/testify/assert"
+	"go.hop.io/sdk/types"
 )
 
 type customError struct{}

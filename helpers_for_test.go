@@ -64,7 +64,9 @@ func (c *mockClientDoer) do(ctx context.Context, a clientArgs, opts []ClientOpti
 		assert.Nil(c.t, a.result)
 	} else {
 		// Ensure that the result is a pointer to the type of the return result.
-		if assert.Equal(c.t, reflect.PtrTo(reflect.TypeOf(c.returnsResult)).String(), reflect.TypeOf(a.result).String()) {
+		pointerIsSame := assert.Equal(c.t, reflect.PtrTo(reflect.TypeOf(c.returnsResult)).String(), reflect.TypeOf(a.result).String())
+
+		if pointerIsSame {
 			// Set the value of the result pointer to the return result.
 			reflect.ValueOf(a.result).Elem().Set(reflect.ValueOf(c.returnsResult))
 		}

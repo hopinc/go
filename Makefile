@@ -12,6 +12,10 @@ cov-html:
 test:
 	go test -race -cover ./...
 
+.PHONY: lint
+lint:
+	golangci-lint run ./...
+
 .PHONY: update-types
 update-types:
 	TYPES_UPDATE=1 go test -cover ./...

@@ -22,7 +22,8 @@ func (c ClientCategoryProjectsTokens) Delete(ctx context.Context, id string, opt
 	}, opts)
 }
 
-// GetAll is used to get all tokens associated with a project. The project ID MUST be specified in client options (either at a client or function level).
+// GetAll is used to get all tokens associated with a project. The project ID MUST be specified in client options
+// (either at a client or function level).
 func (c ClientCategoryProjectsTokens) GetAll(ctx context.Context, opts ...ClientOption) ([]*types.ProjectToken, error) {
 	if c.c.getTokenType() == "ptk" {
 		return nil, types.InvalidToken("project tokens cannot be retrieved with a project token")
@@ -45,7 +46,9 @@ func (c ClientCategoryProjectsTokens) GetAll(ctx context.Context, opts ...Client
 }
 
 // Create is used to create a token. The project ID MUST be specified in client options (either at a client or function level).
-func (c ClientCategoryProjectsTokens) Create(ctx context.Context, permissions []types.ProjectPermission, opts ...ClientOption) (*types.ProjectToken, error) {
+func (c ClientCategoryProjectsTokens) Create(
+	ctx context.Context, permissions []types.ProjectPermission, opts ...ClientOption,
+) (*types.ProjectToken, error) {
 	if c.c.getTokenType() == "ptk" {
 		return nil, types.InvalidToken("project tokens cannot be created with a project token")
 	}
@@ -70,15 +73,14 @@ func (c ClientCategoryProjectsTokens) Create(ctx context.Context, permissions []
 	return &token, nil
 }
 
-// GetAllMembers is used to get all members associated with a project. The project ID MUST be specified in client options (either at a client or function level).
+// GetAllMembers is used to get all members associated with a project. The project ID MUST be specified in client
+// options (either at a client or function level).
 func (c ClientCategoryProjects) GetAllMembers(ctx context.Context, opts ...ClientOption) ([]*types.ProjectMember, error) {
 	projectId := c.c.getProjectId(opts)
 	if c.c.getTokenType() == "ptk" {
 		projectId = "@this"
-	} else {
-		if projectId == "" {
-			return nil, types.InvalidToken("project ID must be specified when using bearer authentication to get members")
-		}
+	} else if projectId == "" {
+		return nil, types.InvalidToken("project ID must be specified when using bearer authentication to get members")
 	}
 
 	var members []*types.ProjectMember

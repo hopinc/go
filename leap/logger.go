@@ -57,8 +57,7 @@ func formatMetadata(m map[string]any) string {
 	s := ""
 	for _, k := range keys {
 		v := m[k]
-		switch x := v.(type) {
-		case json.RawMessage:
+		if x, ok := v.(json.RawMessage); ok {
 			v = string(x)
 		}
 		s += " " + k + "=" + fmt.Sprint(v)

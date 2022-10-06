@@ -291,7 +291,7 @@ func (c *Client) InitEvent() *types.LeapInitEvent {
 }
 
 // Used to handle dispatching events.
-func (c *Client) dispatchEvent(r json.RawMessage) {
+func (c *Client) dispatchEvent(r json.RawMessage) { //nolint:gocognit
 	var x dispatchEvent
 	err := json.Unmarshal(r, &x)
 	if err != nil {

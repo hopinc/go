@@ -3,8 +3,8 @@ package hop
 import (
 	"testing"
 
-	"go.hop.io/sdk/types"
 	"github.com/stretchr/testify/assert"
+	"go.hop.io/sdk/types"
 )
 
 func TestClient_Channels_Create(t *testing.T) {

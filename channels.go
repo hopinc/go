@@ -2,10 +2,10 @@ package hop
 
 import (
 	"context"
-	"golang.org/x/sync/errgroup"
 	"net/url"
 
 	"go.hop.io/sdk/types"
+	"golang.org/x/sync/errgroup"
 )
 
 // Create is used to create a channel. The channelType argument should be the type of channel that you want to create, state
@@ -218,7 +218,9 @@ func (t ClientCategoryChannelsTokens) IsOnline(ctx context.Context, id string, o
 }
 
 // PublishDirectMessage is used to publish an event to the channel token.
-func (t ClientCategoryChannelsTokens) PublishDirectMessage(ctx context.Context, id, eventName string, data any, opts ...ClientOption) error {
+func (t ClientCategoryChannelsTokens) PublishDirectMessage(
+	ctx context.Context, id, eventName string, data any, opts ...ClientOption,
+) error {
 	return t.c.do(ctx, clientArgs{
 		method:    "POST",
 		path:      "/channels/tokens/" + url.PathEscape(id) + "/messages",

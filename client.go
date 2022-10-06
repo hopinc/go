@@ -103,11 +103,7 @@ func (c *Client) SetAPIBase(apiBase string) *Client {
 	if !strings.HasPrefix(apiBase, "http://") && !strings.HasPrefix(apiBase, "https://") {
 		apiBase = "https://" + apiBase
 	}
-	if strings.HasSuffix(apiBase, "/") {
-		// Remove the trailing slash.
-		apiBase = apiBase[:len(apiBase)-1]
-	}
-	c.apiBase = apiBase
+	c.apiBase = strings.TrimSuffix(apiBase, "/")
 	return c
 }
 
@@ -141,7 +137,7 @@ func (c *Client) getProjectId(opts []ClientOption) string {
 }
 
 // Does the specified HTTP request.
-func (c *Client) do(ctx context.Context, a clientArgs, clientOpts []ClientOption) error {
+func (c *Client) do(ctx context.Context, a clientArgs, clientOpts []ClientOption) error { //nolint:funlen,gocognit,cyclop
 	// Handle getting the body bytes.
 	var r io.Reader
 	textPlain := false

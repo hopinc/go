@@ -118,7 +118,8 @@ const (
 type RuntimeType string
 
 const (
-	// RuntimeTypeEphemeral are sort of fire and forget. Containers won't restart if they exit but they can still be terminated programmatically.
+	// RuntimeTypeEphemeral are sort of fire and forget. Containers won't restart if they exit,
+	// but they can still be terminated programmatically.
 	RuntimeTypeEphemeral RuntimeType = "ephemeral"
 
 	// RuntimeTypePersistent will restart if they exit. They can also be started and stopped programmatically.

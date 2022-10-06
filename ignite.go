@@ -3,8 +3,9 @@ package hop
 import (
 	"context"
 	"errors"
-	"go.hop.io/sdk/types"
 	"net/url"
+
+	"go.hop.io/sdk/types"
 )
 
 // AddDomain is used to add a domain to the gateway. The parameter gatewayId is the ID of the gateway to add the domain to,
@@ -33,7 +34,9 @@ func (c ClientCategoryIgniteGateways) Get(ctx context.Context, id string, opts .
 }
 
 // Create is used to create a deployment.
-func (c ClientCategoryIgniteDeployments) Create(ctx context.Context, deployment *types.DeploymentConfig, opts ...ClientOption) (*types.Deployment, error) {
+func (c ClientCategoryIgniteDeployments) Create(
+	ctx context.Context, deployment *types.DeploymentConfig, opts ...ClientOption,
+) (*types.Deployment, error) {
 	if c.c.getProjectId(opts) == "" {
 		if c.c.getTokenType() != "ptk" {
 			return nil, types.InvalidToken("project ID must be specified when using bearer authentication to make deployments")
@@ -99,7 +102,9 @@ func (c ClientCategoryIgniteDeployments) GetByName(ctx context.Context, name str
 }
 
 // Patch is used to patch a deployment by its ID.
-func (c ClientCategoryIgniteDeployments) Patch(ctx context.Context, id string, patchOpts types.IgniteDeploymentPatchOpts, opts ...ClientOption) (*types.Deployment, error) {
+func (c ClientCategoryIgniteDeployments) Patch(
+	ctx context.Context, id string, patchOpts types.IgniteDeploymentPatchOpts, opts ...ClientOption,
+) (*types.Deployment, error) {
 	var d types.Deployment
 	err := c.c.do(ctx, clientArgs{
 		method:    "PATCH",
@@ -168,7 +173,9 @@ func (c ClientCategoryIgniteDeployments) GetAllGateways(ctx context.Context, id 
 }
 
 // CreateGateway is used to create a gateway attached to a deployment.
-func (c ClientCategoryIgniteDeployments) CreateGateway(ctx context.Context, opts types.GatewayCreationOptions, clientOpts ...ClientOption) (*types.Gateway, error) {
+func (c ClientCategoryIgniteDeployments) CreateGateway(
+	ctx context.Context, opts types.GatewayCreationOptions, clientOpts ...ClientOption,
+) (*types.Gateway, error) {
 	var gw types.Gateway
 	err := c.c.do(ctx, clientArgs{
 		method:    "POST",
@@ -210,7 +217,9 @@ func (c ClientCategoryIgniteContainers) GetLogs(id string, limit int, ascOrder b
 }
 
 // Used to update the container state.
-func (c ClientCategoryIgniteContainers) updateContainerState(ctx context.Context, id string, state types.ContainerState, opts []ClientOption) error {
+func (c ClientCategoryIgniteContainers) updateContainerState(
+	ctx context.Context, id string, state types.ContainerState, opts []ClientOption,
+) error {
 	return c.c.do(ctx, clientArgs{
 		method: "PUT",
 		path:   "/ignite/containers/" + url.PathEscape(id) + "/state",

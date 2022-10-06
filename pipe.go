@@ -26,7 +26,9 @@ func (c ClientCategoryPipeRooms) GetAll(ctx context.Context, opts ...ClientOptio
 }
 
 // Create is used to create a room.
-func (c ClientCategoryPipeRooms) Create(ctx context.Context, opts types.RoomCreationOptions, clientOpts ...ClientOption) (*types.Room, error) {
+func (c ClientCategoryPipeRooms) Create(
+	ctx context.Context, opts types.RoomCreationOptions, clientOpts ...ClientOption,
+) (*types.Room, error) {
 	var room types.Room
 	err := c.c.do(ctx, clientArgs{
 		method:    "POST",

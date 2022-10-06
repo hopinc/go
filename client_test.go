@@ -10,8 +10,8 @@ import (
 	"strings"
 	"testing"
 
-	"go.hop.io/sdk/types"
 	"github.com/stretchr/testify/assert"
+	"go.hop.io/sdk/types"
 )
 
 func TestValidateToken(t *testing.T) {
