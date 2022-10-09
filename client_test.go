@@ -222,7 +222,7 @@ func TestClient_SetAPIBase(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			c := &Client{}
 			c.SetAPIBase(tt.baseUrl)
-			assert.Equal(t, tt.expects, c.apiBase)
+			assert.Equal(t, tt.expects, c.getAPIBase([]ClientOption{}))
 		})
 	}
 }
@@ -421,13 +421,39 @@ func TestClient_do(t *testing.T) {
 			funcOpts:      []ClientOption{projectIdOption{projectId: "test2"}},
 		},
 		{
-			name: "custom base url",
+			name: "custom base url deprecated",
 			wantHeaders: http.Header{
 				"Accept":        {"application/json"},
 				"Authorization": {"testing"},
 				"User-Agent":    {userAgent},
 			},
 			baseUrl:       "https://example.com/v9999",
+			wantUrl:       "https://example.com/v9999/test",
+			returnsStatus: 204,
+			method:        "GET",
+			path:          "/test",
+		},
+		{
+			name: "custom base url client option",
+			wantHeaders: http.Header{
+				"Accept":        {"application/json"},
+				"Authorization": {"testing"},
+				"User-Agent":    {userAgent},
+			},
+			clientOpts:    []ClientOption{WithCustomAPIURL("https://example.com/v9999")},
+			wantUrl:       "https://example.com/v9999/test",
+			returnsStatus: 204,
+			method:        "GET",
+			path:          "/test",
+		},
+		{
+			name: "custom base url function option",
+			wantHeaders: http.Header{
+				"Accept":        {"application/json"},
+				"Authorization": {"testing"},
+				"User-Agent":    {userAgent},
+			},
+			funcOpts:      []ClientOption{WithCustomAPIURL("https://example.com/v9999")},
 			wantUrl:       "https://example.com/v9999/test",
 			returnsStatus: 204,
 			method:        "GET",

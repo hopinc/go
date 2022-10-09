@@ -43,7 +43,6 @@ type Client struct {
 	httpClient    *http.Client
 	authorization string
 	tokenType     string
-	apiBase       string
 	isTest        bool
 	opts          []ClientOption
 
@@ -99,11 +98,10 @@ func (c *Client) AddClientOptions(opts ...ClientOption) {
 
 // SetAPIBase is used to set the base API URL. This is probably something you do not need to use, however it is useful
 // in testing the SDK. The base URL contains the domain and ends with /v1.
+//
+// Deprecated: Use AddClientOptions with WithCustomAPIURL instead.
 func (c *Client) SetAPIBase(apiBase string) *Client {
-	if !strings.HasPrefix(apiBase, "http://") && !strings.HasPrefix(apiBase, "https://") {
-		apiBase = "https://" + apiBase
-	}
-	c.apiBase = strings.TrimSuffix(apiBase, "/")
+	c.AddClientOptions(WithCustomAPIURL(apiBase))
 	return c
 }
 
@@ -136,8 +134,19 @@ func (c *Client) getProjectId(opts []ClientOption) string {
 	return projectId
 }
 
+// Resolves the API base URL from the client options. Will be the default if this is not specified.
+func (c *Client) getAPIBase(opts []ClientOption) string {
+	apiBase := DefaultAPIBase
+	c.forOption(func(x any) {
+		if x, ok := x.(apiUrlOption); ok {
+			apiBase = x.apiBase
+		}
+	}, opts)
+	return apiBase
+}
+
 // Does the specified HTTP request.
-func (c *Client) do(ctx context.Context, a clientArgs, clientOpts []ClientOption) error { //nolint:funlen,gocognit,cyclop
+func (c *Client) do(ctx context.Context, a clientArgs, clientOpts []ClientOption) error { //nolint:funlen,gocognit
 	// Handle getting the body bytes.
 	var r io.Reader
 	textPlain := false
@@ -200,10 +209,7 @@ func (c *Client) do(ctx context.Context, a clientArgs, clientOpts []ClientOption
 			}
 		}
 	}
-	apiBase := c.apiBase
-	if apiBase == "" {
-		apiBase = DefaultAPIBase
-	}
+	apiBase := c.getAPIBase(clientOpts)
 	req, err := http.NewRequestWithContext(ctx, a.method, apiBase+a.path+suffix, r)
 	if err != nil {
 		return err
