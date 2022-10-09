@@ -251,3 +251,21 @@ func (c ClientCategoryIgniteContainers) Create(ctx context.Context, deploymentId
 	}
 	return a[0], nil
 }
+
+// Scale is used to scale the container count of a deployment.
+func (c ClientCategoryIgniteDeployments) Scale(
+	ctx context.Context, deploymentId string, containerCount uint, opts ...ClientOption,
+) ([]*types.Container, error) {
+	var a []*types.Container
+	err := c.c.do(ctx, clientArgs{
+		method:    "PATCH",
+		path:      "/ignite/deployments/" + url.PathEscape(deploymentId) + "/scale",
+		body:      map[string]uint{"scale": containerCount},
+		resultKey: "containers",
+		result:    &a,
+	}, opts)
+	if err != nil {
+		return nil, err
+	}
+	return a, nil
+}

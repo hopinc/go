@@ -205,6 +205,24 @@ func TestClient_Ignite_Deployments_CreateGateway(t *testing.T) {
 		&types.Gateway{ID: "hello"})
 }
 
+func TestClient_Ignite_Deployments_Scale(t *testing.T) {
+	c := &mockClientDoer{
+		t:              t,
+		wantMethod:     "PATCH",
+		wantPath:       "/ignite/deployments/test%20test/scale",
+		wantResultKey:  "containers",
+		wantIgnore404:  false,
+		wantClientOpts: []ClientOption{WithProjectID("test123")},
+		wantBody:       map[string]uint{"scale": 2},
+		tokenType:      "pat",
+	}
+	testApiSingleton(c,
+		&ClientCategoryIgniteDeployments{c: c},
+		"Scale",
+		[]any{"test test", uint(2), WithProjectID("test123")},
+		[]*types.Container{{ID: "hello"}})
+}
+
 func TestClient_Ignite_Containers_Delete(t *testing.T) {
 	c := &mockClientDoer{
 		t:              t,
