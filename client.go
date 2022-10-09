@@ -67,7 +67,7 @@ func (c *Client) forOption(f func(any), opts []ClientOption) {
 }
 
 // NewClient is used to make a new Hop client.
-func NewClient(authorization string) (*Client, error) {
+func NewClient(authorization string, opts ...ClientOption) (*Client, error) {
 	prefix, err := ValidateToken(authorization)
 	if err != nil {
 		return nil, err
@@ -79,6 +79,7 @@ func NewClient(authorization string) (*Client, error) {
 	var c Client
 	c = Client{
 		httpClient:    &http.Client{},
+		opts:          opts,
 		authorization: authorization,
 		tokenType:     prefix,
 		Pipe:          newPipe(&c),

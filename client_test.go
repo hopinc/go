@@ -178,14 +178,28 @@ func TestNewClient(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			c, err := NewClient(tt.token)
-			if tt.expectsErr == "" {
-				assert.NoError(t, err)
-				assert.Equal(t, tt.tokenType, c.getTokenType())
-				assert.True(t, noNilPointers(c))
-			} else {
-				assert.EqualError(t, err, tt.expectsErr)
-			}
+			t.Run("without client options", func(t *testing.T) {
+				c, err := NewClient(tt.token)
+				if tt.expectsErr == "" {
+					assert.NoError(t, err)
+					assert.Equal(t, tt.tokenType, c.getTokenType())
+					assert.True(t, noNilPointers(c))
+				} else {
+					assert.EqualError(t, err, tt.expectsErr)
+				}
+			})
+
+			t.Run("with client options", func(t *testing.T) {
+				c, err := NewClient(tt.token, WithProjectID("test"))
+				if tt.expectsErr == "" {
+					assert.NoError(t, err)
+					assert.Equal(t, tt.tokenType, c.getTokenType())
+					assert.True(t, noNilPointers(c))
+					assert.Equal(t, "test", c.getProjectId([]ClientOption{}))
+				} else {
+					assert.EqualError(t, err, tt.expectsErr)
+				}
+			})
 		})
 	}
 }
