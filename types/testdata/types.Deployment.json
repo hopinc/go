@@ -39,12 +39,18 @@
 		"created_at": "abc",
 		"deployment_id": "def",
 		"id": "ghi",
-		"status": "jkl"
+		"status": "jkl",
+		"build": {
+			"deployment_id": "mno",
+			"digest": "pqr",
+			"finished_at": "stu",
+			"id": "vwx"
+		}
 	},
 	"active_build": {
-		"deployment_id": "mno",
-		"digest": "pqr",
-		"finished_at": "stu",
-		"id": "vwx"
+		"deployment_id": "abc",
+		"digest": "def",
+		"finished_at": "ghi",
+		"id": "jkl"
 	}
 }

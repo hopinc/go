@@ -289,6 +289,9 @@ type DeploymentRollout struct {
 
 	// State is the state of the rollout.
 	State RolloutState `json:"status"`
+
+	// Build is the build that this rollout is for. This can be nil.
+	Build *DeploymentBuild `json:"build"`
 }
 
 // DeploymentBuild is used to define the active build of a deployment.
