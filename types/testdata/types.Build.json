@@ -1,6 +1,22 @@
 {
 	"id": "abc",
 	"deployment_id": "def",
-	"digest": "ghi",
-	"finished_at": "jkl"
+	"metadata": {
+		"account_type": "ghi",
+		"author": {
+			"avatar_url": "jkl",
+			"username": "mno"
+		},
+		"repo_id": 5,
+		"repo_name": "pqr",
+		"branch": "stu",
+		"commit_sha": "vwx",
+		"commit_msg": "abc",
+		"commit_url": "def"
+	},
+	"method": "ghi",
+	"started_at": "jkl",
+	"finished_at": "mno",
+	"state": "pqr",
+	"digest": "stu"
 }

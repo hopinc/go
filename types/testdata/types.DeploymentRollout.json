@@ -7,7 +7,23 @@
 	"build": {
 		"id": "mno",
 		"deployment_id": "pqr",
-		"digest": "stu",
-		"finished_at": "vwx"
+		"metadata": {
+			"account_type": "stu",
+			"author": {
+				"avatar_url": "vwx",
+				"username": "abc"
+			},
+			"repo_id": 10,
+			"repo_name": "def",
+			"branch": "ghi",
+			"commit_sha": "jkl",
+			"commit_msg": "mno",
+			"commit_url": "pqr"
+		},
+		"method": "stu",
+		"started_at": "vwx",
+		"finished_at": "abc",
+		"state": "def",
+		"digest": "ghi"
 	}
 }

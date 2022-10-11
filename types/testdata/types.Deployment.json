@@ -43,14 +43,46 @@
 		"build": {
 			"id": "mno",
 			"deployment_id": "pqr",
-			"digest": "stu",
-			"finished_at": "vwx"
+			"metadata": {
+				"account_type": "stu",
+				"author": {
+					"avatar_url": "vwx",
+					"username": "abc"
+				},
+				"repo_id": 30,
+				"repo_name": "def",
+				"branch": "ghi",
+				"commit_sha": "jkl",
+				"commit_msg": "mno",
+				"commit_url": "pqr"
+			},
+			"method": "stu",
+			"started_at": "vwx",
+			"finished_at": "abc",
+			"state": "def",
+			"digest": "ghi"
 		}
 	},
 	"active_build": {
-		"id": "abc",
-		"deployment_id": "def",
-		"digest": "ghi",
-		"finished_at": "jkl"
+		"id": "jkl",
+		"deployment_id": "mno",
+		"metadata": {
+			"account_type": "pqr",
+			"author": {
+				"avatar_url": "stu",
+				"username": "vwx"
+			},
+			"repo_id": 46,
+			"repo_name": "abc",
+			"branch": "def",
+			"commit_sha": "ghi",
+			"commit_msg": "jkl",
+			"commit_url": "mno"
+		},
+		"method": "pqr",
+		"started_at": "stu",
+		"finished_at": "vwx",
+		"state": "abc",
+		"digest": "def"
 	}
 }

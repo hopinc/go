@@ -341,6 +341,23 @@ type BuildMetadata struct {
 	CommitURL string `json:"commit_url"`
 }
 
+// BuildState is the state of a build.
+type BuildState string
+
+const (
+	// BuildStatePending is used to define a build that is pending.
+	BuildStatePending BuildState = "pending"
+
+	// BuildStateFailed is used to define a build that has failed.
+	BuildStateFailed BuildState = "failed"
+
+	// BuildStateSucceeded is used to define a build that has succeeded.
+	BuildStateSucceeded BuildState = "succeeded"
+
+	// BuildStateCancelled is used to define a build that has been canceled.
+	BuildStateCancelled BuildState = "cancelled"
+)
+
 // Build is used to define the active build of a deployment.
 type Build struct {
 	// ID is the ID of the build.
@@ -360,6 +377,9 @@ type Build struct {
 
 	// FinishedAt is the time that the build finished at. Is nil for no value.
 	FinishedAt *Timestamp `json:"finished_at"`
+
+	// State is the state of the build.
+	State BuildState `json:"state"`
 
 	// Digest is the digest for the image. Can be blank for no value.
 	Digest string `json:"digest"`

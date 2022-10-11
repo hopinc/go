@@ -58,6 +58,7 @@ var types = []reflect.Type{
 	reflect.TypeOf(Build{}),
 	reflect.TypeOf(BuildMetadata{}),
 	reflect.TypeOf(BuildMethod("")),
+	reflect.TypeOf(BuildState("")),
 
 	// pipe.go
 	reflect.TypeOf(IngestProtocol("")),

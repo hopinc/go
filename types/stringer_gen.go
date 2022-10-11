@@ -83,3 +83,13 @@ func (x Build) String() string {
 func (x BuildMethod) String() string {
 	return stringifyValue(x)
 }
+
+// String returns the string representation of this value. This function is auto-generated.
+func (x BuildMetadata) String() string {
+	return stringifyValue(x)
+}
+
+// String returns the string representation of this value. This function is auto-generated.
+func (x BuildState) String() string {
+	return stringifyValue(x)
+}
