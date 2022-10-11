@@ -55,7 +55,9 @@ var types = []reflect.Type{
 	reflect.TypeOf(IgniteDeploymentUpdateOpts{}),
 	reflect.TypeOf(RolloutState("")),
 	reflect.TypeOf(DeploymentRollout{}),
-	reflect.TypeOf(DeploymentBuild{}),
+	reflect.TypeOf(Build{}),
+	reflect.TypeOf(BuildMetadata{}),
+	reflect.TypeOf(BuildMethod("")),
 
 	// pipe.go
 	reflect.TypeOf(IngestProtocol("")),

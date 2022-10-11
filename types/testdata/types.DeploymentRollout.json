@@ -5,9 +5,9 @@
 	"id": "ghi",
 	"status": "jkl",
 	"build": {
-		"deployment_id": "mno",
-		"digest": "pqr",
-		"finished_at": "stu",
-		"id": "vwx"
+		"id": "mno",
+		"deployment_id": "pqr",
+		"digest": "stu",
+		"finished_at": "vwx"
 	}
 }

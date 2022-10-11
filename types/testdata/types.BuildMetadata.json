@@ -1,0 +1,13 @@
+{
+	"account_type": "abc",
+	"author": {
+		"avatar_url": "def",
+		"username": "ghi"
+	},
+	"repo_id": 3,
+	"repo_name": "jkl",
+	"branch": "mno",
+	"commit_sha": "pqr",
+	"commit_msg": "stu",
+	"commit_url": "vwx"
+}

@@ -291,22 +291,78 @@ type DeploymentRollout struct {
 	State RolloutState `json:"status"`
 
 	// Build is the build that this rollout is for. This can be nil.
-	Build *DeploymentBuild `json:"build"`
+	Build *Build `json:"build"`
 }
 
-// DeploymentBuild is used to define the active build of a deployment.
-type DeploymentBuild struct {
+// BuildMethod is the method used to build a container.
+type BuildMethod string
+
+const (
+	// BuildMethodGitHub is used to define a build method that was triggered by GitHub.
+	BuildMethodGitHub BuildMethod = "github"
+
+	// BuildMethodCLI is used to define a build method that was triggered by the CLI.
+	BuildMethodCLI BuildMethod = "cli"
+)
+
+// BuildAuthor is used to define the author of a build.
+type BuildAuthor struct {
+	// AvatarURL is the URL of the avatar of the author. This can be blank.
+	AvatarURL string `json:"avatar_url"`
+
+	// Username is the username of the author.
+	Username string `json:"username"`
+}
+
+// BuildMetadata is the metadata for a build.
+type BuildMetadata struct {
+	// AccountType is the type of account that triggered the build. This can be blank.
+	AccountType string `json:"account_type"`
+
+	// Author is the author of the build. This can be nil.
+	Author *BuildAuthor `json:"author"`
+
+	// RepoID is the ID of the repository that the build was triggered from.
+	RepoID int `json:"repo_id"`
+
+	// RepoName is the name of the repository that the build was triggered from.
+	RepoName string `json:"repo_name"`
+
+	// Branch is the branch that the build was triggered from.
+	Branch string `json:"branch"`
+
+	// CommitSHA is the SHA of the commit that the build was triggered from.
+	CommitSHA string `json:"commit_sha"`
+
+	// CommitMessage is the message of the commit that the build was triggered from.
+	CommitMessage string `json:"commit_msg"`
+
+	// CommitURL is the URL of the commit that the build was triggered from. This can be blank.
+	CommitURL string `json:"commit_url"`
+}
+
+// Build is used to define the active build of a deployment.
+type Build struct {
+	// ID is the ID of the build.
+	ID string `json:"id"`
+
 	// DeploymentID is the ID of the deployment that this build is for.
 	DeploymentID string `json:"deployment_id"`
 
-	// Digest is the digest for the image. Can be blank for no value.
-	Digest string `json:"digest"`
+	// Metadata is the metadata for the build. This can be nil.
+	Metadata *BuildMetadata `json:"metadata"`
+
+	// Method is the method used to build the container.
+	Method BuildMethod `json:"method"`
+
+	// StartedAt is the time that the build was started at. Is nil for no value.
+	StartedAt *Timestamp `json:"started_at"`
 
 	// FinishedAt is the time that the build finished at. Is nil for no value.
 	FinishedAt *Timestamp `json:"finished_at"`
 
-	// ID is the ID of the build.
-	ID string `json:"id"`
+	// Digest is the digest for the image. Can be blank for no value.
+	Digest string `json:"digest"`
 }
 
 // Deployment is used to define a deployment in Ignite.
@@ -330,7 +386,7 @@ type Deployment struct {
 	ActiveRollout *DeploymentRollout `json:"active_rollout"`
 
 	// ActiveBuild is the build for this deployment. Can be nil if not defined.
-	ActiveBuild *DeploymentBuild `json:"active_build"`
+	ActiveBuild *Build `json:"active_build"`
 }
 
 // Region is used to define a Hop datacenter region.
