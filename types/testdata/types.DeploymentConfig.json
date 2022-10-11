@@ -32,6 +32,6 @@
 	"volume": {
 		"fs": "stu",
 		"size": "vwx",
-		"mount_path": "abc"
+		"mountpath": "abc"
 	}
 }

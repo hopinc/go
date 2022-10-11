@@ -22,7 +22,7 @@ type VolumeDefinition struct {
 	Size Size `json:"size"`
 
 	// MountPath is the mount path of the volume.
-	MountPath string `json:"mount_path"`
+	MountPath string `json:"mountpath"`
 }
 
 // GatewayType is the type of the gateway.
