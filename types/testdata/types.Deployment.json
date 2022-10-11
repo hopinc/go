@@ -33,5 +33,18 @@
 		"restart_policy": "vwx",
 		"type": "mno",
 		"version": "pqr"
+	},
+	"active_rollout": {
+		"count": 20,
+		"created_at": "abc",
+		"deployment_id": "def",
+		"id": "ghi",
+		"status": "jkl"
+	},
+	"active_build": {
+		"deployment_id": "mno",
+		"digest": "pqr",
+		"finished_at": "stu",
+		"id": "vwx"
 	}
 }

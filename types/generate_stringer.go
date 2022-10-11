@@ -15,7 +15,8 @@ var types = []string{
 	"LeapUnavailableEvent", "LeapAvailableEvent", "LeapChannelStateUpdateEvent",
 	"LeapPipeRoomAvailableEvent", "LeapPipeRoomUpdateEvent", "IgniteDeploymentPatchOpts",
 	"Container", "ContainerMetadata", "DeploymentConfig", "DeploymentConfigPartial",
-	"VolumeDefinition", "VolumeFormat",
+	"VolumeDefinition", "VolumeFormat", "RolloutState", "DeploymentRollout",
+	"DeploymentBuild",
 }
 
 const stringTemplate = `// String returns the string representation of this value. This function is auto-generated.

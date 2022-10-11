@@ -273,6 +273,39 @@ func (x DeploymentConfig) MarshalJSON() ([]byte, error) {
 	return json.Marshal(m)
 }
 
+// DeploymentRollout is used to define the rollout of a deployment.
+type DeploymentRollout struct {
+	// Count is the number of containers which are being recreated.
+	Count int `json:"count"`
+
+	// CreatedAt is the time that the rollout was created at.
+	CreatedAt Timestamp `json:"created_at"`
+
+	// DeploymentID is the ID of the deployment that this rollout is for.
+	DeploymentID string `json:"deployment_id"`
+
+	// ID is the ID of the rollout.
+	ID string `json:"id"`
+
+	// State is the state of the rollout.
+	State RolloutState `json:"status"`
+}
+
+// DeploymentBuild is used to define the active build of a deployment.
+type DeploymentBuild struct {
+	// DeploymentID is the ID of the deployment that this build is for.
+	DeploymentID string `json:"deployment_id"`
+
+	// Digest is the digest for the image. Can be blank for no value.
+	Digest string `json:"digest"`
+
+	// FinishedAt is the time that the build finished at. Is nil for no value.
+	FinishedAt *Timestamp `json:"finished_at"`
+
+	// ID is the ID of the build.
+	ID string `json:"id"`
+}
+
 // Deployment is used to define a deployment in Ignite.
 type Deployment struct {
 	// ID is the ID of the deployment.
@@ -289,6 +322,12 @@ type Deployment struct {
 
 	// Config is the configuration for this deployment.
 	Config DeploymentConfigPartial `json:"config"`
+
+	// ActiveRollout is the rollout for this deployment. Can be nil if not defined.
+	ActiveRollout *DeploymentRollout `json:"active_rollout"`
+
+	// ActiveBuild is the build for this deployment. Can be nil if not defined.
+	ActiveBuild *DeploymentBuild `json:"active_build"`
 }
 
 // Region is used to define a Hop datacenter region.
@@ -436,3 +475,17 @@ type IgniteDeploymentUpdateOpts struct {
 //
 // Deprecated: Use IgniteDeploymentUpdateOpts instead.
 type IgniteDeploymentPatchOpts = IgniteDeploymentUpdateOpts
+
+// RolloutState is used to define the state of a rollout.
+type RolloutState string
+
+const (
+	// RolloutStatePending is used to define a rollout that is pending.
+	RolloutStatePending RolloutState = "pending"
+
+	// RolloutStateFinished is used to define a rollout that has finished.
+	RolloutStateFinished RolloutState = "finished"
+
+	// RolloutStateFailed is used to define a rollout that has failed.
+	RolloutStateFailed RolloutState = "failed"
+)

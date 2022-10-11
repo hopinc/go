@@ -52,6 +52,10 @@ var types = []reflect.Type{
 	reflect.TypeOf(LoggingLevel("")),
 	reflect.TypeOf(ContainerLog{}),
 	reflect.TypeOf(IgniteDeploymentPatchOpts{}),
+	reflect.TypeOf(IgniteDeploymentUpdateOpts{}),
+	reflect.TypeOf(RolloutState("")),
+	reflect.TypeOf(DeploymentRollout{}),
+	reflect.TypeOf(DeploymentBuild{}),
 
 	// pipe.go
 	reflect.TypeOf(IngestProtocol("")),
