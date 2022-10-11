@@ -101,22 +101,31 @@ func (c ClientCategoryIgniteDeployments) GetByName(ctx context.Context, name str
 	return &d, nil
 }
 
-// Patch is used to patch a deployment by its ID.
-func (c ClientCategoryIgniteDeployments) Patch(
-	ctx context.Context, id string, patchOpts types.IgniteDeploymentPatchOpts, opts ...ClientOption,
+// Update is used to update a deployment by its ID.
+func (c ClientCategoryIgniteDeployments) Update(
+	ctx context.Context, id string, updateOpts types.IgniteDeploymentUpdateOpts, opts ...ClientOption,
 ) (*types.Deployment, error) {
 	var d types.Deployment
 	err := c.c.do(ctx, clientArgs{
 		method:    "PATCH",
 		path:      "/ignite/deployments/" + url.PathEscape(id),
 		resultKey: "deployment",
-		body:      patchOpts,
+		body:      updateOpts,
 		result:    &d,
 	}, opts)
 	if err != nil {
 		return nil, err
 	}
 	return &d, nil
+}
+
+// Patch is used to patch a deployment by its ID.
+//
+// Deprecated: use Update instead.
+func (c ClientCategoryIgniteDeployments) Patch(
+	ctx context.Context, id string, patchOpts types.IgniteDeploymentPatchOpts, opts ...ClientOption,
+) (*types.Deployment, error) {
+	return c.Update(ctx, id, patchOpts, opts...)
 }
 
 // GetContainers is used to get the containers of a deployment.

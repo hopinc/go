@@ -411,8 +411,8 @@ type ContainerLog struct {
 	Level LoggingLevel `json:"level"`
 }
 
-// IgniteDeploymentPatchOpts is used to define the options for patching a deployment.
-type IgniteDeploymentPatchOpts struct {
+// IgniteDeploymentUpdateOpts is used to define the options for updating a deployment.
+type IgniteDeploymentUpdateOpts struct {
 	// Name is the name of the deployment. If this is not blank, it will be updated.
 	Name string `json:"name,omitempty"`
 
@@ -431,3 +431,8 @@ type IgniteDeploymentPatchOpts struct {
 	// Resources is the resources for the deployment. If this is not nil, it will be updated.
 	Resources *Resources `json:"resources,omitempty"`
 }
+
+// IgniteDeploymentPatchOpts is the old name for IgniteDeploymentUpdateOpts.
+//
+// Deprecated: Use IgniteDeploymentUpdateOpts instead.
+type IgniteDeploymentPatchOpts = IgniteDeploymentUpdateOpts

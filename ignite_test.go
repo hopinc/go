@@ -99,7 +99,8 @@ func TestClient_Ignite_Deployments_GetByName(t *testing.T) {
 		&types.Deployment{ID: "hello"})
 }
 
-func TestClient_Ignite_Deployments_Patch(t *testing.T) {
+func testIgniteUpdate(t *testing.T, name string) {
+	t.Helper()
 	c := &mockClientDoer{
 		t:              t,
 		wantMethod:     "PATCH",
@@ -107,14 +108,22 @@ func TestClient_Ignite_Deployments_Patch(t *testing.T) {
 		wantResultKey:  "deployment",
 		wantIgnore404:  false,
 		wantClientOpts: []ClientOption{WithProjectID("test123")},
-		wantBody:       types.IgniteDeploymentPatchOpts{Name: "new name"},
+		wantBody:       types.IgniteDeploymentUpdateOpts{Name: "new name"},
 		tokenType:      "pat",
 	}
 	testApiSingleton(c,
 		&ClientCategoryIgniteDeployments{c: c},
-		"Patch",
-		[]any{"test test", types.IgniteDeploymentPatchOpts{Name: "new name"}, WithProjectID("test123")},
+		name,
+		[]any{"test test", types.IgniteDeploymentUpdateOpts{Name: "new name"}, WithProjectID("test123")},
 		&types.Deployment{ID: "hello"})
+}
+
+func TestClient_Ignite_Deployments_Patch(t *testing.T) {
+	testIgniteUpdate(t, "Patch")
+}
+
+func TestClient_Ignite_Deployments_Update(t *testing.T) {
+	testIgniteUpdate(t, "Update")
 }
 
 func TestClient_Ignite_Deployments_GetContainers(t *testing.T) {
