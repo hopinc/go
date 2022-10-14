@@ -33,6 +33,14 @@ func (c ClientCategoryIgniteGateways) Get(ctx context.Context, id string, opts .
 	return &gw, nil
 }
 
+// Delete is used to delete a gateway by its ID.
+func (c ClientCategoryIgniteGateways) Delete(ctx context.Context, id string, opts ...ClientOption) error {
+	return c.c.do(ctx, clientArgs{
+		method: "DELETE",
+		path:   "/ignite/gateways/" + url.PathEscape(id),
+	}, opts)
+}
+
 // Create is used to create a deployment.
 func (c ClientCategoryIgniteDeployments) Create(
 	ctx context.Context, deployment *types.DeploymentConfig, opts ...ClientOption,

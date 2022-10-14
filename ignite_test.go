@@ -39,6 +39,21 @@ func TestClient_Ignite_Gateways_Get(t *testing.T) {
 		&types.Gateway{ID: "hello"})
 }
 
+func TestClient_Ignite_Gateways_Delete(t *testing.T) {
+	c := &mockClientDoer{
+		t:             t,
+		wantMethod:    "DELETE",
+		wantPath:      "/ignite/gateways/test%20test",
+		wantIgnore404: false,
+		tokenType:     "pat",
+	}
+	testApiSingleton(c,
+		&ClientCategoryIgniteGateways{c: c},
+		"Delete",
+		[]any{"test test"},
+		nil)
+}
+
 func TestClient_Ignite_Deployments_Create(t *testing.T) {
 	deploymentConfig := &types.DeploymentConfig{
 		DeploymentConfigPartial: types.DeploymentConfigPartial{
