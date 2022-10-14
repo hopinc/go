@@ -487,9 +487,6 @@ type Container struct {
 
 // GatewayCreationOptions is used to define the options for creating a gateway.
 type GatewayCreationOptions struct {
-	// ProjectID is the ID of the project that this gateway is for. Can be blank if using a project token.
-	ProjectID string `json:"-"`
-
 	// DeploymentID is the ID of the deployment that this gateway is for.
 	DeploymentID string `json:"-"`
 
@@ -501,6 +498,11 @@ type GatewayCreationOptions struct {
 
 	// TargetPort is the port to listen on.
 	TargetPort int `json:"target_port"`
+
+	// ProjectID is the ID of the project that this gateway is for. Can be blank if using a project token.
+	//
+	// Deprecated: Set the project ID with client options instead.
+	ProjectID string `json:"-"`
 }
 
 // LoggingLevel is used to define the logging level.

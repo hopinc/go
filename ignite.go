@@ -185,6 +185,10 @@ func (c ClientCategoryIgniteDeployments) GetAllGateways(ctx context.Context, id 
 func (c ClientCategoryIgniteDeployments) CreateGateway(
 	ctx context.Context, opts types.GatewayCreationOptions, clientOpts ...ClientOption,
 ) (*types.Gateway, error) {
+	if opts.ProjectID != "" { //nolint:staticcheck // Support deprecated field.
+		clientOpts = append(clientOpts, WithProjectID(opts.ProjectID)) //nolint:staticcheck // Support deprecated field.
+	}
+
 	var gw types.Gateway
 	err := c.c.do(ctx, clientArgs{
 		method:    "POST",
