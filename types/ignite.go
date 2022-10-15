@@ -490,6 +490,9 @@ type GatewayCreationOptions struct {
 	// DeploymentID is the ID of the deployment that this gateway is for.
 	DeploymentID string `json:"-"`
 
+	// Name is the name of the gateway.
+	Name string `json:"name"`
+
 	// Type is the type of gateway to create, either internal or external.
 	Type GatewayType `json:"type"`
 
