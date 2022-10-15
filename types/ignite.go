@@ -570,3 +570,15 @@ const (
 	// RolloutStateFailed is used to define a rollout that has failed.
 	RolloutStateFailed RolloutState = "failed"
 )
+
+// IgniteGatewayUpdateOpts is used to define the options for updating a gateway.
+type IgniteGatewayUpdateOpts struct {
+	// Name is the name of the gateway. If this is not blank, it will be updated.
+	Name string `json:"name,omitempty"`
+
+	// TargetPort is the port to listen on. If this is not 0, it will be updated.
+	TargetPort int `json:"target_port,omitempty"`
+
+	// Protocol is the protocol to use for the gateway. If this is not blank, it will be updated.
+	Protocol GatewayProtocol `json:"protocol,omitempty"`
+}

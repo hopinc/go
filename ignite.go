@@ -41,6 +41,24 @@ func (c ClientCategoryIgniteGateways) Delete(ctx context.Context, id string, opt
 	}, opts)
 }
 
+// Update is used to update a gateway by its ID.
+func (c ClientCategoryIgniteGateways) Update(
+	ctx context.Context, id string, updateOpts types.IgniteGatewayUpdateOpts, opts ...ClientOption,
+) (*types.Gateway, error) {
+	var gw types.Gateway
+	err := c.c.do(ctx, clientArgs{
+		method:    "PATCH",
+		path:      "/ignite/gateways/" + url.PathEscape(id),
+		resultKey: "gateway",
+		body:      updateOpts,
+		result:    &gw,
+	}, opts)
+	if err != nil {
+		return nil, err
+	}
+	return &gw, nil
+}
+
 // Create is used to create a deployment.
 func (c ClientCategoryIgniteDeployments) Create(
 	ctx context.Context, deployment *types.DeploymentConfig, opts ...ClientOption,

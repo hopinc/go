@@ -54,6 +54,23 @@ func TestClient_Ignite_Gateways_Delete(t *testing.T) {
 		nil)
 }
 
+func TestClient_Ignite_Gateways_Update(t *testing.T) {
+	c := &mockClientDoer{
+		t:             t,
+		wantMethod:    "PATCH",
+		wantPath:      "/ignite/gateways/test%20test",
+		wantResultKey: "gateway",
+		wantIgnore404: false,
+		wantBody:      types.IgniteGatewayUpdateOpts{Name: "new name"},
+		tokenType:     "pat",
+	}
+	testApiSingleton(c,
+		&ClientCategoryIgniteGateways{c: c},
+		"Update",
+		[]any{"test test", types.IgniteGatewayUpdateOpts{Name: "new name"}},
+		&types.Gateway{ID: "hello"})
+}
+
 func TestClient_Ignite_Deployments_Create(t *testing.T) {
 	deploymentConfig := &types.DeploymentConfig{
 		DeploymentConfigPartial: types.DeploymentConfigPartial{

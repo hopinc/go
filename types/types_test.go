@@ -59,6 +59,7 @@ var types = []reflect.Type{
 	reflect.TypeOf(BuildMetadata{}),
 	reflect.TypeOf(BuildMethod("")),
 	reflect.TypeOf(BuildState("")),
+	reflect.TypeOf(IgniteGatewayUpdateOpts{}),
 
 	// pipe.go
 	reflect.TypeOf(IngestProtocol("")),
