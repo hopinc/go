@@ -1,8 +1,7 @@
 {
 	"id": "abc",
 	"name": "def",
-	"target_container_count": 2,
-	"container_count": 3,
+	"container_count": 2,
 	"created_at": "ghi",
 	"config": {
 		"container_strategy": "jkl",
@@ -16,18 +15,18 @@
 				"password": "abc"
 			},
 			"github_repo": {
-				"repo_id": 11,
+				"repo_id": 10,
 				"full_name": "def",
 				"branch": "ghi"
 			}
 		},
 		"resources": {
 			"ram": "pqr",
-			"vcpu": 16,
+			"vcpu": 15,
 			"vgpu": [
 				{
 					"type": "stu",
-					"count": 19
+					"count": 18
 				}
 			]
 		},
@@ -36,7 +35,7 @@
 		"version": "pqr"
 	},
 	"active_rollout": {
-		"count": 21,
+		"count": 20,
 		"created_at": "abc",
 		"deployment_id": "def",
 		"id": "ghi",
@@ -50,7 +49,7 @@
 					"avatar_url": "vwx",
 					"username": "abc"
 				},
-				"repo_id": 31,
+				"repo_id": 30,
 				"repo_name": "def",
 				"branch": "ghi",
 				"commit_sha": "jkl",
@@ -73,7 +72,7 @@
 				"avatar_url": "stu",
 				"username": "vwx"
 			},
-			"repo_id": 47,
+			"repo_id": 46,
 			"repo_name": "abc",
 			"branch": "def",
 			"commit_sha": "ghi",
