@@ -393,6 +393,9 @@ type Deployment struct {
 	// Name is the name of the deployment.
 	Name string `json:"name"`
 
+	// TargetContainerCount is the number of expected containers.
+	TargetContainerCount int `json:"target_container_count"`
+
 	// ContainerCount is the number of containers that are currently running.
 	ContainerCount int `json:"container_count"`
 
