@@ -16,5 +16,9 @@
 		"fs": "abc",
 		"size": "def",
 		"mountpath": "ghi"
+	},
+	"metrics": {
+		"cpu_usage_percent": 12,
+		"memory_usage_percent": 13
 	}
 }
