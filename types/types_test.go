@@ -60,6 +60,13 @@ var types = []reflect.Type{
 	reflect.TypeOf(BuildMethod("")),
 	reflect.TypeOf(BuildState("")),
 	reflect.TypeOf(IgniteGatewayUpdateOpts{}),
+	reflect.TypeOf(HealthCheckProtocol("")),
+	reflect.TypeOf(HealthCheckUpdateOpts{}),
+	reflect.TypeOf(HealthCheckCreateOpts{}),
+	reflect.TypeOf(HealthCheckType("")),
+	reflect.TypeOf(HealthCheck{}),
+	reflect.TypeOf(HealthCheckStatus("")),
+	reflect.TypeOf(HealthCheckState{}),
 
 	// pipe.go
 	reflect.TypeOf(IngestProtocol("")),
@@ -125,9 +132,10 @@ func (s *stuffer) stuffType(t reflect.Type) reflect.Value {
 		s.i++
 		return v
 	case reflect.Int64:
-		v := reflect.ValueOf(int64(s.i))
+		y := reflect.New(t)
+		y.Elem().SetInt(int64(s.i))
 		s.i++
-		return v
+		return y.Elem()
 	case reflect.Uint:
 		v := reflect.ValueOf(uint(s.i))
 		s.i++

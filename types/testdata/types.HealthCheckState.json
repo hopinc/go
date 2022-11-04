@@ -1,0 +1,8 @@
+{
+	"deployment_id": "abc",
+	"container_id": "def",
+	"health_check_id": "ghi",
+	"state": "jkl",
+	"next_check": "mno",
+	"created_at": "pqr"
+}
