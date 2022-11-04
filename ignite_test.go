@@ -2,6 +2,7 @@ package hop
 
 import (
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"go.hop.io/sdk/types"
@@ -328,4 +329,135 @@ func TestClient_Ignite_Containers_Start(t *testing.T) {
 		"Start",
 		[]any{"test test", WithProjectID("test123")},
 		nil)
+}
+
+func TestClient_Ignite_Deployments_NewHealthCheck(t *testing.T) {
+	tests := []struct {
+		name string
+
+		input types.HealthCheckCreateOpts
+		body  types.HealthCheckCreateOpts
+	}{
+		{
+			name:  "defaults set",
+			input: types.HealthCheckCreateOpts{DeploymentID: "test test"},
+			body: types.HealthCheckCreateOpts{
+				Protocol:     types.HealthCheckProtocolHTTP,
+				Path:         "/",
+				Port:         8080,
+				InitialDelay: types.Seconds(time.Second * 5),
+				Interval:     types.Seconds(time.Minute),
+				Timeout:      types.Milliseconds(time.Millisecond * 50),
+				MaxRetries:   3,
+			},
+		},
+		{
+			name: "all set by user",
+			input: types.HealthCheckCreateOpts{
+				DeploymentID: "test test",
+				Protocol:     types.HealthCheckProtocolHTTP,
+				Path:         "/hello",
+				Port:         8000,
+				InitialDelay: types.Seconds(time.Second * 10),
+				Interval:     types.Seconds(time.Second * 5),
+				Timeout:      types.Milliseconds(time.Millisecond * 150),
+				MaxRetries:   10,
+			},
+			body: types.HealthCheckCreateOpts{
+				Protocol:     types.HealthCheckProtocolHTTP,
+				Path:         "/hello",
+				Port:         8000,
+				InitialDelay: types.Seconds(time.Second * 10),
+				Interval:     types.Seconds(time.Second * 5),
+				Timeout:      types.Milliseconds(time.Millisecond * 150),
+				MaxRetries:   10,
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := &mockClientDoer{
+				t:             t,
+				wantMethod:    "POST",
+				wantPath:      "/ignite/deployments/test%20test/health-checks",
+				wantResultKey: "health_check",
+				wantIgnore404: false,
+				tokenType:     "pat",
+				wantBody:      tt.body,
+			}
+			testApiSingleton(c,
+				&ClientCategoryIgniteDeployments{c: c},
+				"NewHealthCheck",
+				[]any{tt.input},
+				&types.HealthCheck{ID: "hello"})
+		})
+	}
+}
+
+func TestClient_Ignite_Deployments_GetHealthChecks(t *testing.T) {
+	c := &mockClientDoer{
+		t:             t,
+		wantMethod:    "GET",
+		wantPath:      "/ignite/deployments/test%20test/health-checks",
+		wantResultKey: "health_checks",
+		wantIgnore404: false,
+		tokenType:     "pat",
+	}
+	testApiSingleton(c,
+		&ClientCategoryIgniteDeployments{c: c},
+		"GetHealthChecks",
+		[]any{"test test"},
+		[]*types.HealthCheck{{ID: "hello"}})
+}
+
+func TestClient_Ignite_Deployments_DeleteHealthCheck(t *testing.T) {
+	c := &mockClientDoer{
+		t:             t,
+		wantMethod:    "DELETE",
+		wantPath:      "/ignite/deployments/test%20test/health-checks/testing%20123",
+		wantIgnore404: false,
+		tokenType:     "pat",
+	}
+	testApiSingleton(c,
+		&ClientCategoryIgniteDeployments{c: c},
+		"DeleteHealthCheck",
+		[]any{"test test", "testing 123"},
+		nil)
+}
+
+func TestClient_Ignite_Deployments_UpdateHealthCheck(t *testing.T) {
+	body := types.HealthCheckUpdateOpts{
+		DeploymentID:  "test test",
+		HealthCheckID: "hello world",
+	}
+	c := &mockClientDoer{
+		t:             t,
+		wantMethod:    "PATCH",
+		wantPath:      "/ignite/deployments/test%20test/health-checks/hello%20world",
+		wantResultKey: "health_check",
+		wantBody:      body,
+		wantIgnore404: false,
+		tokenType:     "pat",
+	}
+	testApiSingleton(c,
+		&ClientCategoryIgniteDeployments{c: c},
+		"UpdateHealthCheck",
+		[]any{body},
+		&types.HealthCheck{ID: "hello"})
+}
+
+func TestClient_Ignite_Deployments_HealthCheckStates(t *testing.T) {
+	c := &mockClientDoer{
+		t:             t,
+		wantMethod:    "GET",
+		wantPath:      "/ignite/deployments/test%20test/health-check-state",
+		wantResultKey: "health_check_states",
+		wantIgnore404: false,
+		tokenType:     "pat",
+	}
+	testApiSingleton(c,
+		&ClientCategoryIgniteDeployments{c: c},
+		"HealthCheckStates",
+		[]any{"test test"},
+		[]*types.HealthCheckState{{HealthCheckID: "test"}})
 }

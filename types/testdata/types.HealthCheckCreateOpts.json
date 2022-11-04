@@ -1,0 +1,10 @@
+{
+	"deployment_id": "abc",
+	"protocol": "def",
+	"path": "ghi",
+	"port": 3,
+	"initial_delay": 0,
+	"interval": 0,
+	"timeout": 0,
+	"max_retries": 7
+}

@@ -308,3 +308,113 @@ func (c ClientCategoryIgniteDeployments) Scale(
 	}
 	return a, nil
 }
+
+// NewHealthCheck is used to set a health check on a deployment. Returns the health check ID.
+func (c ClientCategoryIgniteDeployments) NewHealthCheck(
+	ctx context.Context, createOpts types.HealthCheckCreateOpts, opts ...ClientOption,
+) (*types.HealthCheck, error) {
+	// Get the deployment ID.
+	deploymentId := createOpts.DeploymentID
+	createOpts.DeploymentID = ""
+
+	// Set the defaults.
+	if createOpts.Protocol == "" {
+		createOpts.Protocol = types.HealthCheckProtocolHTTP
+	}
+	if createOpts.Path == "" {
+		createOpts.Path = "/"
+	}
+	if createOpts.Port == 0 {
+		createOpts.Port = 8080
+	}
+	if createOpts.InitialDelay == 0 {
+		createOpts.InitialDelay = types.SecondsFromInt(5)
+	}
+	if createOpts.Interval == 0 {
+		createOpts.Interval = types.SecondsFromInt(60)
+	}
+	if createOpts.Timeout == 0 {
+		createOpts.Timeout = types.MillisecondsFromInt(50)
+	}
+	if createOpts.MaxRetries == 0 {
+		createOpts.MaxRetries = 3
+	}
+
+	// Do the HTTP request.
+	var res types.HealthCheck
+	err := c.c.do(ctx, clientArgs{
+		method:    "POST",
+		path:      "/ignite/deployments/" + url.PathEscape(deploymentId) + "/health-checks",
+		body:      createOpts,
+		resultKey: "health_check",
+		result:    &res,
+	}, opts)
+	if err != nil {
+		return nil, err
+	}
+	return &res, nil
+}
+
+// GetHealthChecks is used to get the health checks attached to a deployment ID.
+func (c ClientCategoryIgniteDeployments) GetHealthChecks(
+	ctx context.Context, deploymentId string, opts ...ClientOption,
+) ([]*types.HealthCheck, error) {
+	var res []*types.HealthCheck
+	err := c.c.do(ctx, clientArgs{
+		method:    "GET",
+		path:      "/ignite/deployments/" + url.PathEscape(deploymentId) + "/health-checks",
+		resultKey: "health_checks",
+		result:    &res,
+	}, opts)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
+// DeleteHealthCheck is used to delete a health check by its ID.
+func (c ClientCategoryIgniteDeployments) DeleteHealthCheck(
+	ctx context.Context, deploymentId, healthCheckId string, opts ...ClientOption,
+) error {
+	return c.c.do(ctx, clientArgs{
+		method: "DELETE",
+		path: "/ignite/deployments/" + url.PathEscape(deploymentId) + "/health-checks/" +
+			url.PathEscape(healthCheckId),
+	}, opts)
+}
+
+// UpdateHealthCheck is used to update a health check.
+func (c ClientCategoryIgniteDeployments) UpdateHealthCheck(
+	ctx context.Context, updateOpts types.HealthCheckUpdateOpts, opts ...ClientOption,
+) (*types.HealthCheck, error) {
+	var res types.HealthCheck
+	err := c.c.do(ctx, clientArgs{
+		method: "PATCH",
+		path: "/ignite/deployments/" + url.PathEscape(updateOpts.DeploymentID) + "/health-checks/" +
+			url.PathEscape(updateOpts.HealthCheckID),
+		body:      updateOpts,
+		resultKey: "health_check",
+		result:    &res,
+	}, opts)
+	if err != nil {
+		return nil, err
+	}
+	return &res, nil
+}
+
+// HealthCheckStates is used to get the state of health checks for a deployment.
+func (c ClientCategoryIgniteDeployments) HealthCheckStates(
+	ctx context.Context, deploymentId string, opts ...ClientOption,
+) ([]*types.HealthCheckState, error) {
+	var res []*types.HealthCheckState
+	err := c.c.do(ctx, clientArgs{
+		method:    "GET",
+		path:      "/ignite/deployments/" + url.PathEscape(deploymentId) + "/health-check-state",
+		resultKey: "health_check_states",
+		result:    &res,
+	}, opts)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}

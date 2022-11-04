@@ -98,3 +98,18 @@ func (x BuildState) String() string {
 func (x IgniteGatewayUpdateOpts) String() string {
 	return stringifyValue(x)
 }
+
+// String returns the string representation of this value. This function is auto-generated.
+func (x HealthCheck) String() string {
+	return stringifyValue(x)
+}
+
+// String returns the string representation of this value. This function is auto-generated.
+func (x HealthCheckCreateOpts) String() string {
+	return stringifyValue(x)
+}
+
+// String returns the string representation of this value. This function is auto-generated.
+func (x HealthCheckState) String() string {
+	return stringifyValue(x)
+}
