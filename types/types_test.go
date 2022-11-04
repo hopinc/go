@@ -60,6 +60,7 @@ var types = []reflect.Type{
 	reflect.TypeOf(BuildMethod("")),
 	reflect.TypeOf(BuildState("")),
 	reflect.TypeOf(IgniteGatewayUpdateOpts{}),
+	reflect.TypeOf(ContainerMetrics{}),
 	reflect.TypeOf(HealthCheckProtocol("")),
 	reflect.TypeOf(HealthCheckUpdateOpts{}),
 	reflect.TypeOf(HealthCheckCreateOpts{}),

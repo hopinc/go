@@ -393,6 +393,9 @@ type Deployment struct {
 	// Name is the name of the deployment.
 	Name string `json:"name"`
 
+	// TargetContainerCount is the number of expected containers.
+	TargetContainerCount int `json:"target_container_count"`
+
 	// ContainerCount is the number of containers that are currently running.
 	ContainerCount int `json:"container_count"`
 
@@ -452,6 +455,15 @@ type ContainerMetadata struct {
 	LastExitCode *int `json:"last_exit_code"`
 }
 
+// ContainerMetrics is used to define the metrics of a container.
+type ContainerMetrics struct {
+	// CPUUsagePercent is used to define the % usage of the CPU.
+	CPUUsagePercent int `json:"cpu_usage_percent"`
+
+	// MemoryUsagePercent is used to define the % usage of the RAM.
+	MemoryUsagePercent int `json:"memory_usage_percent"`
+}
+
 // Container is used to define a container in Ignite.
 type Container struct {
 	// ID is the ID of the container.
@@ -483,6 +495,9 @@ type Container struct {
 
 	// Volume is the volume definition for this container. This can be nil.
 	Volume *VolumeDefinition `json:"volume"`
+
+	// Metrics is used to define the container metrics. This can be nil.
+	Metrics *ContainerMetrics `json:"metrics"`
 }
 
 // GatewayCreationOptions is used to define the options for creating a gateway.
