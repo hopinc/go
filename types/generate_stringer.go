@@ -17,6 +17,7 @@ var types = []string{
 	"Container", "ContainerMetadata", "DeploymentConfig", "DeploymentConfigPartial",
 	"VolumeDefinition", "VolumeFormat", "RolloutState", "DeploymentRollout",
 	"Build", "BuildMethod", "BuildMetadata", "BuildState", "IgniteGatewayUpdateOpts",
+	"HealthCheck", "HealthCheckCreateOpts", "HealthCheckState",
 }
 
 const stringTemplate = `// String returns the string representation of this value. This function is auto-generated.

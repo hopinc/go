@@ -585,3 +585,121 @@ type IgniteGatewayUpdateOpts struct {
 	// Protocol is the protocol to use for the gateway. If this is not blank, it will be updated.
 	Protocol GatewayProtocol `json:"protocol,omitempty"`
 }
+
+// HealthCheckProtocol is the type for a health check.
+type HealthCheckProtocol string
+
+const (
+	// HealthCheckProtocolHTTP is used to define a health check running on HTTP.
+	HealthCheckProtocolHTTP HealthCheckProtocol = "http"
+)
+
+// HealthCheckUpdateOpts is used to define update options for health check creation. All values except DeploymentID and
+// HealthCheckID are optional.
+type HealthCheckUpdateOpts struct {
+	// DeploymentID is used to define the ID of the deployment. This must be set.
+	DeploymentID string `json:"-"`
+
+	// HealthCheckID is used to define the ID of the health check. This must be set.
+	HealthCheckID string `json:"-"`
+
+	// InitialDelay is the initial delay in health checking.
+	InitialDelay Seconds `json:"initial_delay,omitempty"`
+
+	// Interval is the interval between health checks in seconds.
+	Interval Seconds `json:"interval,omitempty"`
+
+	// Timeout is used to define the timeout in milliseconds.
+	Timeout Milliseconds `json:"timeout,omitempty"`
+
+	// MaxRetries is the maximum number of allowed retries before it is declared unhealthy.
+	MaxRetries int `json:"max_retries,omitempty"`
+}
+
+// HealthCheckCreateOpts is used to define options during health check creation.
+type HealthCheckCreateOpts struct {
+	// DeploymentID is used to define the ID of the deployment. This must be set.
+	DeploymentID string `json:"deployment_id,omitempty"`
+
+	// Protocol is the protocol that this health check will work on. If blank, will default to "http".
+	Protocol HealthCheckProtocol `json:"protocol"`
+
+	// Path is the path which should be hit for the health check. If blank, will default to "/".
+	Path string `json:"path"`
+
+	// Port is the port that should be hit for the health check. If blank, will default to 8080.
+	Port int `json:"port"`
+
+	// InitialDelay is the initial delay in health checking. If blank, will default to 5 seconds.
+	InitialDelay Seconds `json:"initial_delay"`
+
+	// Interval is the interval between health checks in seconds. If blank, will default to 1 minute.
+	Interval Seconds `json:"interval"`
+
+	// Timeout is used to define the timeout in milliseconds. If blank, will default to 50ms.
+	Timeout Milliseconds `json:"timeout"`
+
+	// MaxRetries is the maximum number of allowed retries before it is declared unhealthy. If blank, will default to 3.
+	MaxRetries int `json:"max_retries"`
+}
+
+// HealthCheckType defines the type of the health check.
+type HealthCheckType string
+
+const (
+	// HealthCheckTypeReadiness defines a readiness type.
+	HealthCheckTypeReadiness HealthCheckType = "readiness"
+
+	// HealthCheckTypeLiveness defines a liveness type.
+	HealthCheckTypeLiveness HealthCheckType = "liveness"
+)
+
+// HealthCheck is used to define the created health check.
+type HealthCheck struct {
+	// Inlines the options since they are also used here.
+	HealthCheckCreateOpts `json:",inline"`
+
+	// ID defines the ID of the health check.
+	ID string `json:"id"`
+
+	// CreatedAt defines when the health check was created.
+	CreatedAt Timestamp `json:"created_at"`
+
+	// Type defines the type of the health check.
+	Type HealthCheckType `json:"type"`
+}
+
+// HealthCheckStatus is the type of the health check status.
+type HealthCheckStatus string
+
+const (
+	// HealthCheckStatusSucceeded is used to define a health check that succeeded.
+	HealthCheckStatusSucceeded HealthCheckStatus = "succeeded"
+
+	// HealthCheckStatusFailed is used to define a health check that failed.
+	HealthCheckStatusFailed HealthCheckStatus = "failed"
+
+	// HealthCheckStatusPending is used to define a health check that is pending.
+	HealthCheckStatusPending HealthCheckStatus = "pending"
+)
+
+// HealthCheckState is used to define the state of a health check.
+type HealthCheckState struct {
+	// DeploymentID defines the deployment ID this relates to.
+	DeploymentID string `json:"deployment_id"`
+
+	// ContainerID defines the container ID this relates to.
+	ContainerID string `json:"container_id"`
+
+	// HealthCheckID is used to define the ID of the health check this relates to.
+	HealthCheckID string `json:"health_check_id"`
+
+	// State is used to define the health check status.
+	State HealthCheckStatus `json:"state"`
+
+	// NextCheck defines the timestamp of the next check.
+	NextCheck Timestamp `json:"next_check"`
+
+	// CreatedAt defines when this health check was created.
+	CreatedAt Timestamp `json:"created_at"`
+}
