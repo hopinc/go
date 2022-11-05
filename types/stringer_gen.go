@@ -113,3 +113,13 @@ func (x HealthCheckCreateOpts) String() string {
 func (x HealthCheckState) String() string {
 	return stringifyValue(x)
 }
+
+// String returns the string representation of this value. This function is auto-generated.
+func (x DeploymentStorageSize) String() string {
+	return stringifyValue(x)
+}
+
+// String returns the string representation of this value. This function is auto-generated.
+func (x DeploymentStorageInfo) String() string {
+	return stringifyValue(x)
+}

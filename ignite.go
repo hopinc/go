@@ -418,3 +418,19 @@ func (c ClientCategoryIgniteDeployments) HealthCheckStates(
 	}
 	return res, nil
 }
+
+// GetStorageStats is used to get stats about storage.
+func (c ClientCategoryIgniteDeployments) GetStorageStats(
+	ctx context.Context, deploymentId string, opts ...ClientOption,
+) (types.DeploymentStorageInfo, error) {
+	var res types.DeploymentStorageInfo
+	err := c.c.do(ctx, clientArgs{
+		method: "GET",
+		path:   "/ignite/deployments/" + url.PathEscape(deploymentId) + "/storage",
+		result: &res,
+	}, opts)
+	if err != nil {
+		return types.DeploymentStorageInfo{}, err
+	}
+	return res, nil
+}

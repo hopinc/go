@@ -461,3 +461,23 @@ func TestClient_Ignite_Deployments_HealthCheckStates(t *testing.T) {
 		[]any{"test test"},
 		[]*types.HealthCheckState{{HealthCheckID: "test"}})
 }
+
+func TestClient_Ignite_Deployments_GetStorageStats(t *testing.T) {
+	c := &mockClientDoer{
+		t:             t,
+		wantMethod:    "GET",
+		wantPath:      "/ignite/deployments/test%20test/storage",
+		wantIgnore404: false,
+		tokenType:     "pat",
+	}
+	testApiSingleton(c,
+		&ClientCategoryIgniteDeployments{c: c},
+		"GetStorageStats",
+		[]any{"test test"},
+		types.DeploymentStorageInfo{
+			Volume: &types.DeploymentStorageSize{
+				ProvisionedSize: 10,
+				UsedSize:        20,
+			},
+		})
+}

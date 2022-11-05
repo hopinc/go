@@ -68,6 +68,8 @@ var types = []reflect.Type{
 	reflect.TypeOf(HealthCheck{}),
 	reflect.TypeOf(HealthCheckStatus("")),
 	reflect.TypeOf(HealthCheckState{}),
+	reflect.TypeOf(DeploymentStorageSize{}),
+	reflect.TypeOf(DeploymentStorageInfo{}),
 
 	// pipe.go
 	reflect.TypeOf(IngestProtocol("")),

@@ -718,3 +718,21 @@ type HealthCheckState struct {
 	// CreatedAt defines when this health check was created.
 	CreatedAt Timestamp `json:"created_at"`
 }
+
+// DeploymentStorageSize is used to define the information about the build cache.
+type DeploymentStorageSize struct {
+	// ProvisionedSize is the amount of storage in MB that is provisioned.
+	ProvisionedSize int `json:"provisioned_size"`
+
+	// UsedSize is the amount of storage in MB that is used for the build cache.
+	UsedSize int `json:"used_size"`
+}
+
+// DeploymentStorageInfo is used to define deployment information about storage.
+type DeploymentStorageInfo struct {
+	// Volume is used to define the storage information. Can be nil.
+	Volume *DeploymentStorageSize `json:"volume"`
+
+	// BuildCache is used to define the build cache storage information. Can be nil.
+	BuildCache *DeploymentStorageSize `json:"build_cache"`
+}
