@@ -85,5 +85,13 @@
 		"finished_at": "vwx",
 		"state": "abc",
 		"digest": "def"
-	}
+	},
+	"metadata": {
+		"container_port_mappings": {
+			"ghi": [
+				"jkl"
+			]
+		}
+	},
+	"running_container_count": 60
 }

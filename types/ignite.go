@@ -388,6 +388,12 @@ type Build struct {
 	Digest string `json:"digest"`
 }
 
+// DeploymentMetadata is the deployments metadata.
+type DeploymentMetadata struct {
+	// ContainerPortMappings is used to map the containers to ports.
+	ContainerPortMappings map[string][]string `json:"container_port_mappings"`
+}
+
 // Deployment is used to define a deployment in Ignite.
 type Deployment struct {
 	// ID is the ID of the deployment.
@@ -413,6 +419,12 @@ type Deployment struct {
 
 	// ActiveBuild is the build for this deployment. Can be nil if not defined.
 	ActiveBuild *Build `json:"active_build"`
+
+	// Metadata is used to define any deployment metadata. Can be nil if not defined.
+	Metadata *DeploymentMetadata `json:"metadata"`
+
+	// RunningContainerCount is the amount of containers in the running state.
+	RunningContainerCount int `json:"running_container_count"`
 }
 
 // Region is used to define a Hop datacenter region.

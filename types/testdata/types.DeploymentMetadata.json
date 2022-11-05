@@ -1,0 +1,7 @@
+{
+	"container_port_mappings": {
+		"abc": [
+			"def"
+		]
+	}
+}
