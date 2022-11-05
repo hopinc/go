@@ -229,6 +229,9 @@ type DeploymentConfigPartial struct {
 
 	// RestartPolicy is the restart policy for this deployment.
 	RestartPolicy RestartPolicy `json:"restart_policy"`
+
+	// Entrypoint is used to define the entrypoint for the application. Can be nil.
+	Entrypoint []string `json:"entrypoint"`
 }
 
 func (x DeploymentConfigPartial) makeMap() map[string]any {
@@ -246,6 +249,7 @@ func (x DeploymentConfigPartial) makeMap() map[string]any {
 		"env":                x.Env,
 		"resources":          x.Resources,
 		"restart_policy":     x.RestartPolicy,
+		"entrypoint":         x.Entrypoint,
 	}
 }
 

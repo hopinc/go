@@ -6,6 +6,9 @@
 	"created_at": "ghi",
 	"config": {
 		"container_strategy": "jkl",
+		"entrypoint": [
+			"abc"
+		],
 		"env": {
 			"jkl": "mno"
 		},
@@ -36,62 +39,62 @@
 		"version": "pqr"
 	},
 	"active_rollout": {
-		"count": 21,
-		"created_at": "abc",
-		"deployment_id": "def",
-		"id": "ghi",
-		"status": "jkl",
+		"count": 22,
+		"created_at": "def",
+		"deployment_id": "ghi",
+		"id": "jkl",
+		"status": "mno",
 		"build": {
-			"id": "mno",
-			"deployment_id": "pqr",
+			"id": "pqr",
+			"deployment_id": "stu",
 			"metadata": {
-				"account_type": "stu",
+				"account_type": "vwx",
 				"author": {
-					"avatar_url": "vwx",
-					"username": "abc"
+					"avatar_url": "abc",
+					"username": "def"
 				},
-				"repo_id": 31,
-				"repo_name": "def",
-				"branch": "ghi",
-				"commit_sha": "jkl",
-				"commit_msg": "mno",
-				"commit_url": "pqr"
+				"repo_id": 32,
+				"repo_name": "ghi",
+				"branch": "jkl",
+				"commit_sha": "mno",
+				"commit_msg": "pqr",
+				"commit_url": "stu"
 			},
-			"method": "stu",
-			"started_at": "vwx",
-			"finished_at": "abc",
-			"state": "def",
-			"digest": "ghi"
+			"method": "vwx",
+			"started_at": "abc",
+			"finished_at": "def",
+			"state": "ghi",
+			"digest": "jkl"
 		}
 	},
 	"active_build": {
-		"id": "jkl",
-		"deployment_id": "mno",
+		"id": "mno",
+		"deployment_id": "pqr",
 		"metadata": {
-			"account_type": "pqr",
+			"account_type": "stu",
 			"author": {
-				"avatar_url": "stu",
-				"username": "vwx"
+				"avatar_url": "vwx",
+				"username": "abc"
 			},
-			"repo_id": 47,
-			"repo_name": "abc",
-			"branch": "def",
-			"commit_sha": "ghi",
-			"commit_msg": "jkl",
-			"commit_url": "mno"
+			"repo_id": 48,
+			"repo_name": "def",
+			"branch": "ghi",
+			"commit_sha": "jkl",
+			"commit_msg": "mno",
+			"commit_url": "pqr"
 		},
-		"method": "pqr",
-		"started_at": "stu",
-		"finished_at": "vwx",
-		"state": "abc",
-		"digest": "def"
+		"method": "stu",
+		"started_at": "vwx",
+		"finished_at": "abc",
+		"state": "def",
+		"digest": "ghi"
 	},
 	"metadata": {
 		"container_port_mappings": {
-			"ghi": [
-				"jkl"
+			"jkl": [
+				"mno"
 			]
 		}
 	},
-	"running_container_count": 60
+	"running_container_count": 61
 }
