@@ -96,6 +96,9 @@ type Gateway struct {
 	// HopshDomain is the hop.sh domain that this gateway is automatically assigned. This will be blank if none is assigned.
 	HopshDomain string `json:"hopsh_domain"`
 
+	// HopshDomainEnabled determines if the hop.sh domain is currently active.
+	HopshDomainEnabled bool `json:"hopsh_domain_enabled"`
+
 	// InternalDomain is the internal domain that this gateway is automatically assigned. This will be blank if none is assigned.
 	InternalDomain string `json:"internal_domain"`
 

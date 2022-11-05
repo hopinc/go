@@ -6,6 +6,7 @@
 	"deployment_id": "mno",
 	"created_at": "pqr",
 	"hopsh_domain": "stu",
+	"hopsh_domain_enabled": true,
 	"internal_domain": "vwx",
 	"target_port": 8,
 	"domains": [
