@@ -133,3 +133,8 @@ func (x Deployment) String() string {
 func (x DeploymentMetadata) String() string {
 	return stringifyValue(x)
 }
+
+// String returns the string representation of this value. This function is auto-generated.
+func (x Domain) String() string {
+	return stringifyValue(x)
+}

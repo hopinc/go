@@ -18,6 +18,31 @@ func (c ClientCategoryIgniteGateways) AddDomain(ctx context.Context, gatewayId s
 	}, opts)
 }
 
+// GetDomain is used to get a domain by its ID.
+func (c ClientCategoryIgniteGateways) GetDomain(
+	ctx context.Context, domainId string, opts ...ClientOption,
+) (*types.Domain, error) {
+	var d types.Domain
+	err := c.c.do(ctx, clientArgs{
+		method:    "GET",
+		path:      "/ignite/domains/" + url.PathEscape(domainId),
+		resultKey: "domain",
+		result:    &d,
+	}, opts)
+	if err != nil {
+		return nil, err
+	}
+	return &d, nil
+}
+
+// DeleteDomain is used to delete a domain by its ID.
+func (c ClientCategoryIgniteGateways) DeleteDomain(ctx context.Context, domainId string, opts ...ClientOption) error {
+	return c.c.do(ctx, clientArgs{
+		method: "DELETE",
+		path:   "/ignite/domains/" + url.PathEscape(domainId),
+	}, opts)
+}
+
 // Get is used to get a gateway by its ID.
 func (c ClientCategoryIgniteGateways) Get(ctx context.Context, id string, opts ...ClientOption) (*types.Gateway, error) {
 	var gw types.Gateway

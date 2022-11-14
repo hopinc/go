@@ -24,6 +24,37 @@ func TestClient_Ignite_Gateways_AddDomain(t *testing.T) {
 		nil)
 }
 
+func TestClient_Ignite_Gateways_GetDomain(t *testing.T) {
+	c := &mockClientDoer{
+		t:             t,
+		wantMethod:    "GET",
+		wantPath:      "/ignite/domains/test%20test",
+		wantResultKey: "domain",
+		wantIgnore404: false,
+		tokenType:     "pat",
+	}
+	testApiSingleton(c,
+		&ClientCategoryIgniteGateways{c: c},
+		"GetDomain",
+		[]any{"test test"},
+		&types.Domain{Domain: "google.com"})
+}
+
+func TestClient_Ignite_Gateways_DeleteDomain(t *testing.T) {
+	c := &mockClientDoer{
+		t:             t,
+		wantMethod:    "DELETE",
+		wantPath:      "/ignite/domains/test%20test",
+		wantIgnore404: false,
+		tokenType:     "pat",
+	}
+	testApiSingleton(c,
+		&ClientCategoryIgniteGateways{c: c},
+		"DeleteDomain",
+		[]any{"test test"},
+		nil)
+}
+
 func TestClient_Ignite_Gateways_Get(t *testing.T) {
 	c := &mockClientDoer{
 		t:             t,
