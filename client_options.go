@@ -1,6 +1,9 @@
 package hop
 
-import "strings"
+import (
+	"io"
+	"strings"
+)
 
 // ClientOption is used to define am option that the client will consume when it is ran.
 // You should not and cannot implement this interface. This is only designed as a signature for other options.
@@ -37,4 +40,16 @@ func WithCustomAPIURL(apiBase string) ClientOption {
 	}
 	apiBase = strings.TrimSuffix(apiBase, "/")
 	return apiUrlOption{apiBase: apiBase}
+}
+
+type curlWriterOption struct {
+	baseClientOption
+
+	w io.Writer
+}
+
+// WithCurlDebugWriter is used to write what the curl command for the request specified would be and a new line to an
+// io.Writer.
+func WithCurlDebugWriter(w io.Writer) ClientOption {
+	return curlWriterOption{w: w}
 }

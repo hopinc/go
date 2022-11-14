@@ -1,6 +1,7 @@
 package hop
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -316,6 +317,7 @@ func TestClient_do(t *testing.T) {
 		returnsStatus int
 		returnsBody   string
 		returnsError  error
+		returnsCurl   string
 
 		baseUrl      string
 		method       string
@@ -375,6 +377,25 @@ func TestClient_do(t *testing.T) {
 			},
 		},
 		{
+			name: "multiple query params curl",
+			wantHeaders: http.Header{
+				"Accept":        {"application/json"},
+				"Authorization": {"testing"},
+				"User-Agent":    {userAgent},
+			},
+			wantUrl:       "https://api.hop.io/v1/test?foo=bar&foo2=bar2",
+			returnsBody:   `{"data":{"foo":"bar"}}`,
+			returnsStatus: 200,
+			method:        "GET",
+			path:          "/test",
+			query: map[string]string{
+				"foo":  "bar",
+				"foo2": "bar2",
+			},
+			returnsCurl: "curl -X 'GET' -H 'Accept: application/json' -H 'Authorization: testing' " +
+				"-H 'User-Agent: {user_agent}' 'https://api.hop.io/v1/test?foo=bar&foo2=bar2'\n",
+		},
+		{
 			name: "get success",
 			wantHeaders: http.Header{
 				"Accept":        {"application/json"},
@@ -386,6 +407,21 @@ func TestClient_do(t *testing.T) {
 			returnsStatus: 200,
 			method:        "GET",
 			path:          "/test",
+		},
+		{
+			name: "get success curl",
+			wantHeaders: http.Header{
+				"Accept":        {"application/json"},
+				"Authorization": {"testing"},
+				"User-Agent":    {userAgent},
+			},
+			wantUrl:       "https://api.hop.io/v1/test",
+			returnsBody:   `{"data":{"foo":"bar"}}`,
+			returnsStatus: 200,
+			method:        "GET",
+			path:          "/test",
+			returnsCurl: "curl -X 'GET' -H 'Accept: application/json' -H 'Authorization: testing' " +
+				"-H 'User-Agent: {user_agent}' 'https://api.hop.io/v1/test'\n",
 		},
 		{
 			name: "no content",
@@ -569,6 +605,25 @@ func TestClient_do(t *testing.T) {
 			body:          []byte(`{"hello":"world"}`),
 		},
 		{
+			name: "json bytes post request curl",
+			wantHeaders: http.Header{
+				"Accept":        {"application/json"},
+				"Authorization": {"testing"},
+				"Content-Type":  {"application/json"},
+				"User-Agent":    {userAgent},
+			},
+			wantUrl:       "https://api.hop.io/v1/test",
+			wantBody:      `{"hello":"world"}`,
+			returnsBody:   `{"data":{"foo":"bar"}}`,
+			returnsStatus: 200,
+			method:        "POST",
+			path:          "/test",
+			body:          []byte(`{"hello":"world"}`),
+			returnsCurl: `curl -X 'POST' -d '{"hello":"world"}' -H 'Accept: application/json' -H ` +
+				"'Authorization: testing' -H 'Content-Type: application/json' -H 'User-Agent: {user_agent}' " +
+				"'https://api.hop.io/v1/test'\n",
+		},
+		{
 			name: "plain text post request",
 			wantHeaders: http.Header{
 				"Accept":        {"application/json"},
@@ -608,6 +663,11 @@ func TestClient_do(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			var buf *bytes.Buffer
+			if tt.returnsCurl != "" {
+				buf = &bytes.Buffer{}
+				tt.clientOpts = append(tt.clientOpts, WithCurlDebugWriter(buf))
+			}
 			c := &Client{
 				httpClient: &http.Client{
 					Transport: mockHttpRoundTripper{
@@ -654,6 +714,10 @@ func TestClient_do(t *testing.T) {
 			if ptr != nil {
 				// Check the body is what we expect.
 				assert.Equal(t, map[string]string{"foo": "bar"}, result)
+			}
+			if tt.returnsCurl != "" {
+				// Check the buffer is equal.
+				assert.Equal(t, tt.returnsCurl, strings.ReplaceAll(buf.String(), userAgent, "{user_agent}"))
 			}
 		})
 	}

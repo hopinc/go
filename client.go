@@ -15,6 +15,7 @@ import (
 	"sync"
 
 	"go.hop.io/sdk/types"
+	"moul.io/http2curl"
 )
 
 var userAgent = "hop-go/" + Version + " (go/" + runtime.Version() + ")"
@@ -146,24 +147,49 @@ func (c *Client) getAPIBase(opts []ClientOption) string {
 	return apiBase
 }
 
+// Resolves any curl debugging writers.
+func (c *Client) getCurlWriters(opts []ClientOption) []io.Writer {
+	var writers []io.Writer
+	c.forOption(func(x any) {
+		if x, ok := x.(curlWriterOption); ok {
+			writers = append(writers, x.w)
+		}
+	}, opts)
+	return writers
+}
+
+func (c *Client) setRequestHeaders(req *http.Request, r io.Reader, textPlain bool) {
+	req.Header.Set("Authorization", c.authorization)
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("User-Agent", userAgent)
+	if r != nil {
+		// This means we have a body of some description. What content type should we use?
+		if textPlain {
+			req.Header.Set("Content-Type", "text/plain")
+		} else {
+			req.Header.Set("Content-Type", "application/json")
+		}
+	}
+}
+
 // Does the specified HTTP request.
 func (c *Client) do(ctx context.Context, a clientArgs, clientOpts []ClientOption) error { //nolint:funlen,gocognit
 	// Handle getting the body bytes.
-	var r io.Reader
+	var body []byte
 	textPlain := false
 	if a.method != "GET" && a.body != nil {
 		switch x := a.body.(type) {
 		case plainText:
 			textPlain = true
-			r = bytes.NewReader(x)
+			body = x
 		case []byte:
-			r = bytes.NewReader(x)
+			body = x
 		default:
 			bodyBytes, err := json.Marshal(a.body)
 			if err != nil {
 				return err
 			}
-			r = bytes.NewReader(bodyBytes)
+			body = bodyBytes
 		}
 	}
 
@@ -211,21 +237,45 @@ func (c *Client) do(ctx context.Context, a clientArgs, clientOpts []ClientOption
 		}
 	}
 	apiBase := c.getAPIBase(clientOpts)
+
+	curlWriters := c.getCurlWriters(clientOpts)
+	if curlWriters != nil {
+		// If curl debugging is on, we make the request structure twice. This is because NewRequestWithContext
+		// takes a reader, and we do not want to pollute that.
+		var r io.Reader
+		if body != nil {
+			r = bytes.NewReader(body)
+		}
+		curlReq, err := http.NewRequest(a.method, apiBase+a.path+suffix, r)
+		if err != nil {
+			return err
+		}
+		c.setRequestHeaders(curlReq, r, textPlain)
+
+		// Convert the request to a curl command.
+		curl, err := http2curl.GetCurlCommand(curlReq)
+		if err != nil {
+			return err
+		}
+		curlB := []byte(curl.String() + "\n")
+
+		// Send the curl request to all the writers.
+		for _, v := range curlWriters {
+			if _, err := v.Write(curlB); err != nil {
+				return err
+			}
+		}
+	}
+
+	var r io.Reader
+	if body != nil {
+		r = bytes.NewReader(body)
+	}
 	req, err := http.NewRequestWithContext(ctx, a.method, apiBase+a.path+suffix, r)
 	if err != nil {
 		return err
 	}
-	req.Header.Set("Authorization", c.authorization)
-	req.Header.Set("Accept", "application/json")
-	req.Header.Set("User-Agent", userAgent)
-	if r != nil {
-		// This means we have a body of some description. What content type should we use?
-		if textPlain {
-			req.Header.Set("Content-Type", "text/plain")
-		} else {
-			req.Header.Set("Content-Type", "application/json")
-		}
-	}
+	c.setRequestHeaders(req, r, textPlain)
 
 	// Do the request.
 	res, err := c.httpClient.Do(req)
