@@ -173,7 +173,7 @@ func (c *Client) setRequestHeaders(req *http.Request, r io.Reader, textPlain boo
 }
 
 // Does the specified HTTP request.
-func (c *Client) do(ctx context.Context, a clientArgs, clientOpts []ClientOption) error { //nolint:funlen,gocognit
+func (c *Client) do(ctx context.Context, a clientArgs, clientOpts []ClientOption) error { //nolint:funlen,gocognit,cyclop
 	// Handle getting the body bytes.
 	var body []byte
 	textPlain := false
@@ -246,14 +246,15 @@ func (c *Client) do(ctx context.Context, a clientArgs, clientOpts []ClientOption
 		if body != nil {
 			r = bytes.NewReader(body)
 		}
-		curlReq, err := http.NewRequest(a.method, apiBase+a.path+suffix, r)
+		curlReq, err := http.NewRequest(a.method, apiBase+a.path+suffix, r) //nolint:noctx // Built for curl handler.
 		if err != nil {
 			return err
 		}
 		c.setRequestHeaders(curlReq, r, textPlain)
 
 		// Convert the request to a curl command.
-		curl, err := http2curl.GetCurlCommand(curlReq)
+		var curl *http2curl.CurlCommand
+		curl, err = http2curl.GetCurlCommand(curlReq)
 		if err != nil {
 			return err
 		}
