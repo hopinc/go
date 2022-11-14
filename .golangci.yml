@@ -28,7 +28,7 @@ linters-settings:
         strict: true
 
   nolintlint:
-    allow-no-explanation: [funlen, gocognit, cyclop, lll]
+    allow-no-explanation: [funlen, gocognit, cyclop, gocyclo, lll]
     require-explanation: true
     require-specific: true
 

@@ -173,7 +173,7 @@ func (c *Client) setRequestHeaders(req *http.Request, r io.Reader, textPlain boo
 }
 
 // Does the specified HTTP request.
-func (c *Client) do(ctx context.Context, a clientArgs, clientOpts []ClientOption) error { //nolint:funlen,gocognit,cyclop
+func (c *Client) do(ctx context.Context, a clientArgs, clientOpts []ClientOption) error { //nolint:funlen,gocognit,gocyclo
 	// Handle getting the body bytes.
 	var body []byte
 	textPlain := false
@@ -262,7 +262,7 @@ func (c *Client) do(ctx context.Context, a clientArgs, clientOpts []ClientOption
 
 		// Send the curl request to all the writers.
 		for _, v := range curlWriters {
-			if _, err := v.Write(curlB); err != nil {
+			if _, err = v.Write(curlB); err != nil {
 				return err
 			}
 		}
