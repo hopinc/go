@@ -1,6 +1,9 @@
 {
+	"protocol": "ghi",
+	"path": "jkl",
+	"port": 4,
 	"initial_delay": 0,
 	"interval": 0,
 	"timeout": 0,
-	"max_retries": 5
+	"max_retries": 8
 }

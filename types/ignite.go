@@ -637,6 +637,15 @@ type HealthCheckUpdateOpts struct {
 	// HealthCheckID is used to define the ID of the health check. This must be set.
 	HealthCheckID string `json:"-"`
 
+	// Protocol is the protocol that this health check will work on.
+	Protocol HealthCheckProtocol `json:"protocol,omitempty"`
+
+	// Path is the path which should be hit for the health check.
+	Path string `json:"path,omitempty"`
+
+	// Port is the port that should be hit for the health check.
+	Port int `json:"port,omitempty"`
+
 	// InitialDelay is the initial delay in health checking.
 	InitialDelay Seconds `json:"initial_delay,omitempty"`
 
