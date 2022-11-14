@@ -477,10 +477,10 @@ type ContainerMetadata struct {
 // ContainerMetrics is used to define the metrics of a container.
 type ContainerMetrics struct {
 	// CPUUsagePercent is used to define the % usage of the CPU.
-	CPUUsagePercent int `json:"cpu_usage_percent"`
+	CPUUsagePercent float64 `json:"cpu_usage_percent"`
 
 	// MemoryUsagePercent is used to define the % usage of the RAM.
-	MemoryUsagePercent int `json:"memory_usage_percent"`
+	MemoryUsagePercent float64 `json:"memory_usage_percent"`
 }
 
 // Container is used to define a container in Ignite.
