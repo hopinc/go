@@ -173,7 +173,7 @@ func (c *Client) setRequestHeaders(req *http.Request, r io.Reader, textPlain boo
 }
 
 // Does the specified HTTP request.
-func (c *Client) do(ctx context.Context, a clientArgs, clientOpts []ClientOption) error { //nolint:funlen,gocognit,gocyclo
+func (c *Client) do(ctx context.Context, a clientArgs, clientOpts []ClientOption) error { //nolint:funlen,gocognit,gocyclo,cyclop
 	// Handle getting the body bytes.
 	var body []byte
 	textPlain := false
