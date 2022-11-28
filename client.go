@@ -55,18 +55,6 @@ type Client struct {
 	Channels *ClientCategoryChannels
 }
 
-// Runs through all options in the client and then any additional options passed through.
-func (c *Client) forOption(f func(any), opts []ClientOption) {
-	if c.opts != nil {
-		for _, v := range c.opts {
-			f(v)
-		}
-	}
-	for _, v := range opts {
-		f(v)
-	}
-}
-
 // NewClient is used to make a new Hop client.
 func NewClient(authorization string, opts ...ClientOption) (*Client, error) {
 	prefix, err := ValidateToken(authorization)
@@ -107,16 +95,32 @@ func (c *Client) SetAPIBase(apiBase string) *Client {
 	return c
 }
 
-type plainText []byte
+// PlainText is a special case for a body that should be sent as text/plain.
+type PlainText []byte
 
-type clientArgs struct {
-	method    string
-	path      string
-	resultKey string
-	query     map[string]string
-	body      any
-	result    any
-	ignore404 bool
+// ClientArgs is used to define the arguments from the function to the client.
+type ClientArgs struct {
+	// Method is used to define the request method.
+	Method string
+
+	// Path is used to define the path (with the URL suffix including /api/vX removed).
+	Path string
+
+	// ResultKey is the key inside the "data" part of the JSON where the data is.
+	ResultKey string
+
+	// Query is any HTTP query parameters that should be sent.
+	Query map[string]string
+
+	// Body is the body to send. This should be json marshalled except for the PlainText type.
+	Body any
+
+	// Result is a pointer to where the result should be unmarshalled. Note that if this is nil, the
+	// result body should be ignored.
+	Result any
+
+	// Ignore404 is whether a 404 should not be treated as an error.
+	Ignore404 bool
 }
 
 type responseBody struct {
@@ -125,37 +129,44 @@ type responseBody struct {
 
 func (c *Client) getTokenType() string { return c.tokenType }
 
+// Transforms the client options into the processed object.
+func (c *Client) processOpts(opts []ClientOption) ProcessedClientOpts {
+	o := ProcessedClientOpts{CurlDebugWriters: []io.Writer{}}
+	process := func(v any) {
+		switch x := v.(type) {
+		case projectIdOption:
+			o.ProjectID = x.projectId
+		case apiUrlOption:
+			o.CustomAPIURL = x.apiBase
+		case curlWriterOption:
+			o.CurlDebugWriters = append(o.CurlDebugWriters, x.w)
+		case customHandlerOption:
+			o.CustomHandler = x.fn
+		}
+	}
+	for _, v := range c.opts {
+		process(v)
+	}
+	for _, v := range opts {
+		process(v)
+	}
+	return o
+}
+
 // Resolves the project ID from the client options. Will be a blank string if this is not specified.
 func (c *Client) getProjectId(opts []ClientOption) string {
 	projectId := ""
-	c.forOption(func(x any) {
-		if x, ok := x.(projectIdOption); ok {
+	for _, v := range c.opts {
+		if x, ok := v.(projectIdOption); ok {
 			projectId = x.projectId
 		}
-	}, opts)
+	}
+	for _, v := range opts {
+		if x, ok := v.(projectIdOption); ok {
+			projectId = x.projectId
+		}
+	}
 	return projectId
-}
-
-// Resolves the API base URL from the client options. Will be the default if this is not specified.
-func (c *Client) getAPIBase(opts []ClientOption) string {
-	apiBase := DefaultAPIBase
-	c.forOption(func(x any) {
-		if x, ok := x.(apiUrlOption); ok {
-			apiBase = x.apiBase
-		}
-	}, opts)
-	return apiBase
-}
-
-// Resolves any curl debugging writers.
-func (c *Client) getCurlWriters(opts []ClientOption) []io.Writer {
-	var writers []io.Writer
-	c.forOption(func(x any) {
-		if x, ok := x.(curlWriterOption); ok {
-			writers = append(writers, x.w)
-		}
-	}, opts)
-	return writers
 }
 
 func (c *Client) setRequestHeaders(req *http.Request, r io.Reader, textPlain bool) {
@@ -173,19 +184,27 @@ func (c *Client) setRequestHeaders(req *http.Request, r io.Reader, textPlain boo
 }
 
 // Does the specified HTTP request.
-func (c *Client) do(ctx context.Context, a clientArgs, clientOpts []ClientOption) error { //nolint:funlen,gocognit,gocyclo,cyclop
+func (c *Client) do(ctx context.Context, a ClientArgs, clientOpts []ClientOption) error { //nolint:funlen,gocognit,gocyclo,cyclop
+	// Transform the client options.
+	processedOpts := c.processOpts(clientOpts)
+
+	// Handle client overrides.
+	if processedOpts.CustomHandler != nil {
+		return processedOpts.CustomHandler(ctx, a, processedOpts)
+	}
+
 	// Handle getting the body bytes.
 	var body []byte
 	textPlain := false
-	if a.method != "GET" && a.body != nil {
-		switch x := a.body.(type) {
-		case plainText:
+	if a.Method != "GET" && a.Body != nil {
+		switch x := a.Body.(type) {
+		case PlainText:
 			textPlain = true
 			body = x
 		case []byte:
 			body = x
 		default:
-			bodyBytes, err := json.Marshal(a.body)
+			bodyBytes, err := json.Marshal(a.Body)
 			if err != nil {
 				return err
 			}
@@ -194,16 +213,16 @@ func (c *Client) do(ctx context.Context, a clientArgs, clientOpts []ClientOption
 	}
 
 	// Add project ID to the query if it is specified.
-	if projectId := c.getProjectId(clientOpts); projectId != "" {
-		if a.query == nil {
-			a.query = map[string]string{}
+	if processedOpts.ProjectID != "" {
+		if a.Query == nil {
+			a.Query = map[string]string{}
 		}
-		a.query["project"] = projectId
+		a.Query["project"] = processedOpts.ProjectID
 	}
 
 	// Create the request.
 	suffix := ""
-	if a.query != nil {
+	if a.Query != nil {
 		suffix = "?"
 		first := true
 
@@ -219,34 +238,37 @@ func (c *Client) do(ctx context.Context, a clientArgs, clientOpts []ClientOption
 
 		if c.isTest {
 			// Order all the keys for unit testing reasons.
-			keys := make([]string, len(a.query))
+			keys := make([]string, len(a.Query))
 			i := 0
-			for k := range a.query {
+			for k := range a.Query {
 				keys[i] = k
 				i++
 			}
 			sort.Strings(keys)
 			for _, k := range keys {
-				addChunk(k, a.query[k])
+				addChunk(k, a.Query[k])
 			}
 		} else {
 			// Just proceed as usual.
-			for k, v := range a.query {
+			for k, v := range a.Query {
 				addChunk(k, v)
 			}
 		}
 	}
-	apiBase := c.getAPIBase(clientOpts)
+	apiBase := processedOpts.CustomAPIURL
+	if apiBase == "" {
+		// Revert to the default.
+		apiBase = DefaultAPIBase
+	}
 
-	curlWriters := c.getCurlWriters(clientOpts)
-	if curlWriters != nil {
+	if len(processedOpts.CurlDebugWriters) != 0 {
 		// If curl debugging is on, we make the request structure twice. This is because NewRequestWithContext
 		// takes a reader, and we do not want to pollute that.
 		var r io.Reader
 		if body != nil {
 			r = bytes.NewReader(body)
 		}
-		curlReq, err := http.NewRequest(a.method, apiBase+a.path+suffix, r) //nolint:noctx // Built for curl handler.
+		curlReq, err := http.NewRequest(a.Method, apiBase+a.Path+suffix, r) //nolint:noctx // Built for curl handler.
 		if err != nil {
 			return err
 		}
@@ -261,7 +283,7 @@ func (c *Client) do(ctx context.Context, a clientArgs, clientOpts []ClientOption
 		curlB := []byte(curl.String() + "\n")
 
 		// Send the curl request to all the writers.
-		for _, v := range curlWriters {
+		for _, v := range processedOpts.CurlDebugWriters {
 			if _, err = v.Write(curlB); err != nil {
 				return err
 			}
@@ -272,7 +294,7 @@ func (c *Client) do(ctx context.Context, a clientArgs, clientOpts []ClientOption
 	if body != nil {
 		r = bytes.NewReader(body)
 	}
-	req, err := http.NewRequestWithContext(ctx, a.method, apiBase+a.path+suffix, r)
+	req, err := http.NewRequestWithContext(ctx, a.Method, apiBase+a.Path+suffix, r)
 	if err != nil {
 		return err
 	}
@@ -288,13 +310,13 @@ func (c *Client) do(ctx context.Context, a clientArgs, clientOpts []ClientOption
 	// If this is a 4xs or 5xx, handle the error.
 	if res.StatusCode >= 400 && 599 >= res.StatusCode {
 		// If this is a 404, check if it is a special case before jumping to the error handler.
-		if res.StatusCode != 404 || !a.ignore404 {
+		if res.StatusCode != 404 || !a.Ignore404 {
 			return handleErrors(res)
 		}
 	}
 
 	// Handle if we should process the data.
-	if a.result != nil {
+	if a.Result != nil {
 		var b []byte
 		if b, err = io.ReadAll(res.Body); err != nil {
 			// Failed to read the body.
@@ -307,21 +329,21 @@ func (c *Client) do(ctx context.Context, a clientArgs, clientOpts []ClientOption
 		}
 		b = x.Data
 
-		if a.resultKey != "" {
+		if a.ResultKey != "" {
 			// Get the json.RawMessage for the specific key.
 			var m map[string]json.RawMessage
 			if err = json.Unmarshal(b, &m); err != nil {
 				return err
 			}
 			var ok bool
-			if b, ok = m[a.resultKey]; !ok {
+			if b, ok = m[a.ResultKey]; !ok {
 				// The key specified was not actually valid.
 				return errors.New("api response error: key was not in response - please report this to " +
 					"the go-hop github repository")
 			}
 		}
 
-		if err = json.Unmarshal(b, a.result); err != nil {
+		if err = json.Unmarshal(b, a.Result); err != nil {
 			return err
 		}
 	}
@@ -331,7 +353,7 @@ func (c *Client) do(ctx context.Context, a clientArgs, clientOpts []ClientOption
 }
 
 type clientDoer interface {
-	do(ctx context.Context, a clientArgs, opts []ClientOption) error
+	do(ctx context.Context, a ClientArgs, opts []ClientOption) error
 	getTokenType() string
 	getProjectId([]ClientOption) string
 }
@@ -390,12 +412,12 @@ func (p *Paginator[T]) Next(ctx context.Context, opts ...ClientOption) ([]T, err
 	}
 
 	var m map[string]json.RawMessage
-	if err := p.c.do(ctx, clientArgs{
-		method:    "GET",
-		path:      p.path,
-		query:     query,
-		result:    &m,
-		ignore404: false,
+	if err := p.c.do(ctx, ClientArgs{
+		Method:    "GET",
+		Path:      p.path,
+		Query:     query,
+		Result:    &m,
+		Ignore404: false,
 	}, opts); err != nil {
 		return nil, err
 	}

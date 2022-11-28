@@ -124,7 +124,7 @@ func TestClient_Projects_Secrets_Create(t *testing.T) {
 		wantMethod:     "PUT",
 		wantPath:       "/projects/test%20test/secrets/ESCAPED%20SECRET",
 		wantResultKey:  "secret",
-		wantBody:       plainText("world"),
+		wantBody:       PlainText("world"),
 		wantClientOpts: []ClientOption{WithProjectID("test test")},
 		wantIgnore404:  false,
 	}

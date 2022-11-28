@@ -13,11 +13,11 @@ func (c ClientCategoryPipeRooms) GetAll(ctx context.Context, opts ...ClientOptio
 		return nil, types.InvalidToken("project ID must be specified when using bearer authentication to get rooms")
 	}
 	var rooms []*types.Room
-	err := c.c.do(ctx, clientArgs{
-		method:    "GET",
-		path:      "/pipe/rooms",
-		resultKey: "rooms",
-		result:    &rooms,
+	err := c.c.do(ctx, ClientArgs{
+		Method:    "GET",
+		Path:      "/pipe/rooms",
+		ResultKey: "rooms",
+		Result:    &rooms,
 	}, opts)
 	if err != nil {
 		return nil, err
@@ -30,12 +30,12 @@ func (c ClientCategoryPipeRooms) Create(
 	ctx context.Context, opts types.RoomCreationOptions, clientOpts ...ClientOption,
 ) (*types.Room, error) {
 	var room types.Room
-	err := c.c.do(ctx, clientArgs{
-		method:    "POST",
-		path:      "/pipe/rooms",
-		resultKey: "room",
-		result:    &room,
-		body:      opts,
+	err := c.c.do(ctx, ClientArgs{
+		Method:    "POST",
+		Path:      "/pipe/rooms",
+		ResultKey: "room",
+		Result:    &room,
+		Body:      opts,
 	}, clientOpts)
 	if err != nil {
 		return nil, err
@@ -45,8 +45,8 @@ func (c ClientCategoryPipeRooms) Create(
 
 // Delete is used to delete a room.
 func (c ClientCategoryPipeRooms) Delete(ctx context.Context, id string, opts ...ClientOption) error {
-	return c.c.do(ctx, clientArgs{
-		method: "DELETE",
-		path:   "/pipe/rooms/" + url.PathEscape(id),
+	return c.c.do(ctx, ClientArgs{
+		Method: "DELETE",
+		Path:   "/pipe/rooms/" + url.PathEscape(id),
 	}, opts)
 }

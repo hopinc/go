@@ -242,7 +242,7 @@ func TestClient_SetAPIBase(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			c := &Client{}
 			c.SetAPIBase(tt.baseUrl)
-			assert.Equal(t, tt.expects, c.getAPIBase([]ClientOption{}))
+			assert.Equal(t, tt.expects, c.processOpts([]ClientOption{}).CustomAPIURL)
 		})
 	}
 }
@@ -339,6 +339,22 @@ func TestClient_do(t *testing.T) {
 			},
 			wantUrl:      "https://api.hop.io/v1/test",
 			returnsError: errors.New("hamster tripped on wire"),
+			expectsError: errors.New("hamster tripped on wire"),
+			method:       "GET",
+			path:         "/test",
+		},
+		{
+			name: "custom handler error",
+			funcOpts: []ClientOption{WithCustomHandler(
+				func(ctx context.Context, a ClientArgs, opts ProcessedClientOpts) error {
+					assert.NotNil(t, ctx)
+					assert.Equal(t, ClientArgs{
+						Method: "GET",
+						Path:   "/test",
+					}, a)
+					return errors.New("hamster tripped on wire")
+				},
+			)},
 			expectsError: errors.New("hamster tripped on wire"),
 			method:       "GET",
 			path:         "/test",
@@ -573,6 +589,32 @@ func TestClient_do(t *testing.T) {
 			path:          "/test",
 		},
 		{
+			name: "custom handler post request",
+			wantHeaders: http.Header{
+				"Accept":        {"application/json"},
+				"Authorization": {"testing"},
+				"Content-Type":  {"application/json"},
+				"User-Agent":    {userAgent},
+			},
+			clientOpts: []ClientOption{WithCustomHandler(func(
+				ctx context.Context, a ClientArgs, opts ProcessedClientOpts,
+			) error {
+				assert.NotNil(t, ctx)
+				assert.Equal(t, ClientArgs{
+					Method: "POST",
+					Path:   "/test",
+					Body:   map[string]string{"hello": "world"},
+					Result: &map[string]string{},
+				}, a)
+				return json.Unmarshal([]byte(`{"foo":"bar"}`), a.Result)
+			})},
+			wantUrl:     "https://api.hop.io/v1/test",
+			returnsBody: `{"data":{"foo":"bar"}}`,
+			method:      "POST",
+			path:        "/test",
+			body:        map[string]string{"hello": "world"},
+		},
+		{
 			name: "marshalled json post request",
 			wantHeaders: http.Header{
 				"Accept":        {"application/json"},
@@ -637,7 +679,7 @@ func TestClient_do(t *testing.T) {
 			returnsStatus: 200,
 			method:        "POST",
 			path:          "/test",
-			body:          plainText("hello world"),
+			body:          PlainText("hello world"),
 		},
 		{
 			name:         "body marshal error",
@@ -693,14 +735,14 @@ func TestClient_do(t *testing.T) {
 				// blank responses should be a nil pointer
 				ptr = nil
 			}
-			err := c.do(context.Background(), clientArgs{
-				method:    tt.method,
-				path:      tt.path,
-				resultKey: tt.resultKey,
-				query:     tt.query,
-				body:      tt.body,
-				result:    ptr,
-				ignore404: tt.ignore404,
+			err := c.do(context.Background(), ClientArgs{
+				Method:    tt.method,
+				Path:      tt.path,
+				ResultKey: tt.resultKey,
+				Query:     tt.query,
+				Body:      tt.body,
+				Result:    ptr,
+				Ignore404: tt.ignore404,
 			}, tt.funcOpts)
 			if tt.expectsError == nil {
 				assert.NoError(t, err)

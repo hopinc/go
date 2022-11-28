@@ -11,10 +11,10 @@ import (
 // AddDomain is used to add a domain to the gateway. The parameter gatewayId is the ID of the gateway to add the domain to,
 // and domain is the full name of the domain.
 func (c ClientCategoryIgniteGateways) AddDomain(ctx context.Context, gatewayId string, domain string, opts ...ClientOption) error {
-	return c.c.do(ctx, clientArgs{
-		method: "POST",
-		path:   "/ignite/gateways/" + url.PathEscape(gatewayId) + "/domains",
-		body:   map[string]any{"domain": domain},
+	return c.c.do(ctx, ClientArgs{
+		Method: "POST",
+		Path:   "/ignite/gateways/" + url.PathEscape(gatewayId) + "/domains",
+		Body:   map[string]any{"domain": domain},
 	}, opts)
 }
 
@@ -23,11 +23,11 @@ func (c ClientCategoryIgniteGateways) GetDomain(
 	ctx context.Context, domainId string, opts ...ClientOption,
 ) (*types.Domain, error) {
 	var d types.Domain
-	err := c.c.do(ctx, clientArgs{
-		method:    "GET",
-		path:      "/ignite/domains/" + url.PathEscape(domainId),
-		resultKey: "domain",
-		result:    &d,
+	err := c.c.do(ctx, ClientArgs{
+		Method:    "GET",
+		Path:      "/ignite/domains/" + url.PathEscape(domainId),
+		ResultKey: "domain",
+		Result:    &d,
 	}, opts)
 	if err != nil {
 		return nil, err
@@ -37,20 +37,20 @@ func (c ClientCategoryIgniteGateways) GetDomain(
 
 // DeleteDomain is used to delete a domain by its ID.
 func (c ClientCategoryIgniteGateways) DeleteDomain(ctx context.Context, domainId string, opts ...ClientOption) error {
-	return c.c.do(ctx, clientArgs{
-		method: "DELETE",
-		path:   "/ignite/domains/" + url.PathEscape(domainId),
+	return c.c.do(ctx, ClientArgs{
+		Method: "DELETE",
+		Path:   "/ignite/domains/" + url.PathEscape(domainId),
 	}, opts)
 }
 
 // Get is used to get a gateway by its ID.
 func (c ClientCategoryIgniteGateways) Get(ctx context.Context, id string, opts ...ClientOption) (*types.Gateway, error) {
 	var gw types.Gateway
-	err := c.c.do(ctx, clientArgs{
-		method:    "GET",
-		path:      "/ignite/gateways/" + url.PathEscape(id),
-		resultKey: "gateway",
-		result:    &gw,
+	err := c.c.do(ctx, ClientArgs{
+		Method:    "GET",
+		Path:      "/ignite/gateways/" + url.PathEscape(id),
+		ResultKey: "gateway",
+		Result:    &gw,
 	}, opts)
 	if err != nil {
 		return nil, err
@@ -60,9 +60,9 @@ func (c ClientCategoryIgniteGateways) Get(ctx context.Context, id string, opts .
 
 // Delete is used to delete a gateway by its ID.
 func (c ClientCategoryIgniteGateways) Delete(ctx context.Context, id string, opts ...ClientOption) error {
-	return c.c.do(ctx, clientArgs{
-		method: "DELETE",
-		path:   "/ignite/gateways/" + url.PathEscape(id),
+	return c.c.do(ctx, ClientArgs{
+		Method: "DELETE",
+		Path:   "/ignite/gateways/" + url.PathEscape(id),
 	}, opts)
 }
 
@@ -71,12 +71,12 @@ func (c ClientCategoryIgniteGateways) Update(
 	ctx context.Context, id string, updateOpts types.IgniteGatewayUpdateOpts, opts ...ClientOption,
 ) (*types.Gateway, error) {
 	var gw types.Gateway
-	err := c.c.do(ctx, clientArgs{
-		method:    "PATCH",
-		path:      "/ignite/gateways/" + url.PathEscape(id),
-		resultKey: "gateway",
-		body:      updateOpts,
-		result:    &gw,
+	err := c.c.do(ctx, ClientArgs{
+		Method:    "PATCH",
+		Path:      "/ignite/gateways/" + url.PathEscape(id),
+		ResultKey: "gateway",
+		Body:      updateOpts,
+		Result:    &gw,
 	}, opts)
 	if err != nil {
 		return nil, err
@@ -107,13 +107,13 @@ func (c ClientCategoryIgniteDeployments) Create(
 	}
 
 	var d types.Deployment
-	err = c.c.do(ctx, clientArgs{
-		method:    "POST",
-		path:      "/ignite/deployments",
-		resultKey: "deployment",
-		body:      deployment,
-		result:    &d,
-		ignore404: false,
+	err = c.c.do(ctx, ClientArgs{
+		Method:    "POST",
+		Path:      "/ignite/deployments",
+		ResultKey: "deployment",
+		Body:      deployment,
+		Result:    &d,
+		Ignore404: false,
 	}, opts)
 	if err != nil {
 		return nil, err
@@ -124,11 +124,11 @@ func (c ClientCategoryIgniteDeployments) Create(
 // Get is used to get a deployment by its ID.
 func (c ClientCategoryIgniteDeployments) Get(ctx context.Context, id string, opts ...ClientOption) (*types.Deployment, error) {
 	var d types.Deployment
-	err := c.c.do(ctx, clientArgs{
-		method:    "GET",
-		path:      "/ignite/deployments/" + url.PathEscape(id),
-		resultKey: "deployment",
-		result:    &d,
+	err := c.c.do(ctx, ClientArgs{
+		Method:    "GET",
+		Path:      "/ignite/deployments/" + url.PathEscape(id),
+		ResultKey: "deployment",
+		Result:    &d,
 	}, opts)
 	if err != nil {
 		return nil, err
@@ -139,12 +139,12 @@ func (c ClientCategoryIgniteDeployments) Get(ctx context.Context, id string, opt
 // GetByName is used to get a deployment by its name.
 func (c ClientCategoryIgniteDeployments) GetByName(ctx context.Context, name string, opts ...ClientOption) (*types.Deployment, error) {
 	var d types.Deployment
-	err := c.c.do(ctx, clientArgs{
-		method:    "GET",
-		path:      "/ignite/deployments/search",
-		query:     map[string]string{"name": name},
-		resultKey: "deployment",
-		result:    &d,
+	err := c.c.do(ctx, ClientArgs{
+		Method:    "GET",
+		Path:      "/ignite/deployments/search",
+		Query:     map[string]string{"name": name},
+		ResultKey: "deployment",
+		Result:    &d,
 	}, opts)
 	if err != nil {
 		return nil, err
@@ -157,12 +157,12 @@ func (c ClientCategoryIgniteDeployments) Update(
 	ctx context.Context, id string, updateOpts types.IgniteDeploymentUpdateOpts, opts ...ClientOption,
 ) (*types.Deployment, error) {
 	var d types.Deployment
-	err := c.c.do(ctx, clientArgs{
-		method:    "PATCH",
-		path:      "/ignite/deployments/" + url.PathEscape(id),
-		resultKey: "deployment",
-		body:      updateOpts,
-		result:    &d,
+	err := c.c.do(ctx, ClientArgs{
+		Method:    "PATCH",
+		Path:      "/ignite/deployments/" + url.PathEscape(id),
+		ResultKey: "deployment",
+		Body:      updateOpts,
+		Result:    &d,
 	}, opts)
 	if err != nil {
 		return nil, err
@@ -182,11 +182,11 @@ func (c ClientCategoryIgniteDeployments) Patch(
 // GetContainers is used to get the containers of a deployment.
 func (c ClientCategoryIgniteDeployments) GetContainers(ctx context.Context, id string, opts ...ClientOption) ([]*types.Container, error) {
 	var containers []*types.Container
-	err := c.c.do(ctx, clientArgs{
-		method:    "GET",
-		path:      "/ignite/deployments/" + url.PathEscape(id) + "/containers",
-		resultKey: "containers",
-		result:    &containers,
+	err := c.c.do(ctx, ClientArgs{
+		Method:    "GET",
+		Path:      "/ignite/deployments/" + url.PathEscape(id) + "/containers",
+		ResultKey: "containers",
+		Result:    &containers,
 	}, opts)
 	if err != nil {
 		return nil, err
@@ -197,11 +197,11 @@ func (c ClientCategoryIgniteDeployments) GetContainers(ctx context.Context, id s
 // GetAll is used to get all deployments.
 func (c ClientCategoryIgniteDeployments) GetAll(ctx context.Context, opts ...ClientOption) ([]*types.Deployment, error) {
 	var deployments []*types.Deployment
-	err := c.c.do(ctx, clientArgs{
-		method:    "GET",
-		path:      "/ignite/deployments",
-		resultKey: "deployments",
-		result:    &deployments,
+	err := c.c.do(ctx, ClientArgs{
+		Method:    "GET",
+		Path:      "/ignite/deployments",
+		ResultKey: "deployments",
+		Result:    &deployments,
 	}, opts)
 	if err != nil {
 		return nil, err
@@ -211,20 +211,20 @@ func (c ClientCategoryIgniteDeployments) GetAll(ctx context.Context, opts ...Cli
 
 // Delete is used to delete a deployment by its ID.
 func (c ClientCategoryIgniteDeployments) Delete(ctx context.Context, id string, opts ...ClientOption) error {
-	return c.c.do(ctx, clientArgs{
-		method: "DELETE",
-		path:   "/ignite/deployments/" + url.PathEscape(id),
+	return c.c.do(ctx, ClientArgs{
+		Method: "DELETE",
+		Path:   "/ignite/deployments/" + url.PathEscape(id),
 	}, opts)
 }
 
 // GetAllGateways is used to get all gateways attached to a deployment.
 func (c ClientCategoryIgniteDeployments) GetAllGateways(ctx context.Context, id string, opts ...ClientOption) ([]*types.Gateway, error) {
 	var gateways []*types.Gateway
-	err := c.c.do(ctx, clientArgs{
-		method:    "GET",
-		path:      "/ignite/deployments/" + url.PathEscape(id) + "/gateways",
-		resultKey: "gateways",
-		result:    &gateways,
+	err := c.c.do(ctx, ClientArgs{
+		Method:    "GET",
+		Path:      "/ignite/deployments/" + url.PathEscape(id) + "/gateways",
+		ResultKey: "gateways",
+		Result:    &gateways,
 	}, opts)
 	if err != nil {
 		return nil, err
@@ -241,12 +241,12 @@ func (c ClientCategoryIgniteDeployments) CreateGateway(
 	}
 
 	var gw types.Gateway
-	err := c.c.do(ctx, clientArgs{
-		method:    "POST",
-		path:      "/ignite/deployments/" + url.PathEscape(opts.DeploymentID) + "/gateways",
-		body:      opts,
-		resultKey: "gateway",
-		result:    &gw,
+	err := c.c.do(ctx, ClientArgs{
+		Method:    "POST",
+		Path:      "/ignite/deployments/" + url.PathEscape(opts.DeploymentID) + "/gateways",
+		Body:      opts,
+		ResultKey: "gateway",
+		Result:    &gw,
 	}, clientOpts)
 	if err != nil {
 		return nil, err
@@ -256,9 +256,9 @@ func (c ClientCategoryIgniteDeployments) CreateGateway(
 
 // Delete is used to delete a container by its ID.
 func (c ClientCategoryIgniteContainers) Delete(ctx context.Context, id string, opts ...ClientOption) error {
-	return c.c.do(ctx, clientArgs{
-		method: "DELETE",
-		path:   "/ignite/containers/" + url.PathEscape(id),
+	return c.c.do(ctx, ClientArgs{
+		Method: "DELETE",
+		Path:   "/ignite/containers/" + url.PathEscape(id),
 	}, opts)
 }
 
@@ -284,10 +284,10 @@ func (c ClientCategoryIgniteContainers) GetLogs(id string, limit int, ascOrder b
 func (c ClientCategoryIgniteContainers) updateContainerState(
 	ctx context.Context, id string, state types.ContainerState, opts []ClientOption,
 ) error {
-	return c.c.do(ctx, clientArgs{
-		method: "PUT",
-		path:   "/ignite/containers/" + url.PathEscape(id) + "/state",
-		body:   map[string]types.ContainerState{"preferred_state": state},
+	return c.c.do(ctx, ClientArgs{
+		Method: "PUT",
+		Path:   "/ignite/containers/" + url.PathEscape(id) + "/state",
+		Body:   map[string]types.ContainerState{"preferred_state": state},
 	}, opts)
 }
 
@@ -304,11 +304,11 @@ func (c ClientCategoryIgniteContainers) Start(ctx context.Context, id string, op
 // Create is used to create a container.
 func (c ClientCategoryIgniteContainers) Create(ctx context.Context, deploymentId string, opts ...ClientOption) (*types.Container, error) {
 	var a []*types.Container
-	err := c.c.do(ctx, clientArgs{
-		method:    "POST",
-		path:      "/ignite/deployments/" + url.PathEscape(deploymentId) + "/containers",
-		resultKey: "containers",
-		result:    &a,
+	err := c.c.do(ctx, ClientArgs{
+		Method:    "POST",
+		Path:      "/ignite/deployments/" + url.PathEscape(deploymentId) + "/containers",
+		ResultKey: "containers",
+		Result:    &a,
 	}, opts)
 	if err != nil {
 		return nil, err
@@ -321,12 +321,12 @@ func (c ClientCategoryIgniteDeployments) Scale(
 	ctx context.Context, deploymentId string, containerCount uint, opts ...ClientOption,
 ) ([]*types.Container, error) {
 	var a []*types.Container
-	err := c.c.do(ctx, clientArgs{
-		method:    "PATCH",
-		path:      "/ignite/deployments/" + url.PathEscape(deploymentId) + "/scale",
-		body:      map[string]uint{"scale": containerCount},
-		resultKey: "containers",
-		result:    &a,
+	err := c.c.do(ctx, ClientArgs{
+		Method:    "PATCH",
+		Path:      "/ignite/deployments/" + url.PathEscape(deploymentId) + "/scale",
+		Body:      map[string]uint{"scale": containerCount},
+		ResultKey: "containers",
+		Result:    &a,
 	}, opts)
 	if err != nil {
 		return nil, err
@@ -367,12 +367,12 @@ func (c ClientCategoryIgniteDeployments) NewHealthCheck(
 
 	// Do the HTTP request.
 	var res types.HealthCheck
-	err := c.c.do(ctx, clientArgs{
-		method:    "POST",
-		path:      "/ignite/deployments/" + url.PathEscape(deploymentId) + "/health-checks",
-		body:      createOpts,
-		resultKey: "health_check",
-		result:    &res,
+	err := c.c.do(ctx, ClientArgs{
+		Method:    "POST",
+		Path:      "/ignite/deployments/" + url.PathEscape(deploymentId) + "/health-checks",
+		Body:      createOpts,
+		ResultKey: "health_check",
+		Result:    &res,
 	}, opts)
 	if err != nil {
 		return nil, err
@@ -385,11 +385,11 @@ func (c ClientCategoryIgniteDeployments) GetHealthChecks(
 	ctx context.Context, deploymentId string, opts ...ClientOption,
 ) ([]*types.HealthCheck, error) {
 	var res []*types.HealthCheck
-	err := c.c.do(ctx, clientArgs{
-		method:    "GET",
-		path:      "/ignite/deployments/" + url.PathEscape(deploymentId) + "/health-checks",
-		resultKey: "health_checks",
-		result:    &res,
+	err := c.c.do(ctx, ClientArgs{
+		Method:    "GET",
+		Path:      "/ignite/deployments/" + url.PathEscape(deploymentId) + "/health-checks",
+		ResultKey: "health_checks",
+		Result:    &res,
 	}, opts)
 	if err != nil {
 		return nil, err
@@ -401,9 +401,9 @@ func (c ClientCategoryIgniteDeployments) GetHealthChecks(
 func (c ClientCategoryIgniteDeployments) DeleteHealthCheck(
 	ctx context.Context, deploymentId, healthCheckId string, opts ...ClientOption,
 ) error {
-	return c.c.do(ctx, clientArgs{
-		method: "DELETE",
-		path: "/ignite/deployments/" + url.PathEscape(deploymentId) + "/health-checks/" +
+	return c.c.do(ctx, ClientArgs{
+		Method: "DELETE",
+		Path: "/ignite/deployments/" + url.PathEscape(deploymentId) + "/health-checks/" +
 			url.PathEscape(healthCheckId),
 	}, opts)
 }
@@ -413,13 +413,13 @@ func (c ClientCategoryIgniteDeployments) UpdateHealthCheck(
 	ctx context.Context, updateOpts types.HealthCheckUpdateOpts, opts ...ClientOption,
 ) (*types.HealthCheck, error) {
 	var res types.HealthCheck
-	err := c.c.do(ctx, clientArgs{
-		method: "PATCH",
-		path: "/ignite/deployments/" + url.PathEscape(updateOpts.DeploymentID) + "/health-checks/" +
+	err := c.c.do(ctx, ClientArgs{
+		Method: "PATCH",
+		Path: "/ignite/deployments/" + url.PathEscape(updateOpts.DeploymentID) + "/health-checks/" +
 			url.PathEscape(updateOpts.HealthCheckID),
-		body:      updateOpts,
-		resultKey: "health_check",
-		result:    &res,
+		Body:      updateOpts,
+		ResultKey: "health_check",
+		Result:    &res,
 	}, opts)
 	if err != nil {
 		return nil, err
@@ -432,11 +432,11 @@ func (c ClientCategoryIgniteDeployments) HealthCheckStates(
 	ctx context.Context, deploymentId string, opts ...ClientOption,
 ) ([]*types.HealthCheckState, error) {
 	var res []*types.HealthCheckState
-	err := c.c.do(ctx, clientArgs{
-		method:    "GET",
-		path:      "/ignite/deployments/" + url.PathEscape(deploymentId) + "/health-check-state",
-		resultKey: "health_check_states",
-		result:    &res,
+	err := c.c.do(ctx, ClientArgs{
+		Method:    "GET",
+		Path:      "/ignite/deployments/" + url.PathEscape(deploymentId) + "/health-check-state",
+		ResultKey: "health_check_states",
+		Result:    &res,
 	}, opts)
 	if err != nil {
 		return nil, err
@@ -449,10 +449,10 @@ func (c ClientCategoryIgniteDeployments) GetStorageStats(
 	ctx context.Context, deploymentId string, opts ...ClientOption,
 ) (types.DeploymentStorageInfo, error) {
 	var res types.DeploymentStorageInfo
-	err := c.c.do(ctx, clientArgs{
-		method: "GET",
-		path:   "/ignite/deployments/" + url.PathEscape(deploymentId) + "/storage",
-		result: &res,
+	err := c.c.do(ctx, ClientArgs{
+		Method: "GET",
+		Path:   "/ignite/deployments/" + url.PathEscape(deploymentId) + "/storage",
+		Result: &res,
 	}, opts)
 	if err != nil {
 		return types.DeploymentStorageInfo{}, err

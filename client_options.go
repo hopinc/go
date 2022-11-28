@@ -1,6 +1,7 @@
 package hop
 
 import (
+	"context"
 	"io"
 	"strings"
 )
@@ -52,4 +53,33 @@ type curlWriterOption struct {
 // io.Writer.
 func WithCurlDebugWriter(w io.Writer) ClientOption {
 	return curlWriterOption{w: w}
+}
+
+type customHandlerOption struct {
+	baseClientOption
+
+	fn CustomHandler
+}
+
+// CustomHandler is used to define a custom handler for Hop requests.
+type CustomHandler func(ctx context.Context, a ClientArgs, opts ProcessedClientOpts) error
+
+// WithCustomHandler is used to define a custom Hop request handler.
+func WithCustomHandler(fn CustomHandler) ClientOption {
+	return customHandlerOption{fn: fn}
+}
+
+// ProcessedClientOpts is the result of all the client options that were passed in.
+type ProcessedClientOpts struct {
+	// ProjectID is the project iD this is relating to. Blank if not set.
+	ProjectID string
+
+	// CustomAPIURL is the last API URL that was swt. Blank if not set.
+	CustomAPIURL string
+
+	// CurlDebugWriters are writers that the curl command and new line of a request should be sent to.
+	CurlDebugWriters []io.Writer
+
+	// CustomHandler is used to define the custom handler for Hop requests. Nil if not set.
+	CustomHandler CustomHandler
 }

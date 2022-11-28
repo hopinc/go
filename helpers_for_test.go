@@ -39,15 +39,15 @@ func (c *mockClientDoer) getProjectId(opts []ClientOption) string {
 
 func (c *mockClientDoer) getTokenType() string { return c.tokenType }
 
-func (c *mockClientDoer) do(ctx context.Context, a clientArgs, opts []ClientOption) error {
+func (c *mockClientDoer) do(ctx context.Context, a ClientArgs, opts []ClientOption) error {
 	c.t.Helper()
 	assert.NotNil(c.t, ctx)
-	assert.Equal(c.t, c.wantMethod, a.method)
-	assert.Equal(c.t, c.wantPath, a.path)
-	assert.Equal(c.t, c.wantQuery, a.query)
-	assert.Equal(c.t, c.wantBody, a.body)
-	assert.Equal(c.t, c.wantResultKey, a.resultKey)
-	assert.Equal(c.t, c.wantIgnore404, a.ignore404)
+	assert.Equal(c.t, c.wantMethod, a.Method)
+	assert.Equal(c.t, c.wantPath, a.Path)
+	assert.Equal(c.t, c.wantQuery, a.Query)
+	assert.Equal(c.t, c.wantBody, a.Body)
+	assert.Equal(c.t, c.wantResultKey, a.ResultKey)
+	assert.Equal(c.t, c.wantIgnore404, a.Ignore404)
 	wantClientOpts := c.wantClientOpts
 	if wantClientOpts == nil {
 		wantClientOpts = []ClientOption{}
@@ -61,14 +61,14 @@ func (c *mockClientDoer) do(ctx context.Context, a clientArgs, opts []ClientOpti
 	}
 	if c.returnsResult == nil {
 		// Ensure the result is nil.
-		assert.Nil(c.t, a.result)
+		assert.Nil(c.t, a.Result)
 	} else {
 		// Ensure that the result is a pointer to the type of the return result.
-		pointerIsSame := assert.Equal(c.t, reflect.PtrTo(reflect.TypeOf(c.returnsResult)).String(), reflect.TypeOf(a.result).String())
+		pointerIsSame := assert.Equal(c.t, reflect.PtrTo(reflect.TypeOf(c.returnsResult)).String(), reflect.TypeOf(a.Result).String())
 
 		if pointerIsSame {
 			// Set the value of the result pointer to the return result.
-			reflect.ValueOf(a.result).Elem().Set(reflect.ValueOf(c.returnsResult))
+			reflect.ValueOf(a.Result).Elem().Set(reflect.ValueOf(c.returnsResult))
 		}
 	}
 	return nil

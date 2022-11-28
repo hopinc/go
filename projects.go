@@ -16,9 +16,9 @@ func (c ClientCategoryProjectsTokens) Delete(ctx context.Context, id string, opt
 	if projectId == "" {
 		return types.InvalidToken("project id must be specified")
 	}
-	return c.c.do(ctx, clientArgs{
-		method: "DELETE",
-		path:   "/projects/" + url.PathEscape(projectId) + "/tokens/" + url.PathEscape(id),
+	return c.c.do(ctx, ClientArgs{
+		Method: "DELETE",
+		Path:   "/projects/" + url.PathEscape(projectId) + "/tokens/" + url.PathEscape(id),
 	}, opts)
 }
 
@@ -33,11 +33,11 @@ func (c ClientCategoryProjectsTokens) GetAll(ctx context.Context, opts ...Client
 		return nil, types.InvalidToken("project id must be specified")
 	}
 	var tokens []*types.ProjectToken
-	err := c.c.do(ctx, clientArgs{
-		method:    "GET",
-		path:      "/projects/" + url.PathEscape(projectId) + "/tokens",
-		resultKey: "project_tokens",
-		result:    &tokens,
+	err := c.c.do(ctx, ClientArgs{
+		Method:    "GET",
+		Path:      "/projects/" + url.PathEscape(projectId) + "/tokens",
+		ResultKey: "project_tokens",
+		Result:    &tokens,
 	}, opts)
 	if err != nil {
 		return nil, err
@@ -60,12 +60,12 @@ func (c ClientCategoryProjectsTokens) Create(
 		permissions = []types.ProjectPermission{}
 	}
 	var token types.ProjectToken
-	err := c.c.do(ctx, clientArgs{
-		method:    "POST",
-		path:      "/projects/" + url.PathEscape(projectId) + "/tokens",
-		resultKey: "project_token",
-		body:      map[string][]types.ProjectPermission{"permissions": permissions},
-		result:    &token,
+	err := c.c.do(ctx, ClientArgs{
+		Method:    "POST",
+		Path:      "/projects/" + url.PathEscape(projectId) + "/tokens",
+		ResultKey: "project_token",
+		Body:      map[string][]types.ProjectPermission{"permissions": permissions},
+		Result:    &token,
 	}, opts)
 	if err != nil {
 		return nil, err
@@ -84,11 +84,11 @@ func (c ClientCategoryProjects) GetAllMembers(ctx context.Context, opts ...Clien
 	}
 
 	var members []*types.ProjectMember
-	err := c.c.do(ctx, clientArgs{
-		method:    "GET",
-		path:      "/projects/" + url.PathEscape(projectId) + "/members",
-		resultKey: "members",
-		result:    &members,
+	err := c.c.do(ctx, ClientArgs{
+		Method:    "GET",
+		Path:      "/projects/" + url.PathEscape(projectId) + "/members",
+		ResultKey: "members",
+		Result:    &members,
 	}, opts)
 	if err != nil {
 		return nil, err
@@ -107,11 +107,11 @@ func (c ClientCategoryProjects) GetCurrentMember(ctx context.Context, opts ...Cl
 		return nil, types.InvalidToken("project ID must be specified when using bearer authentication to get current member")
 	}
 	var projectMember types.ProjectMember
-	err := c.c.do(ctx, clientArgs{
-		method:    "GET",
-		path:      "/projects/" + url.PathEscape(projectId) + "/members/@me",
-		resultKey: "project_member",
-		result:    &projectMember,
+	err := c.c.do(ctx, ClientArgs{
+		Method:    "GET",
+		Path:      "/projects/" + url.PathEscape(projectId) + "/members/@me",
+		ResultKey: "project_member",
+		Result:    &projectMember,
 	}, opts)
 	if err != nil {
 		return nil, err
@@ -129,11 +129,11 @@ func (c ClientCategoryProjectsSecrets) GetAll(ctx context.Context, opts ...Clien
 		return nil, types.InvalidToken("project ID must be specified when using bearer authentication to get all secrets")
 	}
 	var secrets []*types.ProjectSecret
-	err := c.c.do(ctx, clientArgs{
-		method:    "GET",
-		path:      "/projects/" + url.PathEscape(projectId) + "/secrets",
-		resultKey: "secrets",
-		result:    &secrets,
+	err := c.c.do(ctx, ClientArgs{
+		Method:    "GET",
+		Path:      "/projects/" + url.PathEscape(projectId) + "/secrets",
+		ResultKey: "secrets",
+		Result:    &secrets,
 	}, opts)
 	if err != nil {
 		return nil, err
@@ -151,12 +151,12 @@ func (c ClientCategoryProjectsSecrets) Create(ctx context.Context, key, value st
 		return nil, types.InvalidToken("project ID must be specified when using bearer authentication to get all secrets")
 	}
 	var secret types.ProjectSecret
-	err := c.c.do(ctx, clientArgs{
-		method:    "PUT",
-		path:      "/projects/" + url.PathEscape(projectId) + "/secrets/" + url.PathEscape(key),
-		resultKey: "secret",
-		body:      plainText(value),
-		result:    &secret,
+	err := c.c.do(ctx, ClientArgs{
+		Method:    "PUT",
+		Path:      "/projects/" + url.PathEscape(projectId) + "/secrets/" + url.PathEscape(key),
+		ResultKey: "secret",
+		Body:      PlainText(value),
+		Result:    &secret,
 	}, opts)
 	if err != nil {
 		return nil, err
@@ -173,8 +173,8 @@ func (c ClientCategoryProjectsSecrets) Delete(ctx context.Context, id string, op
 	if projectId == "" {
 		return types.InvalidToken("project ID must be specified when using bearer authentication to get all secrets")
 	}
-	return c.c.do(ctx, clientArgs{
-		method: "DELETE",
-		path:   "/projects/" + url.PathEscape(projectId) + "/secrets/" + url.PathEscape(id),
+	return c.c.do(ctx, ClientArgs{
+		Method: "DELETE",
+		Path:   "/projects/" + url.PathEscape(projectId) + "/secrets/" + url.PathEscape(id),
 	}, opts)
 }

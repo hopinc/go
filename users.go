@@ -13,10 +13,10 @@ func (c ClientCategoryUsersMe) Get(ctx context.Context, opts ...ClientOption) (*
 		return nil, types.InvalidToken("cannot get user with project token")
 	}
 	var u types.UserMeInfo
-	err := c.c.do(ctx, clientArgs{
-		method: "GET",
-		path:   "/users/@me",
-		result: &u,
+	err := c.c.do(ctx, ClientArgs{
+		Method: "GET",
+		Path:   "/users/@me",
+		Result: &u,
 	}, opts)
 	if err != nil {
 		return nil, err
@@ -30,12 +30,12 @@ func (c ClientCategoryUsersMe) CreatePat(ctx context.Context, name string, opts 
 		return nil, types.InvalidToken("cannot create users tokens with project token")
 	}
 	var pat types.UserPat
-	err := c.c.do(ctx, clientArgs{
-		method:    "POST",
-		path:      "/users/@me/pats",
-		resultKey: "pat",
-		body:      map[string]string{"name": name},
-		result:    &pat,
+	err := c.c.do(ctx, ClientArgs{
+		Method:    "POST",
+		Path:      "/users/@me/pats",
+		ResultKey: "pat",
+		Body:      map[string]string{"name": name},
+		Result:    &pat,
 	}, opts)
 	if err != nil {
 		return nil, err
@@ -49,11 +49,11 @@ func (c ClientCategoryUsersMe) GetAllPats(ctx context.Context, opts ...ClientOpt
 		return nil, types.InvalidToken("cannot get users tokens with project token")
 	}
 	var pats []*types.UserPat
-	err := c.c.do(ctx, clientArgs{
-		method:    "GET",
-		path:      "/users/@me/pats",
-		resultKey: "pats",
-		result:    &pats,
+	err := c.c.do(ctx, ClientArgs{
+		Method:    "GET",
+		Path:      "/users/@me/pats",
+		ResultKey: "pats",
+		Result:    &pats,
 	}, opts)
 	if err != nil {
 		return nil, err
@@ -66,8 +66,8 @@ func (c ClientCategoryUsersMe) DeletePat(ctx context.Context, id string, opts ..
 	if c.c.getTokenType() == "ptk" {
 		return types.InvalidToken("cannot delete users tokens with project token")
 	}
-	return c.c.do(ctx, clientArgs{
-		method: "DELETE",
-		path:   "/users/@me/pats/" + url.PathEscape(id),
+	return c.c.do(ctx, ClientArgs{
+		Method: "DELETE",
+		Path:   "/users/@me/pats/" + url.PathEscape(id),
 	}, opts)
 }

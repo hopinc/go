@@ -30,14 +30,14 @@ func (c ClientCategoryChannels) Create(
 
 	// Do the request.
 	var ch types.Channel
-	err := c.c.do(ctx, clientArgs{
-		method:    method,
-		path:      path,
-		resultKey: "channel",
-		query:     query,
-		body:      map[string]any{"type": channelType, "state": state},
-		result:    &ch,
-		ignore404: false,
+	err := c.c.do(ctx, ClientArgs{
+		Method:    method,
+		Path:      path,
+		ResultKey: "channel",
+		Query:     query,
+		Body:      map[string]any{"type": channelType, "state": state},
+		Result:    &ch,
+		Ignore404: false,
 	}, opts)
 	if err != nil {
 		return nil, err
@@ -48,12 +48,12 @@ func (c ClientCategoryChannels) Create(
 // Get is used to get a channel. Will throw types.NotFound if it was not found.
 func (c ClientCategoryChannels) Get(ctx context.Context, id string, opts ...ClientOption) (*types.Channel, error) {
 	var ch types.Channel
-	err := c.c.do(ctx, clientArgs{
-		method:    "GET",
-		path:      "/channels/" + url.PathEscape(id),
-		resultKey: "channel",
-		result:    &ch,
-		ignore404: false,
+	err := c.c.do(ctx, ClientArgs{
+		Method:    "GET",
+		Path:      "/channels/" + url.PathEscape(id),
+		ResultKey: "channel",
+		Result:    &ch,
+		Ignore404: false,
 	}, opts)
 	if err != nil {
 		return nil, err
@@ -75,10 +75,10 @@ func (c ClientCategoryChannels) GetAll() *Paginator[*types.Channel] {
 // SubscribeToken is used to subscribe a token to a channel.
 func (c ClientCategoryChannels) SubscribeToken(ctx context.Context, channelId, token string, opts ...ClientOption) error {
 	path := "/channels/" + url.PathEscape(channelId) + "/subscribers/" + url.PathEscape(token)
-	return c.c.do(ctx, clientArgs{
-		method:    "PUT",
-		path:      path,
-		ignore404: false,
+	return c.c.do(ctx, ClientArgs{
+		Method:    "PUT",
+		Path:      path,
+		Ignore404: false,
 	}, opts)
 }
 
@@ -96,52 +96,52 @@ func (c ClientCategoryChannels) SubscribeTokens(ctx context.Context, channelId s
 
 // SetState is used to set the state of a channel.
 func (c ClientCategoryChannels) SetState(ctx context.Context, id string, state map[string]any, opts ...ClientOption) error {
-	return c.c.do(ctx, clientArgs{
-		method:    "PUT",
-		path:      "/channels/" + url.PathEscape(id) + "/state",
-		body:      state,
-		ignore404: false,
+	return c.c.do(ctx, ClientArgs{
+		Method:    "PUT",
+		Path:      "/channels/" + url.PathEscape(id) + "/state",
+		Body:      state,
+		Ignore404: false,
 	}, opts)
 }
 
 // PatchState is used to patch the state of a channel.
 func (c ClientCategoryChannels) PatchState(ctx context.Context, id string, state map[string]any, opts ...ClientOption) error {
-	return c.c.do(ctx, clientArgs{
-		method:    "PATCH",
-		path:      "/channels/" + url.PathEscape(id) + "/state",
-		body:      state,
-		ignore404: false,
+	return c.c.do(ctx, ClientArgs{
+		Method:    "PATCH",
+		Path:      "/channels/" + url.PathEscape(id) + "/state",
+		Body:      state,
+		Ignore404: false,
 	}, opts)
 }
 
 // PublishMessage is used to publish an event to the channel.
 func (c ClientCategoryChannels) PublishMessage(ctx context.Context, channelId, eventName string, data any, opts ...ClientOption) error {
-	return c.c.do(ctx, clientArgs{
-		method:    "POST",
-		path:      "/channels/" + url.PathEscape(channelId) + "/messages",
-		body:      map[string]any{"e": eventName, "d": data},
-		ignore404: false,
+	return c.c.do(ctx, ClientArgs{
+		Method:    "POST",
+		Path:      "/channels/" + url.PathEscape(channelId) + "/messages",
+		Body:      map[string]any{"e": eventName, "d": data},
+		Ignore404: false,
 	}, opts)
 }
 
 // Delete is used to delete a channel.
 func (c ClientCategoryChannels) Delete(ctx context.Context, id string, opts ...ClientOption) error {
-	return c.c.do(ctx, clientArgs{
-		method:    "DELETE",
-		path:      "/channels/" + url.PathEscape(id),
-		ignore404: false,
+	return c.c.do(ctx, ClientArgs{
+		Method:    "DELETE",
+		Path:      "/channels/" + url.PathEscape(id),
+		Ignore404: false,
 	}, opts)
 }
 
 // GetStats is used to get the stats of a channel.
 func (c ClientCategoryChannels) GetStats(ctx context.Context, id string, opts ...ClientOption) (*types.Stats, error) {
 	var s types.Stats
-	err := c.c.do(ctx, clientArgs{
-		method:    "GET",
-		path:      "/channels/" + url.PathEscape(id) + "/stats",
-		resultKey: "stats",
-		result:    &s,
-		ignore404: false,
+	err := c.c.do(ctx, ClientArgs{
+		Method:    "GET",
+		Path:      "/channels/" + url.PathEscape(id) + "/stats",
+		ResultKey: "stats",
+		Result:    &s,
+		Ignore404: false,
 	}, opts)
 	if err != nil {
 		return nil, err
@@ -151,10 +151,10 @@ func (c ClientCategoryChannels) GetStats(ctx context.Context, id string, opts ..
 
 // Delete is used to delete a channel token.
 func (t ClientCategoryChannelsTokens) Delete(ctx context.Context, id string, opts ...ClientOption) error {
-	return t.c.do(ctx, clientArgs{
-		method:    "DELETE",
-		path:      "/channels/tokens/" + url.PathEscape(id),
-		ignore404: false,
+	return t.c.do(ctx, ClientArgs{
+		Method:    "DELETE",
+		Path:      "/channels/tokens/" + url.PathEscape(id),
+		Ignore404: false,
 	}, opts)
 }
 
@@ -168,13 +168,13 @@ func (t ClientCategoryChannelsTokens) Create(ctx context.Context, state map[stri
 		state = map[string]any{}
 	}
 	var ct types.ChannelToken
-	err := t.c.do(ctx, clientArgs{
-		method:    "POST",
-		path:      "/channels/tokens",
-		body:      map[string]any{"state": state},
-		resultKey: "token",
-		result:    &ct,
-		ignore404: false,
+	err := t.c.do(ctx, ClientArgs{
+		Method:    "POST",
+		Path:      "/channels/tokens",
+		Body:      map[string]any{"state": state},
+		ResultKey: "token",
+		Result:    &ct,
+		Ignore404: false,
 	}, opts)
 	if err != nil {
 		return nil, err
@@ -184,23 +184,23 @@ func (t ClientCategoryChannelsTokens) Create(ctx context.Context, state map[stri
 
 // SetState is used to set the state of a channel token.
 func (t ClientCategoryChannelsTokens) SetState(ctx context.Context, id string, state map[string]any, opts ...ClientOption) error {
-	return t.c.do(ctx, clientArgs{
-		method:    "PATCH",
-		path:      "/channels/tokens/" + url.PathEscape(id),
-		body:      map[string]any{"state": state},
-		ignore404: false,
+	return t.c.do(ctx, ClientArgs{
+		Method:    "PATCH",
+		Path:      "/channels/tokens/" + url.PathEscape(id),
+		Body:      map[string]any{"state": state},
+		Ignore404: false,
 	}, opts)
 }
 
 // Get is used to get a token by its ID.
 func (t ClientCategoryChannelsTokens) Get(ctx context.Context, id string, opts ...ClientOption) (*types.ChannelToken, error) {
 	var ct types.ChannelToken
-	err := t.c.do(ctx, clientArgs{
-		method:    "GET",
-		path:      "/channels/tokens/" + url.PathEscape(id),
-		resultKey: "token",
-		result:    &ct,
-		ignore404: false,
+	err := t.c.do(ctx, ClientArgs{
+		Method:    "GET",
+		Path:      "/channels/tokens/" + url.PathEscape(id),
+		ResultKey: "token",
+		Result:    &ct,
+		Ignore404: false,
 	}, opts)
 	if err != nil {
 		return nil, err
@@ -221,23 +221,23 @@ func (t ClientCategoryChannelsTokens) IsOnline(ctx context.Context, id string, o
 func (t ClientCategoryChannelsTokens) PublishDirectMessage(
 	ctx context.Context, id, eventName string, data any, opts ...ClientOption,
 ) error {
-	return t.c.do(ctx, clientArgs{
-		method:    "POST",
-		path:      "/channels/tokens/" + url.PathEscape(id) + "/messages",
-		body:      map[string]any{"e": eventName, "d": data},
-		ignore404: false,
+	return t.c.do(ctx, ClientArgs{
+		Method:    "POST",
+		Path:      "/channels/tokens/" + url.PathEscape(id) + "/messages",
+		Body:      map[string]any{"e": eventName, "d": data},
+		Ignore404: false,
 	}, opts)
 }
 
 // GetAll gets all the tokens.
 func (t ClientCategoryChannelsTokens) GetAll(ctx context.Context, opts ...ClientOption) ([]*types.ChannelToken, error) {
 	var a []*types.ChannelToken
-	err := t.c.do(ctx, clientArgs{
-		method:    "GET",
-		path:      "/channels/tokens",
-		resultKey: "tokens",
-		result:    &a,
-		ignore404: false,
+	err := t.c.do(ctx, ClientArgs{
+		Method:    "GET",
+		Path:      "/channels/tokens",
+		ResultKey: "tokens",
+		Result:    &a,
+		Ignore404: false,
 	}, opts)
 	if err != nil {
 		return nil, err
