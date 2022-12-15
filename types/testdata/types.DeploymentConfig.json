@@ -1,4 +1,7 @@
 {
+	"cmd": [
+		"stu"
+	],
 	"container_strategy": "abc",
 	"entrypoint": [
 		"pqr"
@@ -18,7 +21,7 @@
 			"branch": "vwx"
 		}
 	},
-	"name": "stu",
+	"name": "vwx",
 	"resources": {
 		"ram": "ghi",
 		"vcpu": 11,
@@ -33,8 +36,8 @@
 	"type": "def",
 	"version": "ghi",
 	"volume": {
-		"fs": "vwx",
-		"size": "abc",
-		"mountpath": "def"
+		"fs": "abc",
+		"size": "def",
+		"mountpath": "ghi"
 	}
 }

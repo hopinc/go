@@ -1,4 +1,7 @@
 {
+	"cmd": [
+		"stu"
+	],
 	"container_strategy": "abc",
 	"entrypoint": [
 		"pqr"

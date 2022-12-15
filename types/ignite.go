@@ -232,6 +232,9 @@ type DeploymentConfigPartial struct {
 
 	// Entrypoint is used to define the entrypoint for the application. Can be nil.
 	Entrypoint []string `json:"entrypoint"`
+
+	// Cmd is used to define the cmd for the application. Can be nil.
+	Cmd []string `json:"cmd"`
 }
 
 func (x DeploymentConfigPartial) makeMap() map[string]any {
@@ -250,6 +253,7 @@ func (x DeploymentConfigPartial) makeMap() map[string]any {
 		"resources":          x.Resources,
 		"restart_policy":     x.RestartPolicy,
 		"entrypoint":         x.Entrypoint,
+		"cmd":                x.Cmd,
 	}
 }
 
