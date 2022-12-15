@@ -315,6 +315,9 @@ type DeploymentRollout struct {
 
 	// Build is the build that this rollout is for. This can be nil.
 	Build *Build `json:"build"`
+
+	// Acknowledged is used to define if the rollout has been acknowledged by the user.
+	Acknowledged bool `json:"acknowledged"`
 }
 
 // BuildMethod is the method used to build a container.

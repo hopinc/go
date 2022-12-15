@@ -68,7 +68,8 @@
 			"finished_at": "ghi",
 			"state": "jkl",
 			"digest": "mno"
-		}
+		},
+		"acknowledged": true
 	},
 	"active_build": {
 		"id": "pqr",

@@ -25,5 +25,6 @@
 		"finished_at": "abc",
 		"state": "def",
 		"digest": "ghi"
-	}
+	},
+	"acknowledged": true
 }
