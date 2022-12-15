@@ -14,7 +14,11 @@
 			"id": "abc",
 			"domain": "def",
 			"state": "ghi",
-			"created_at": "jkl"
+			"created_at": "jkl",
+			"redirect": {
+				"url": "mno",
+				"status_code": 14
+			}
 		}
 	]
 }

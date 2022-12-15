@@ -71,6 +71,18 @@ type Domain struct {
 
 	// CreatedAt defines when this domain was created.
 	CreatedAt Timestamp `json:"created_at"`
+
+	// Redirect is where the domain can redirect. Can be nil if no redirect is configured.
+	Redirect *DomainRedirect `json:"redirect"`
+}
+
+// DomainRedirect is used to define a domain redirect.
+type DomainRedirect struct {
+	// URL is the URL to redirect to.
+	URL string `json:"url"`
+
+	// StatusCode is the status code to use for the redirect.
+	StatusCode int `json:"status_code"`
 }
 
 // Gateway is used to define a gateway used in Ignite.
