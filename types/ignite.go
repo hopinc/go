@@ -318,6 +318,15 @@ type DeploymentRollout struct {
 
 	// Acknowledged is used to define if the rollout has been acknowledged by the user.
 	Acknowledged bool `json:"acknowledged"`
+
+	// InitContainerID is the container ID this rollout is portioning to. This can be blank.
+	InitContainerID string `json:"init_container_id"`
+
+	// HealthCheckFailed is used to define if the health check failed.
+	HealthCheckFailed bool `json:"health_check_failed"`
+
+	// LastUpdatedAt is the time that the rollout was last updated at.
+	LastUpdatedAt Timestamp `json:"last_updated_at"`
 }
 
 // BuildMethod is the method used to build a container.
@@ -438,7 +447,12 @@ type Deployment struct {
 	Config DeploymentConfigPartial `json:"config"`
 
 	// ActiveRollout is the rollout for this deployment. Can be nil if not defined.
+	//
+	// Deprecated: Use LatestRollout instead.
 	ActiveRollout *DeploymentRollout `json:"active_rollout"`
+
+	// LatestRollout is the rollout for this deployment. Can be nil if not defined.
+	LatestRollout *DeploymentRollout `json:"latest_rollout"`
 
 	// ActiveBuild is the build for this deployment. Can be nil if not defined.
 	ActiveBuild *Build `json:"active_build"`
