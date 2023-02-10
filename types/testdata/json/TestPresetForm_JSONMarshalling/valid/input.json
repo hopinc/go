@@ -1,0 +1,18 @@
+{
+  "v": 1,
+  "fields": [{
+    "title": "Hello World!",
+    "required": true,
+    "input": {
+      "type": "string",
+      "default": "Hello World!",
+      "autogen": "PROJECT_NAMESPACE"
+    },
+    "map_to": [
+      {
+        "type": "env",
+        "key": "HELLO_WORLD"
+      }
+    ]
+  }]
+}

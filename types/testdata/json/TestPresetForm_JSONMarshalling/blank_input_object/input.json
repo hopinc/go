@@ -1,0 +1,9 @@
+{
+  "v": 1,
+  "fields": [{
+    "title": "Hello World!",
+    "required": true,
+    "input": {},
+    "map_to": []
+  }]
+}

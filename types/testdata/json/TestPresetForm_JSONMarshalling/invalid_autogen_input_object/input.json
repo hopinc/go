@@ -1,0 +1,13 @@
+{
+  "v": 1,
+  "fields": [{
+    "title": "Hello World!",
+    "required": true,
+    "input": {
+      "type": "string",
+      "default": "Hello World!",
+      "autogen": "xD"
+    },
+    "map_to": []
+  }]
+}

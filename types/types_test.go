@@ -218,11 +218,6 @@ func (s *stuffer) stuffType(t reflect.Type) reflect.Value {
 
 func TestTypes(t *testing.T) {
 	typesUpdate := os.Getenv("TYPES_UPDATE") == "1"
-	if typesUpdate {
-		// Remove and remake the types directory.
-		require.NoError(t, os.RemoveAll("testdata"))
-		require.NoError(t, os.Mkdir("testdata", 0777))
-	}
 
 	for _, type_ := range types {
 		t.Run(type_.String(), func(t *testing.T) {
