@@ -26,7 +26,7 @@ const DefaultAPIBase = "https://api.hop.io/v1"
 // IDPrefixes are allowed ID prefixes.
 var IDPrefixes = []string{
 	"user", "project", "pm", "role", "pi", "ptk", "pat", "container", "pipe_room", "deployment", "bearer",
-	"ptkid", "secret", "gateway", "domain", "leap_token", "build", "rollout",
+	"ptkid", "secret", "gateway", "domain", "leap_token", "build", "rollout", "health_check", "session",
 }
 
 // ValidateToken is used to validate a authentication token. Returns an error if the token is invalid.

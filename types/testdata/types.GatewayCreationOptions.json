@@ -2,5 +2,6 @@
 	"name": "def",
 	"type": "ghi",
 	"protocol": "jkl",
-	"target_port": 4
+	"target_port": 4,
+	"internal_domain": "mno"
 }

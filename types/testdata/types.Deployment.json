@@ -136,5 +136,9 @@
 			]
 		}
 	},
-	"running_container_count": 87
+	"running_container_count": 87,
+	"build_cache_enabled": true,
+	"build_settings": {
+		"root_directory": "pqr"
+	}
 }

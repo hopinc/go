@@ -114,6 +114,16 @@ func TestValidateToken(t *testing.T) {
 			expectsPrefix: "rollout",
 		},
 		{
+			name:          "health_check",
+			token:         "health_check_xyz",
+			expectsPrefix: "health_check",
+		},
+		{
+			name:          "session",
+			token:         "session_xyz",
+			expectsPrefix: "session",
+		},
+		{
 			name:       "invalid",
 			token:      "invalid_xyz",
 			expectsErr: "invalid authorization token prefix: invalid_xyz",

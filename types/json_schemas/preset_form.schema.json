@@ -1,0 +1,139 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$defs": {
+    "Field": {
+      "additionalProperties": false,
+      "required": ["input", "title", "required", "map_to"],
+      "properties": {
+        "input": {
+          "oneOf": [
+            {
+              "additionalProperties": false,
+              "required": ["type"],
+              "properties": {
+                "type": {
+                  "const": "string",
+                  "description": "The type of the field input."
+                },
+                "default": {
+                  "optional": true,
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "Defines the optional default for the input."
+                },
+                "autogen": {
+                  "optional": true,
+                  "oneOf": [{"const": "PROJECT_NAMESPACE"}, {"const": "SECURE_TOKEN"}],
+                  "description": "Defines the auto-generated value to set."
+                },
+                "max_length": {
+                  "optional": true,
+                  "type": "integer",
+                  "description": "Defines the maximum length."
+                },
+                "validator": {
+                  "optional": true,
+                  "type": "string",
+                  "description": "Defines the validator."
+                }
+              }
+            },
+            {
+              "additionalProperties": false,
+              "required": ["type", "min", "max"],
+              "properties": {
+                "type": {
+                  "const": "range",
+                  "description": "The type of the field input."
+                },
+                "default": {
+                  "optional": true,
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "Defines the optional default for the input."
+                },
+                "autogen": {
+                  "optional": true,
+                  "oneOf": [{"const": "PROJECT_NAMESPACE"}, {"const": "SECURE_TOKEN"}],
+                  "description": "Defines the auto-generated value to set."
+                },
+                "min": {
+                  "type": "integer",
+                  "description": "Defines the minimum value."
+                },
+                "max": {
+                  "type": "integer",
+                  "description": "Defines the maximum value."
+                },
+                "increment": {
+                  "type": "integer",
+                  "description": "Defines the amount this increments by."
+                },
+                "unit": {
+                  "type": "string",
+                  "description": "Defines the unit this amount is using."
+                }
+              }
+            }
+          ]
+        },
+        "title": {
+          "type": "string",
+          "description": "The title of the form field."
+        },
+        "required": {
+          "type": "boolean",
+          "description": "Defines if the form field is required."
+        },
+        "map_to": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["type", "key"],
+                "properties": {
+                  "type": {
+                    "const": "env",
+                    "description": "The type of the property."
+                  },
+                  "key": {
+                    "type": "string",
+                    "description": "Defines the key this maps to."
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["type"],
+                "properties": {
+                  "type": {
+                    "const": "volume_size",
+                    "description": "The type of the property."
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  },
+  "title": "Preset Form",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["v", "fields"],
+  "properties": {
+    "v": {
+      "type": "integer",
+      "oneOf": [{"const": 1}],
+      "description": "The version of the schema."
+    },
+    "fields": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/Field" }
+    }
+  }
+}

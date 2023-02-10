@@ -1,6 +1,278 @@
 package types
 
-import "encoding/json"
+import (
+	_ "embed"
+	"encoding/json"
+	"errors"
+	"strings"
+
+	"github.com/xeipuuv/gojsonschema"
+)
+
+// ValidationError is used when a JSON schema is invalidated.
+type ValidationError struct {
+	Errors []gojsonschema.ResultError `json:"errors"`
+}
+
+// Error is used to concatenate the content of all the errors.
+func (e ValidationError) Error() string {
+	s := make([]string, len(e.Errors))
+	for i, v := range e.Errors {
+		s[i] = v.String()
+	}
+	return strings.Join(s, ", ")
+}
+
+//go:embed json_schemas/preset_form.schema.json
+var presetFormSchema []byte
+
+var presetFormSchemaLoaded = gojsonschema.NewBytesLoader(presetFormSchema)
+
+// PresetFormMappingType is used to define the type of the mapping.
+type PresetFormMappingType string
+
+const (
+	// PresetFormMappingTypeEnv is used to define a env mapping.
+	PresetFormMappingTypeEnv PresetFormMappingType = "env"
+
+	// PresetFormMappingVolumeSize is used to define a volume size mapping.
+	PresetFormMappingVolumeSize PresetFormMappingType = "volume_size"
+)
+
+// PresetFormMapTo is used to map a external source to this field.
+type PresetFormMapTo struct {
+	// Type is used to define the mapping type. Must be env.
+	Type PresetFormMappingType `json:"type"`
+
+	// Key is used to define the key this maps to. This should be blank when
+	// the type is volume size.
+	Key string `json:"key,omitempty"`
+}
+
+// MarshalJSON is used to handle JSON marshalling.
+func (p PresetFormMapTo) MarshalJSON() ([]byte, error) {
+	if p.Type == "" {
+		p.Type = PresetFormMappingTypeEnv
+	}
+	return json.Marshal(map[string]any{"type": p.Type, "key": p.Key})
+}
+
+var _ json.Marshaler = PresetFormMapTo{}
+
+// PresetFormInputAutogen is the auto-generation type for this field.
+type PresetFormInputAutogen string
+
+const (
+	// PresetFormInputAutogenProjectNamespace is used to define a project namespace string.
+	PresetFormInputAutogenProjectNamespace PresetFormInputAutogen = "PROJECT_NAMESPACE"
+
+	// PresetFormInputAutogenSecureToken is used to define a secure token string.
+	PresetFormInputAutogenSecureToken PresetFormInputAutogen = "SECURE_TOKEN"
+)
+
+// PresetFormInput is used to define the form input information.
+type PresetFormInput interface {
+	noThirdPartyHere()
+}
+
+// PresetFormInputString implements PresetFormInput and is returned when the
+// type is "string".
+type PresetFormInputString struct {
+	// Default is used to define the default content. Can be blank.
+	Default string `json:"default,omitempty"`
+
+	// Autogen defines the auto-generated value for this input.
+	// Can be blank if unset.
+	Autogen PresetFormInputAutogen `json:"autogen,omitempty"`
+
+	// MaxLength is the maximum length of the string.
+	MaxLength *uint `json:"max_length,omitempty"`
+
+	// Validator is used to define the validator.
+	Validator string `json:"validator,omitempty"`
+}
+
+func (PresetFormInputString) noThirdPartyHere() {}
+
+var _ PresetFormInput = PresetFormInputString{}
+
+// PresetFormInputRange implements PresetFormInput and is returned when the
+// type is "range".
+type PresetFormInputRange struct {
+	// Default is used to define the default content. Can be blank.
+	Default *int `json:"default,omitempty"`
+
+	// Min is the minimum number in the range.
+	Min int `json:"min"`
+
+	// Max is the maximum number in the range.
+	Max int `json:"max"`
+
+	// Increment is the number to increment by.
+	Increment *int `json:"increment,omitempty"`
+
+	// Unit is the unit to use.
+	Unit *string `json:"unit"`
+}
+
+func (PresetFormInputRange) noThirdPartyHere() {}
+
+var _ PresetFormInput = PresetFormInputRange{}
+
+// PresetFormField is used to define a field in a preset form.
+type PresetFormField struct {
+	// Input is used to define the input information. Cannot be nil.
+	// When unmarshalled, will be a pointer to a input type that
+	// implements this interface.
+	Input PresetFormInput `json:"input"`
+
+	// Title is used to define the title of the form field.
+	Title string `json:"title"`
+
+	// Required is used to define if the form field is required.
+	Required bool `json:"required"`
+
+	// MapTo is used to define a map of mappings. Cannot be nil.
+	MapTo []PresetFormMapTo `json:"map_to"`
+}
+
+var (
+	stringSuffix = []byte(`,"type":"string"}`)
+	rangeSuffix  = []byte(`,"type":"range"}`)
+)
+
+// MarshalJSON is used to marshal this into a JSON object.
+func (f *PresetFormField) MarshalJSON() ([]byte, error) {
+	suffix := stringSuffix
+	switch f.Input.(type) {
+	case PresetFormInputRange, *PresetFormInputRange:
+		suffix = rangeSuffix
+	}
+
+	b, err := json.Marshal(f.Input)
+	if err != nil {
+		return b, err
+	}
+	b = append(b[:len(b)-1], suffix...)
+
+	return json.Marshal(map[string]any{
+		"input":    json.RawMessage(b),
+		"title":    f.Title,
+		"required": f.Required,
+		"map_to":   f.MapTo,
+	})
+}
+
+var _ json.Marshaler = (*PresetFormField)(nil)
+
+// UnmarshalJSON is used to unmarshal the field from a JSON object.
+func (f *PresetFormField) UnmarshalJSON(b []byte) error {
+	type presetBodyDouble struct {
+		Input    json.RawMessage   `json:"input"`
+		Title    string            `json:"title"`
+		Required bool              `json:"required"`
+		MapTo    []PresetFormMapTo `json:"map_to"`
+	}
+	var x presetBodyDouble
+	err := json.Unmarshal(b, &x)
+	if err != nil {
+		return err
+	}
+
+	f.Title = x.Title
+	f.Required = x.Required
+	f.MapTo = x.MapTo
+
+	type onlyType struct {
+		Type string `json:"type"`
+	}
+	var o onlyType
+	err = json.Unmarshal(x.Input, &o)
+	if err != nil {
+		return err
+	}
+
+	var v any = &PresetFormInputString{}
+	if strings.ToLower(o.Type) == "range" {
+		v = &PresetFormInputRange{}
+	}
+	err = json.Unmarshal(x.Input, v)
+	f.Input = v.(PresetFormInput)
+	return err
+}
+
+var _ json.Unmarshaler = (*PresetFormField)(nil)
+
+// PresetForm is form preset information.
+type PresetForm struct {
+	// Version is used to define the version of the form.
+	Version uint `json:"v"`
+
+	// Fields is used to define the form fields.
+	Fields []PresetFormField `json:"fields"`
+}
+
+// UnmarshalJSON is used to unmarshal JSON into the structure specified.
+func (p *PresetForm) UnmarshalJSON(b []byte) error {
+	res, err := gojsonschema.Validate(presetFormSchemaLoaded, gojsonschema.NewBytesLoader(b))
+	if err != nil {
+		return err
+	}
+	if !res.Valid() {
+		return ValidationError{res.Errors()}
+	}
+
+	var m map[string]json.RawMessage
+	if err = json.Unmarshal(b, &m); err != nil {
+		return err
+	}
+
+	processKey := func(key string, ptr any) error {
+		x, ok := m[key]
+		if !ok {
+			return errors.New("key not found - please report this to hopinc/go, the schema is wrong")
+		}
+		return json.Unmarshal(x, ptr)
+	}
+	if err = processKey("v", &p.Version); err != nil {
+		return err
+	}
+	return processKey("fields", &p.Fields)
+}
+
+var _ json.Unmarshaler = (*PresetForm)(nil)
+
+// MarshalJSON is used to marshal the content into bytes.
+func (p *PresetForm) MarshalJSON() ([]byte, error) {
+	v := p.Version
+	if v == 0 {
+		v = 1
+	}
+
+	fields := p.Fields
+	if fields == nil {
+		fields = []PresetFormField{}
+	}
+
+	b, err := json.Marshal(map[string]any{
+		"v":      v,
+		"fields": fields,
+	})
+	if err != nil {
+		return b, err
+	}
+
+	res, err := gojsonschema.Validate(presetFormSchemaLoaded, gojsonschema.NewBytesLoader(b))
+	if err != nil {
+		return nil, err
+	}
+	if !res.Valid() {
+		return nil, ValidationError{res.Errors()}
+	}
+	return b, nil
+}
+
+var _ json.Marshaler = (*PresetForm)(nil)
 
 // VolumeFormat is used to define the format of a volume.
 type VolumeFormat string
@@ -426,6 +698,12 @@ type DeploymentMetadata struct {
 	ContainerPortMappings map[string][]string `json:"container_port_mappings"`
 }
 
+// ContainerBuildSettings is used to define the build settings for a container.
+type ContainerBuildSettings struct {
+	// RootDirectory is used to define the root directory for the container build. Can be blank.
+	RootDirectory string `json:"root_directory"`
+}
+
 // Deployment is used to define a deployment in Ignite.
 type Deployment struct {
 	// ID is the ID of the deployment.
@@ -462,6 +740,12 @@ type Deployment struct {
 
 	// RunningContainerCount is the amount of containers in the running state.
 	RunningContainerCount int `json:"running_container_count"`
+
+	// BuildCacheEnabled is used to define if the build cache is enabled.
+	BuildCacheEnabled bool `json:"build_cache_enabled"`
+
+	// BuildSettings is used to define the build settings for a container.
+	BuildSettings *ContainerBuildSettings `json:"build_settings"`
 }
 
 // Region is used to define a Hop datacenter region.
@@ -550,6 +834,10 @@ type Container struct {
 
 	// Metrics is used to define the container metrics. This can be nil.
 	Metrics *ContainerMetrics `json:"metrics"`
+
+	// Overrides is used to define overrides that were provided manually to the container.
+	// Items in Resources can be empty if they are unset, or overrides can be nil.
+	Overrides *Resources `json:"overrides"`
 }
 
 // GatewayCreationOptions is used to define the options for creating a gateway.
@@ -568,6 +856,9 @@ type GatewayCreationOptions struct {
 
 	// TargetPort is the port to listen on.
 	TargetPort int `json:"target_port"`
+
+	// InternalDomain is used when the gateway type is internal.
+	InternalDomain string `json:"internal_domain,omitempty"`
 
 	// ProjectID is the ID of the project that this gateway is for. Can be blank if using a project token.
 	//

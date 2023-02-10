@@ -312,6 +312,23 @@ func TestClient_Ignite_Containers_Delete(t *testing.T) {
 		nil)
 }
 
+func TestClient_Ignite_Containers_DeleteAndRecreate(t *testing.T) {
+	c := &mockClientDoer{
+		t:              t,
+		wantMethod:     "DELETE",
+		wantPath:       "/ignite/containers/test%20test",
+		wantIgnore404:  false,
+		wantClientOpts: []ClientOption{WithProjectID("test123")},
+		wantQuery:      map[string]string{"recreate": "true"},
+		tokenType:      "pat",
+	}
+	testApiSingleton(c,
+		&ClientCategoryIgniteContainers{c: c},
+		"DeleteAndRecreate",
+		[]any{"test test", WithProjectID("test123")},
+		nil)
+}
+
 func TestClient_Ignite_Containers_GetLogs(t *testing.T) {
 	c := &mockClientDoer{}
 	res := (&ClientCategoryIgniteContainers{c: c}).GetLogs(

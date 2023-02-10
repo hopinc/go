@@ -262,6 +262,16 @@ func (c ClientCategoryIgniteContainers) Delete(ctx context.Context, id string, o
 	}, opts)
 }
 
+// DeleteAndRecreate is used to delete a container by its ID and then recreate it. This is another function to avoid a
+// breaking change.
+func (c ClientCategoryIgniteContainers) DeleteAndRecreate(ctx context.Context, id string, opts ...ClientOption) error {
+	return c.c.do(ctx, ClientArgs{
+		Method: "DELETE",
+		Path:   "/ignite/containers/" + url.PathEscape(id),
+		Query:  map[string]string{"recreate": "true"},
+	}, opts)
+}
+
 // GetLogs is used to get a paginator for the logs of a container.
 func (c ClientCategoryIgniteContainers) GetLogs(id string, limit int, ascOrder bool) *Paginator[*types.ContainerLog] {
 	orderBy := "desc"
