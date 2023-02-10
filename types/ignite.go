@@ -197,7 +197,7 @@ func (f *PresetFormField) UnmarshalJSON(b []byte) error {
 		v = &PresetFormInputRange{}
 	}
 	err = json.Unmarshal(x.Input, v)
-	f.Input = v.(PresetFormInput)
+	f.Input, _ = v.(PresetFormInput)
 	return err
 }
 
