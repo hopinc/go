@@ -18,5 +18,17 @@
 	"started_at": "jkl",
 	"finished_at": "mno",
 	"state": "pqr",
-	"digest": "stu"
+	"digest": "stu",
+	"environment": {
+		"language": "vwx",
+		"cmds": {
+			"build": "abc",
+			"start": "def",
+			"install": "ghi"
+		}
+	},
+	"validation_failure": {
+		"reason": "jkl",
+		"help_link": "mno"
+	}
 }

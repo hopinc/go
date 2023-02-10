@@ -652,6 +652,9 @@ type BuildMetadata struct {
 type BuildState string
 
 const (
+	// BuildStateValidating is used to define a build that is validating.
+	BuildStateValidating BuildState = "validating"
+
 	// BuildStatePending is used to define a build that is pending.
 	BuildStatePending BuildState = "pending"
 
@@ -663,7 +666,40 @@ const (
 
 	// BuildStateCancelled is used to define a build that has been canceled.
 	BuildStateCancelled BuildState = "cancelled"
+
+	// BuildStateValidationFailed is used to define a build where the validation failed.
+	BuildStateValidationFailed BuildState = "validation_failed"
 )
+
+// BuildCmds is used to define the commands for the build.
+type BuildCmds struct {
+	// Build is the command used for builds. Can be nil.
+	Build *string `json:"build"`
+
+	// Start is the command used for starting the container. Can be nil.
+	Start *string `json:"start"`
+
+	// Install is the command used for installing the container. Can be nil.
+	Install *string `json:"install"`
+}
+
+// BuildEnvironment contains information about the build environment.
+type BuildEnvironment struct {
+	// Language is the language this was built with. Can be nil.
+	Language *string `json:"language"`
+
+	// Cmds are the commands that were invoked during the build.
+	Cmds BuildCmds `json:"cmds"`
+}
+
+// BuildValidationFailure is used to define a build validation failure.
+type BuildValidationFailure struct {
+	// Reason is the reason that the validation failed.
+	Reason string `json:"reason"`
+
+	// HelpLink is used to define a help link if present. Can be nil.
+	HelpLink *string `json:"help_link"`
+}
 
 // Build is used to define the active build of a deployment.
 type Build struct {
@@ -690,6 +726,12 @@ type Build struct {
 
 	// Digest is the digest for the image. Can be blank for no value.
 	Digest string `json:"digest"`
+
+	// Environment is information about the build environment.
+	Environment BuildEnvironment `json:"environment"`
+
+	// ValidationFailure is set when the build state is failed.
+	ValidationFailure *BuildValidationFailure `json:"validation_failure"`
 }
 
 // DeploymentMetadata is the deployments metadata.

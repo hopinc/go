@@ -67,78 +67,114 @@
 			"started_at": "def",
 			"finished_at": "ghi",
 			"state": "jkl",
-			"digest": "mno"
+			"digest": "mno",
+			"environment": {
+				"language": "pqr",
+				"cmds": {
+					"build": "stu",
+					"start": "vwx",
+					"install": "abc"
+				}
+			},
+			"validation_failure": {
+				"reason": "def",
+				"help_link": "ghi"
+			}
 		},
 		"acknowledged": true,
-		"init_container_id": "pqr",
+		"init_container_id": "jkl",
 		"health_check_failed": true,
-		"last_updated_at": "stu"
+		"last_updated_at": "mno"
 	},
 	"latest_rollout": {
-		"count": 46,
-		"created_at": "vwx",
-		"deployment_id": "abc",
-		"id": "def",
-		"status": "ghi",
+		"count": 52,
+		"created_at": "pqr",
+		"deployment_id": "stu",
+		"id": "vwx",
+		"status": "abc",
 		"build": {
-			"id": "jkl",
-			"deployment_id": "mno",
+			"id": "def",
+			"deployment_id": "ghi",
 			"metadata": {
-				"account_type": "pqr",
+				"account_type": "jkl",
 				"author": {
-					"avatar_url": "stu",
-					"username": "vwx"
+					"avatar_url": "mno",
+					"username": "pqr"
 				},
-				"repo_id": 56,
-				"repo_name": "abc",
-				"branch": "def",
-				"commit_sha": "ghi",
-				"commit_msg": "jkl",
-				"commit_url": "mno"
+				"repo_id": 62,
+				"repo_name": "stu",
+				"branch": "vwx",
+				"commit_sha": "abc",
+				"commit_msg": "def",
+				"commit_url": "ghi"
 			},
-			"method": "pqr",
-			"started_at": "stu",
-			"finished_at": "vwx",
-			"state": "abc",
-			"digest": "def"
+			"method": "jkl",
+			"started_at": "mno",
+			"finished_at": "pqr",
+			"state": "stu",
+			"digest": "vwx",
+			"environment": {
+				"language": "abc",
+				"cmds": {
+					"build": "def",
+					"start": "ghi",
+					"install": "jkl"
+				}
+			},
+			"validation_failure": {
+				"reason": "mno",
+				"help_link": "pqr"
+			}
 		},
 		"acknowledged": true,
-		"init_container_id": "ghi",
+		"init_container_id": "stu",
 		"health_check_failed": true,
-		"last_updated_at": "jkl"
+		"last_updated_at": "vwx"
 	},
 	"active_build": {
-		"id": "mno",
-		"deployment_id": "pqr",
+		"id": "abc",
+		"deployment_id": "def",
 		"metadata": {
-			"account_type": "stu",
+			"account_type": "ghi",
 			"author": {
-				"avatar_url": "vwx",
-				"username": "abc"
+				"avatar_url": "jkl",
+				"username": "mno"
 			},
-			"repo_id": 74,
-			"repo_name": "def",
-			"branch": "ghi",
-			"commit_sha": "jkl",
-			"commit_msg": "mno",
-			"commit_url": "pqr"
+			"repo_id": 86,
+			"repo_name": "pqr",
+			"branch": "stu",
+			"commit_sha": "vwx",
+			"commit_msg": "abc",
+			"commit_url": "def"
 		},
-		"method": "stu",
-		"started_at": "vwx",
-		"finished_at": "abc",
-		"state": "def",
-		"digest": "ghi"
+		"method": "ghi",
+		"started_at": "jkl",
+		"finished_at": "mno",
+		"state": "pqr",
+		"digest": "stu",
+		"environment": {
+			"language": "vwx",
+			"cmds": {
+				"build": "abc",
+				"start": "def",
+				"install": "ghi"
+			}
+		},
+		"validation_failure": {
+			"reason": "jkl",
+			"help_link": "mno"
+		}
 	},
 	"metadata": {
 		"container_port_mappings": {
-			"jkl": [
-				"mno"
+			"pqr": [
+				"stu"
 			]
 		}
 	},
-	"running_container_count": 87,
+	"running_container_count": 105,
 	"build_cache_enabled": true,
 	"build_settings": {
-		"root_directory": "pqr"
+		"root_directory": "vwx"
 	}
 }
