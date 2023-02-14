@@ -98,6 +98,7 @@ var types = []reflect.Type{
 
 	// users.go
 	reflect.TypeOf(User{}),
+	reflect.TypeOf(SelfUser{}),
 	reflect.TypeOf(UserMeInfo{}),
 	reflect.TypeOf(UserPat{}),
 

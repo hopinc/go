@@ -15,13 +15,33 @@ type User struct {
 	Email string `json:"email"`
 }
 
+// SelfUser is used to define the self user.
+type SelfUser struct {
+	User `json:",inline"`
+
+	// EmailVerified is set to true if the user has verified their email.
+	EmailVerified bool `json:"email_verified"`
+
+	// TOTPEnabled is set to true if the user has enabled TOTP authentication.
+	TOTPEnabled bool `json:"totp_enabled"`
+
+	// WebauthnEnabled is set to true if the user hss enabled webauthn authentication.
+	WebauthnEnabled bool `json:"webauthn_enabled"`
+
+	// MFAEnabled is set to true if the user has enabled MFA.
+	MFAEnabled bool `json:"mfa_enabled"`
+
+	// Admin defines if the user is an admin.
+	Admin bool `json:"admin"`
+}
+
 // UserMeInfo is the payload returned fcr all information about the current user.
 type UserMeInfo struct {
 	// Projects is the list of projects the user is a member of.
 	Projects []*Project `json:"projects"`
 
 	// User is the user.
-	User User `json:"user"`
+	User SelfUser `json:"user"`
 
 	// ProjectMemberRoleMap is a map of project ID to project member role.
 	ProjectMemberRoleMap map[string]*ProjectRole `json:"project_member_role_map"`

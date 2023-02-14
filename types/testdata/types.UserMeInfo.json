@@ -25,7 +25,12 @@
 		"id": "abc",
 		"name": "def",
 		"username": "ghi",
-		"email": "jkl"
+		"email": "jkl",
+		"email_verified": true,
+		"totp_enabled": true,
+		"webauthn_enabled": true,
+		"mfa_enabled": true,
+		"admin": true
 	},
 	"project_member_role_map": {
 		"mno": {

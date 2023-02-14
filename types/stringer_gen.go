@@ -138,3 +138,13 @@ func (x DeploymentMetadata) String() string {
 func (x Domain) String() string {
 	return stringifyValue(x)
 }
+
+// String returns the string representation of this value. This function is auto-generated.
+func (x DomainRedirect) String() string {
+	return stringifyValue(x)
+}
+
+// String returns the string representation of this value. This function is auto-generated.
+func (x SelfUser) String() string {
+	return stringifyValue(x)
+}

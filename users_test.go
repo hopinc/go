@@ -19,7 +19,11 @@ func TestClient_Users_Me_Get(t *testing.T) {
 		&ClientCategoryUsersMe{c: c},
 		"Get",
 		[]any{},
-		&types.UserMeInfo{User: types.User{Name: "jeff"}})
+		&types.UserMeInfo{User: types.SelfUser{
+			User: types.User{
+				Name: "jeff",
+			},
+		}})
 }
 
 func TestClient_Users_Me_CreatePat(t *testing.T) {
