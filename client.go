@@ -117,10 +117,16 @@ type ClientArgs struct {
 
 	// Result is a pointer to where the result should be unmarshalled. Note that if this is nil, the
 	// result body should be ignored.
+	// *SPECIAL CASE:* If PassRequest is not nil, ignore this field and pass it to that.
 	Result any
 
 	// Ignore404 is whether a 404 should not be treated as an error.
 	Ignore404 bool
+
+	// PassRequest is a function used to pass a OK request to instead of closing it.
+	// This is used for the filesystem since we need to pass around a context that constantly pulls more
+	// information in some cases.
+	PassRequest func(r *http.Response)
 }
 
 type responseBody struct {
@@ -305,7 +311,14 @@ func (c *Client) do(ctx context.Context, a ClientArgs, clientOpts []ClientOption
 	if err != nil {
 		return err
 	}
-	defer res.Body.Close()
+
+	// The closure *can* be cancelled later in the chain, lets watch for this.
+	closeBody := true
+	defer func() {
+		if closeBody {
+			_ = res.Body.Close()
+		}
+	}()
 
 	// If this is a 4xs or 5xx, handle the error.
 	if res.StatusCode >= 400 && 599 >= res.StatusCode {
@@ -313,6 +326,13 @@ func (c *Client) do(ctx context.Context, a ClientArgs, clientOpts []ClientOption
 		if res.StatusCode != 404 || !a.Ignore404 {
 			return handleErrors(res)
 		}
+	}
+
+	// Handle if we should pass off the request.
+	if a.PassRequest != nil {
+		a.PassRequest(res)
+		closeBody = false
+		return nil
 	}
 
 	// Handle if we should process the data.

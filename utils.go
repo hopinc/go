@@ -40,7 +40,10 @@ func handleErrors(res *http.Response) error {
 	}
 	if res.StatusCode == 404 {
 		// Infer that this is a not found error.
-		return types.NotFound(r.Error.Message)
+		return types.NotFound{
+			Code:    r.Error.Code,
+			Message: r.Error.Message,
+		}
 	}
 	if res.StatusCode >= 500 {
 		// Infer that this is a internal server error.

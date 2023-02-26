@@ -707,7 +707,7 @@ func TestClient_do(t *testing.T) {
 			},
 			wantUrl:       "https://api.hop.io/v1/test",
 			returnsBody:   `{"error":{"message":"fail","code":"not_found"}}`,
-			expectsError:  types.NotFound("fail"),
+			expectsError:  types.NotFound{Message: "fail", Code: "not_found"},
 			returnsStatus: 404,
 			method:        "GET",
 			path:          "/test",

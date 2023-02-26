@@ -66,7 +66,7 @@ func Test_handleErrors(t *testing.T) {
 			status:         404,
 			body:           []byte(`{"success":false,"error":{"code":"not_found","message":"oof"}}`),
 			expectsErr:     "oof",
-			expectsErrType: types.NotFound(""),
+			expectsErrType: types.NotFound{},
 		},
 		{
 			name:           "server error",

@@ -6,10 +6,16 @@ import (
 )
 
 // NotFound is sent when the object is not found. THe string is the error message from the API.
-type NotFound string
+type NotFound struct {
+	// Code gives you the error code, allowing you to differentiate errors.
+	Code string `json:"code"`
+
+	// Message is the message from the Hop SDK.
+	Message string `json:"message"`
+}
 
 // Error implements the error interface.
-func (n NotFound) Error() string { return (string)(n) }
+func (n NotFound) Error() string { return n.Message }
 
 // ServerError is sent when Hop encounters a internal server error that happens to fit the error schema.
 type ServerError string
