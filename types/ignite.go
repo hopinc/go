@@ -840,6 +840,9 @@ type ContainerMetrics struct {
 
 	// MemoryUsagePercent is used to define the % usage of the RAM.
 	MemoryUsagePercent float64 `json:"memory_usage_percent"`
+
+	// MemoryUsageBytes is the number of bytes of memory currently being used.
+	MemoryUsageBytes uint32 `json:"memory_usage_bytes"`
 }
 
 // Container is used to define a container in Ignite.
