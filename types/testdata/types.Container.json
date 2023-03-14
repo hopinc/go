@@ -19,15 +19,16 @@
 	},
 	"metrics": {
 		"cpu_usage_percent": 12,
-		"memory_usage_percent": 13
+		"memory_usage_percent": 13,
+		"memory_usage_bytes": 14
 	},
 	"overrides": {
 		"ram": "jkl",
-		"vcpu": 14,
+		"vcpu": 15,
 		"vgpu": [
 			{
 				"type": "mno",
-				"count": 17
+				"count": 18
 			}
 		]
 	}
