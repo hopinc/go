@@ -71,6 +71,22 @@ func TestClient_Channels_SubscribeToken(t *testing.T) {
 		nil)
 }
 
+func TestClient_Channels_RemoveToken(t *testing.T) {
+	c := &mockClientDoer{
+		t:              t,
+		wantMethod:     "DELETE",
+		wantPath:       "/channels/test%20test/subscribers/testing%20testing123",
+		wantClientOpts: []ClientOption{WithProjectID("test123")},
+		wantIgnore404:  false,
+		tokenType:      "pat",
+	}
+	testApiSingleton(c,
+		&ClientCategoryChannels{c: c},
+		"RemoveToken",
+		[]any{"test test", "testing testing123", WithProjectID("test123")},
+		nil)
+}
+
 func TestClient_Channels_SetState(t *testing.T) {
 	c := &mockClientDoer{
 		t:              t,

@@ -82,6 +82,16 @@ func (c ClientCategoryChannels) SubscribeToken(ctx context.Context, channelId, t
 	}, opts)
 }
 
+// RemoveToken is used to remove a token from a channel.
+func (c ClientCategoryChannels) RemoveToken(ctx context.Context, channelId, token string, opts ...ClientOption) error {
+	path := "/channels/" + url.PathEscape(channelId) + "/subscribers/" + url.PathEscape(token)
+	return c.c.do(ctx, ClientArgs{
+		Method:    "DELETE",
+		Path:      path,
+		Ignore404: false,
+	}, opts)
+}
+
 // SubscribeTokens is used to subscribe many tokens to a channel.
 func (c ClientCategoryChannels) SubscribeTokens(ctx context.Context, channelId string, tokens []string, opts ...ClientOption) error {
 	eg := errgroup.Group{}
